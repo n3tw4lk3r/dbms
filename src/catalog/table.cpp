@@ -11,7 +11,13 @@ Table::Table(
 ) :
     name(name),
     schema(schema)
-{}
+{
+    for (const auto& column : schema) {
+        if (column.indexed) {
+            indexes.emplace(column.name, BTree());
+        }
+    }
+}
 
 const std::string Table::getName() const {
     return name;
@@ -127,8 +133,8 @@ void Table::validateUniqueConstraints(
                 row.values[column_index];
 
             if (ValueComparator::compare(existing_value,
-                              new_value,
-                              "==")) {
+                                         new_value,
+                                         "==")) {
                 throw DatabaseError(
                     "Duplicate value for indexed column '" +
                     column.name +

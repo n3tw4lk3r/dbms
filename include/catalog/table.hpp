@@ -1,9 +1,11 @@
 #pragma once
 
+#include <unordered_map>
 #include <string>
 #include <vector>
 
 #include "common/types.hpp"
+#include "storage/btree.hpp"
 #include "storage/row.hpp"
 
 namespace dbms {
@@ -52,6 +54,8 @@ private:
 
     std::vector<ColumnSchema> schema;
     std::vector<Row> rows;
+
+    std::unordered_map<std::string, BTree> indexes;
 };
 
 } // namespace dbms
