@@ -260,7 +260,7 @@ void BTree::fillChild(BTreeNode* node, size_t child_index) {
         min_degree
     ) {
 
-        borrowFromNext(node, child_index;
+        borrowFromNext(node, child_index);
         return;
     }
 
