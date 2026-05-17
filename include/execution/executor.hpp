@@ -63,6 +63,22 @@ private:
         const Value& pattern
     );
 
+    bool canUseIndexLookup(
+        const Table& table,
+        const std::vector<Condition>& conditions
+    );
+
+    Row* tryFindIndexedRow(
+        Table& table,
+        const std::vector<Condition>& conditions
+    );
+
+    void printSelectedRow(
+        const Row& row,
+        const Command& cmd,
+        const std::vector<ColumnSchema>& schema
+    );
+
 private:
     System& system;
 };

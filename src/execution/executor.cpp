@@ -128,12 +128,31 @@ void Executor::executeSelect(const Command& cmd) {
         throw std::runtime_error("Table not found");
     }
 
-    const auto& rows = table->getRows();
     const auto& schema = table->getSchema();
 
-    bool select_all =
-        cmd.select_columns.size() == 1 &&
-        cmd.select_columns[0].name == "*";
+    if (canUseIndexLookup(*table, cmd.conditions)) {
+        Row* row = tryFindIndexedRow(
+            *table,
+            cmd.conditions
+        );
+
+        if (!row) {
+            std::cout << "(empty)\n";
+            return;
+        }
+
+        if (!matchConditions(cmd.conditions, *row, schema)) {
+            std::cout << "(empty)\n";
+            return;
+        }
+
+        printSelectedRow(*row, cmd, schema);
+
+        std::cout << '\n';
+        return;
+    }
+
+    const auto& rows = table->getRows();
 
     bool has_rows = false;
 
@@ -148,11 +167,7 @@ void Executor::executeSelect(const Command& cmd) {
 
         has_rows = true;
 
-        if (select_all) {
-            printFullRow(row);
-        } else {
-            printSelectedColumns(row, schema, cmd.select_columns);
-        }
+        printSelectedRow(row, cmd, schema);
 
         std::cout << '\n';
     }
@@ -186,12 +201,16 @@ void Executor::executeUpdate(const Command& cmd) {
         }
 
         for (const auto& assignment : cmd.assignments) {
-            int column_index =
-                findColumnIndex(schema, assignment.column);
+            int column_index = findColumnIndex(
+                schema,
+                assignment.column
+            );
 
             if (column_index < 0) {
                 throw std::runtime_error(
-                    "Unknown column: " + assignment.column);
+                    "Unknown column: " +
+                    assignment.column
+                );
             }
 
             row.values[column_index] = assignment.value;
@@ -270,12 +289,16 @@ void Executor::printSelectedColumns(
     const std::vector<SelectColumn>& columns
 ) {
     for (size_t i = 0; i < columns.size(); ++i) {
-        int column_index =
-            findColumnIndex(schema, columns[i].name);
+        int column_index = findColumnIndex(
+            schema,
+            columns[i].name
+        );
 
         if (column_index < 0) {
             throw std::runtime_error(
-                "Unknown column: " + columns[i].name);
+                "Unknown column: " +
+                columns[i].name
+            );
         }
 
         printValue(row.values[column_index]);
@@ -284,6 +307,27 @@ void Executor::printSelectedColumns(
             std::cout << ", ";
         }
     }
+}
+
+void Executor::printSelectedRow(
+    const Row& row,
+    const Command& cmd,
+    const std::vector<ColumnSchema>& schema
+) {
+    bool select_all =
+        cmd.select_columns.size() == 1 &&
+        cmd.select_columns[0].name == "*";
+
+    if (select_all) {
+        printFullRow(row);
+        return;
+    }
+
+    printSelectedColumns(
+        row,
+        schema,
+        cmd.select_columns
+    );
 }
 
 void Executor::printValue(const Value& value) {
@@ -313,19 +357,30 @@ bool Executor::matchConditions(
     }
 
     for (const auto& condition : conditions) {
-        Value left =
-            resolveOperand(condition.lhs, row, schema);
+        Value left = resolveOperand(
+            condition.lhs,
+            row,
+            schema
+        );
 
-        Value right =
-            resolveOperand(condition.rhs, row, schema);
+        Value right = resolveOperand(
+            condition.rhs,
+            row,
+            schema
+        );
 
         if (condition.operator_type == "BETWEEN") {
-            Value range_end =
-                resolveOperand(condition.range_end,
-                               row,
-                               schema);
+            Value range_end = resolveOperand(
+                condition.range_end,
+                row,
+                schema
+            );
 
-            if (!ValueComparator::between(left, right, range_end)) {
+            if (!ValueComparator::between(
+                left,
+                right,
+                range_end)
+            ) {
                 return false;
             }
 
@@ -340,9 +395,11 @@ bool Executor::matchConditions(
             continue;
         }
 
-        if (!ValueComparator::compare(left,
-                                      right,
-                                      condition.operator_type)) {
+        if (!ValueComparator::compare(
+            left,
+            right,
+            condition.operator_type)
+        ) {
             return false;
         }
     }
@@ -372,11 +429,14 @@ Value Executor::resolveOperand(
         return operand.value;
     }
 
-    int column_index =
-        findColumnIndex(schema, operand.column);
+    int column_index = findColumnIndex(
+        schema,
+        operand.column
+    );
 
-    if (column_index < 0 ||
-        column_index >= static_cast<int>(row.values.size())) {
+    if (column_index < 0 || column_index >=
+        static_cast<int>(row.values.size())
+    ) {
         return Value();
     }
 
@@ -388,7 +448,8 @@ bool Executor::likeValues(
     const Value& pattern
 ) {
     if (value.getType() != Value::Type::kString ||
-        pattern.getType() != Value::Type::kString) {
+        pattern.getType() != Value::Type::kString
+    ) {
         return false;
     }
 
@@ -397,10 +458,50 @@ bool Executor::likeValues(
 
         return std::regex_match(
             value.asString(),
-            regex);
+            regex
+        );
     } catch (...) {
         return false;
     }
+}
+
+bool Executor::canUseIndexLookup(
+    const Table& table,
+    const std::vector<Condition>& conditions
+) {
+    if (conditions.size() != 1) {
+        return false;
+    }
+
+    const Condition& condition = conditions[0];
+
+    if (condition.operator_type != "==") {
+        return false;
+    }
+
+    if (!condition.lhs.is_column) {
+        return false;
+    }
+
+    if (condition.rhs.is_column) {
+        return false;
+    }
+
+    return table.hasIndexedColumn(
+        condition.lhs.column
+    );
+}
+
+Row* Executor::tryFindIndexedRow(
+    Table& table,
+    const std::vector<Condition>& conditions
+) {
+    const Condition& condition = conditions[0];
+
+    return table.findByIndexedValue(
+        condition.lhs.column,
+        condition.rhs.value
+    );
 }
 
 } // namespace dbms
