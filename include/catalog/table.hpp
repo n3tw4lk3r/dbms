@@ -1,10 +1,11 @@
 #pragma once
 
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "common/types.hpp"
+#include "common/value.hpp"
 #include "storage/btree.hpp"
 #include "storage/row.hpp"
 
@@ -22,9 +23,22 @@ public:
     RowId insertRow(const std::vector<Value>& values);
 
     const std::vector<Row>& getRows() const;
+
     std::vector<Row>& getRowsMutable();
 
     const std::vector<ColumnSchema>& getSchema() const;
+
+    bool hasIndexedColumn(const std::string& column_name) const;
+
+    bool containsIndexedValue(
+        const std::string& column_name,
+        const Value& value
+    ) const;
+
+    Row* findByIndexedValue(
+        const std::string& column_name,
+        const Value& value
+    );
 
 private:
     void validateRow(const std::vector<Value>& values) const;
@@ -47,14 +61,15 @@ private:
         const std::vector<Value>& values
     ) const;
 
+    int findColumnIndex(const std::string& column_name) const;
+
+    void insertIntoIndexes(const Row& row);
+
 private:
     RowId next_row_id = 1;
-
     std::string name;
-
     std::vector<ColumnSchema> schema;
     std::vector<Row> rows;
-
     std::unordered_map<std::string, BTree> indexes;
 };
 
