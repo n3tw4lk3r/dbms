@@ -60,6 +60,35 @@ RowId BTree::find(const IndexedValue& key) const {
     return entry->row_id;
 }
 
+size_t BTree::size() const {
+    size_t count = 0;
+
+    std::vector<const BTreeNode*> stack;
+    stack.push_back(root.get());
+
+    while (!stack.empty()) {
+        const BTreeNode* node = stack.back();
+        stack.pop_back();
+
+        count += node->entries.size();
+
+        for (const auto& child : node->children) {
+            stack.push_back(child.get());
+        }
+    }
+
+    return count;
+}
+
+bool BTree::empty() const {
+    return root->entries.empty();
+}
+
+bool BTree::verify() const {
+    size_t leaf_depth = 0;
+    return verifyNode(root.get(), 0, leaf_depth);
+}
+
 void BTree::insertNonFull(
     BTreeNode* node,
     const BTreeEntry& entry
@@ -96,30 +125,36 @@ void BTree::insertNonFull(
 
 void BTree::splitChild(BTreeNode* parent, size_t child_index) {
     BTreeNode* child = parent->children[child_index].get();
-    auto sibling = std::make_unique<BTreeNode>(child->is_leaf);
 
-    parent->entries.insert(
-        parent->entries.begin() + child_index,
-        child->entries[min_degree - 1]
+    auto sibling = std::make_unique<BTreeNode>(
+        child->is_leaf
     );
 
-    for (size_t i = 0; i < min_degree - 1; ++i) {
-        sibling->entries.push_back(
-            child->entries[i + min_degree]
-        );
+    BTreeEntry median = child->entries[min_degree - 1];
+
+    for (size_t i = min_degree; i < child->entries.size(); ++i) {
+        sibling->entries.push_back(child->entries[i]);
     }
 
     child->entries.resize(min_degree - 1);
 
     if (!child->is_leaf) {
-        for (size_t i = 0; i < min_degree; ++i) {
+        for (size_t i = min_degree;
+             i < child->children.size();
+             ++i
+        ) {
             sibling->children.push_back(
-                std::move(child->children[i + min_degree])
+                std::move(child->children[i])
             );
         }
 
         child->children.resize(min_degree);
     }
+
+    parent->entries.insert(
+        parent->entries.begin() + child_index,
+        median
+    );
 
     parent->children.insert(
         parent->children.begin() + child_index + 1,
@@ -337,6 +372,38 @@ void BTree::mergeChildren(BTreeNode* node, size_t child_index) {
     node->children.erase(node->children.begin() +
         child_index + 1
     );
+}
+
+bool BTree::verifyNode(
+    const BTreeNode* node,
+    size_t depth,
+    size_t& leaf_depth
+) const {
+    for (size_t i = 1; i < node->entries.size(); ++i) {
+        if (node->entries[i].key < node->entries[i - 1].key) {
+            return false;
+        }
+    }
+
+    if (node->is_leaf) {
+        if (leaf_depth == 0) {
+            leaf_depth = depth;
+        }
+
+        return leaf_depth == depth;
+    }
+
+    if (node->children.size() != node->entries.size() + 1) {
+        return false;
+    }
+
+    for (const auto& child : node->children) {
+        if (!verifyNode(child.get(), depth + 1, leaf_depth)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 } // namespace dbms

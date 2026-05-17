@@ -14,6 +14,11 @@ public:
     bool erase(const IndexedValue& key);
     bool contains(const IndexedValue& key) const;
     RowId find(const IndexedValue& key) const;
+    
+    size_t size() const;
+    bool empty() const;
+    
+    bool verify() const;
 
 private:
     void insertNonFull(BTreeNode* node, const BTreeEntry& entry);
@@ -36,6 +41,12 @@ private:
     void mergeChildren(BTreeNode* node, size_t child_index);
 
     size_t findKeyIndex(BTreeNode* node, const IndexedValue& key) const;
+    
+    bool verifyNode(
+        const BTreeNode* node,
+        size_t depth,
+        size_t& leaf_depth
+    ) const;
 
 private:
     size_t min_degree;
