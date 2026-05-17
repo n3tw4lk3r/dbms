@@ -22,9 +22,8 @@ public:
 
     RowId insertRow(const std::vector<Value>& values);
 
-    const std::vector<Row>& getRows() const;
-
-    std::vector<Row>& getRowsMutable();
+    const std::vector<std::unique_ptr<Row>>& getRows() const;
+    std::vector<std::unique_ptr<Row>>& getRowsMutable();
 
     const std::vector<ColumnSchema>& getSchema() const;
 
@@ -39,6 +38,8 @@ public:
         const std::string& column_name,
         const Value& value
     );
+
+    Row* findRowById(RowId row_id);
 
 private:
     void validateRow(const std::vector<Value>& values) const;
@@ -69,8 +70,9 @@ private:
     RowId next_row_id = 1;
     std::string name;
     std::vector<ColumnSchema> schema;
-    std::vector<Row> rows;
+    std::vector<std::unique_ptr<Row>> rows;
     std::unordered_map<std::string, BTree> indexes;
+    std::unordered_map<RowId, Row*> row_lookup;
 };
 
 } // namespace dbms

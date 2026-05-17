@@ -14,10 +14,7 @@ Table::Table(
 {
     for (const auto& column : schema) {
         if (column.indexed) {
-            indexes.emplace(
-                column.name,
-                BTree()
-            );
+            indexes.emplace(column.name, BTree());
         }
     }
 }
@@ -29,21 +26,27 @@ const std::string Table::getName() const {
 RowId Table::insertRow(const std::vector<Value>& values) {
     validateRow(values);
 
-    Row row;
-    row.id = next_row_id;
-    ++next_row_id;
-    row.values = values;
+    auto row = std::make_unique<Row>();
 
-    rows.push_back(row);
-    insertIntoIndexes(rows.back());
-    return row.id;
+    row->id = next_row_id;
+    ++next_row_id;
+
+    row->values = values;
+
+    Row* row_ptr = row.get();
+
+    rows.push_back(std::move(row));
+    row_lookup[row_ptr->id] = row_ptr;
+    insertIntoIndexes(*row_ptr);
+
+    return row_ptr->id;
 }
 
-const std::vector<Row>& Table::getRows() const {
+const std::vector<std::unique_ptr<Row>>& Table::getRows() const {
     return rows;
 }
 
-std::vector<Row>& Table::getRowsMutable() {
+std::vector<std::unique_ptr<Row>>& Table::getRowsMutable() {
     return rows;
 }
 
@@ -82,25 +85,29 @@ Row* Table::findByIndexedValue(
         return nullptr;
     }
 
-    RowId row_id = it->second.find(
-            IndexedValue(value)
-        );
+    RowId row_id = it->second.find(IndexedValue(value));
 
     if (row_id == 0) {
         return nullptr;
     }
 
-    for (auto& row : rows) {
-        if (row.deleted) {
-            continue;
-        }
+    Row* row = findRowById(row_id);
 
-        if (row.id == row_id) {
-            return &row;
-        }
+    if (!row || row->deleted) {
+        return nullptr;
     }
 
-    return nullptr;
+    return row;
+}
+
+Row* Table::findRowById(RowId row_id) {
+    auto it = row_lookup.find(row_id);
+
+    if (it == row_lookup.end()) {
+        return nullptr;
+    }
+
+    return it->second;
 }
 
 void Table::validateRow(const std::vector<Value>& values) const {
@@ -198,9 +205,7 @@ int Table::findColumnIndex(
     return -1;
 }
 
-void Table::insertIntoIndexes(
-    const Row& row
-) {
+void Table::insertIntoIndexes(const Row& row) {
     for (size_t i = 0; i < schema.size(); ++i) {
         const auto& column = schema[i];
 

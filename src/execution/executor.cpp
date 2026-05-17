@@ -156,7 +156,9 @@ void Executor::executeSelect(const Command& cmd) {
 
     bool has_rows = false;
 
-    for (const auto& row : rows) {
+    for (const auto& row_ptr : rows) {
+        const Row& row = *row_ptr;
+
         if (row.deleted) {
             continue;
         }
@@ -191,7 +193,9 @@ void Executor::executeUpdate(const Command& cmd) {
 
     size_t updated = 0;
 
-    for (auto& row : rows) {
+    for (const auto& row_ptr : rows) {
+        Row& row = *row_ptr;
+
         if (row.deleted) {
             continue;
         }
@@ -238,7 +242,9 @@ void Executor::executeDelete(const Command& cmd) {
 
     size_t deleted = 0;
 
-    for (auto& row : rows) {
+    for (const auto& row_ptr : rows) {
+        Row& row = *row_ptr;
+
         if (row.deleted) {
             continue;
         }
