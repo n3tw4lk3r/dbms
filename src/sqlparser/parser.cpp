@@ -375,7 +375,13 @@ Command Parser::parseCreateTable(const std::vector<std::string>& tokens) {
 }
 
 Value Parser::parseValue(const std::string& token) {
-    if (!token.empty() && std::isdigit(token[0])) {
+    if (token == "NULL") {
+        return Value();
+    }
+
+    if (!token.empty() && (std::isdigit(token[0]) ||
+        (token[0] == '-' && token.size() > 1))
+    ) {
         return Value(std::stoi(token));
     }
 
@@ -438,7 +444,14 @@ Operand Parser::parseOperand(const std::string& token) {
         return op;
     }
 
-    if (!token.empty() && std::isdigit(token[0])) {
+    if (token == "NULL") {
+        op.value = Value();
+        return op;
+    }
+
+    if (!token.empty() && (std::isdigit(token[0]) ||
+         (token[0] == '-' && token.size() > 1))
+    ) {
         op.value = Value(std::stoi(token));
         return op;
     }
