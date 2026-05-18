@@ -17,7 +17,13 @@ Database* System::getDatabase(const std::string& name) {
 }
 
 void System::useDatabase(const std::string& name) {
-    current_database = getDatabase(name);
+    Database* db = getDatabase(name);
+
+    if (!db) {
+        throw std::runtime_error("Database not found");
+    }
+
+    current_database = db;
 }
 
 Database* System::getCurrentDatabase() {
