@@ -66,6 +66,14 @@ void Executor::executeCreateDatabase(const Command& cmd) {
 }
 
 void Executor::executeDropDatabase(const Command& cmd) {
+    Database* db = system.getDatabase(cmd.database_name);
+
+    if (!db) {
+        throw std::runtime_error("Database not found");
+    }
+
+    system.dropDatabase(cmd.database_name);
+
     std::cout
         << "Database dropped: "
         << cmd.database_name
@@ -93,7 +101,14 @@ void Executor::executeCreateTable(const Command& cmd) {
 }
 
 void Executor::executeDropTable(const Command& cmd) {
-    resolveDatabase(cmd);
+    Database* db = resolveDatabase(cmd);
+    Table* table = db->getTable(cmd.table_name);
+
+    if (!table) {
+        throw std::runtime_error("Table not found");
+    }
+
+    db->dropTable(cmd.table_name);
 
     std::cout
         << "Table dropped: "

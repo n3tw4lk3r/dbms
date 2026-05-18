@@ -27,4 +27,14 @@ Table* Database::getTable(const std::string& table_name) {
     return it->second.get();
 }
 
+void Database::dropTable(const std::string& table_name) {
+    auto it = tables.find(table_name);
+
+    if (it == tables.end()) {
+        return;
+    }
+
+    tables.erase(it);
+}
+
 } // namespace dbms

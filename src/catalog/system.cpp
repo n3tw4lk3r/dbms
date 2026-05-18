@@ -24,4 +24,18 @@ Database* System::getCurrentDatabase() {
     return current_database;
 }
 
+void System::dropDatabase(const std::string& name) {
+    auto it = databases.find(name);
+
+    if (it == databases.end()) {
+        return;
+    }
+
+    if (current_database == it->second.get()) {
+        current_database = nullptr;
+    }
+
+    databases.erase(it);
+}
+
 } // namespace dbms
