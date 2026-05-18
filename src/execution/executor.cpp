@@ -121,7 +121,6 @@ void Executor::executeInsert(const Command& cmd) {
 
 void Executor::executeSelect(const Command& cmd) {
     Database* db = resolveDatabase(cmd);
-
     Table* table = db->getTable(cmd.table_name);
 
     if (!table) {
@@ -129,33 +128,24 @@ void Executor::executeSelect(const Command& cmd) {
     }
 
     const auto& schema = table->getSchema();
+    std::vector<const Row*> result_rows;
 
     if (canUseIndexLookup(*table, cmd.conditions)) {
-        Row* row = tryFindIndexedRow(
-            *table,
-            cmd.conditions
-        );
+        Row* row = tryFindIndexedRow(*table, cmd.conditions);
 
-        if (!row) {
-            std::cout << "(empty)\n";
-            return;
+        if (row && matchConditions(
+            cmd.conditions,
+            *row,
+            schema
+        )) {
+            result_rows.push_back(row);
         }
 
-        if (!matchConditions(cmd.conditions, *row, schema)) {
-            std::cout << "(empty)\n";
-            return;
-        }
-
-        printSelectedRow(*row, cmd, schema);
-
-        std::cout << '\n';
+        printJsonRows(result_rows, cmd, schema);
         return;
     }
 
     const auto& rows = table->getRows();
-
-    bool has_rows = false;
-
     for (const auto& row_ptr : rows) {
         const Row& row = *row_ptr;
 
@@ -167,16 +157,10 @@ void Executor::executeSelect(const Command& cmd) {
             continue;
         }
 
-        has_rows = true;
-
-        printSelectedRow(row, cmd, schema);
-
-        std::cout << '\n';
+        result_rows.push_back(&row);
     }
 
-    if (!has_rows) {
-        std::cout << "(empty)\n";
-    }
+    printJsonRows(result_rows, cmd, schema);
 }
 
 void Executor::executeUpdate(const Command& cmd) {
@@ -262,64 +246,82 @@ Database* Executor::resolveDatabase(const Command& cmd) {
     return db;
 }
 
-void Executor::printFullRow(const Row& row) {
-    for (size_t i = 0; i < row.values.size(); ++i) {
-        printValue(row.values[i]);
+void Executor::printJsonRows(
+    const std::vector<const Row*>& rows,
+    const Command& cmd,
+    const std::vector<ColumnSchema>& schema
+) {
+    std::cout << "[\n";
 
-        if (i + 1 != row.values.size()) {
-            std::cout << ", ";
+    for (size_t i = 0; i < rows.size(); ++i) {
+        printJsonRow(*rows[i], cmd, schema);
+
+        if (i + 1 != rows.size()) {
+            std::cout << ",";
         }
+
+        std::cout << "\n";
     }
+
+    std::cout << "]\n";
 }
 
-void Executor::printSelectedColumns(
+void Executor::printJsonRow(
     const Row& row,
-    const std::vector<ColumnSchema>& schema,
-    const std::vector<SelectColumn>& columns
+    const Command& cmd,
+    const std::vector<ColumnSchema>& schema
 ) {
+    std::cout << "  {\n";
+
+    bool select_all = cmd.select_columns.size() == 1 &&
+        cmd.select_columns[0].name == "*";
+
+    std::vector<SelectColumn> columns;
+    if (select_all) {
+        for (const auto& column : schema) {
+            SelectColumn select_column;
+            select_column.name = column.name;
+            columns.push_back(select_column);
+        }
+    } else {
+        columns = cmd.select_columns;
+    }
+
     for (size_t i = 0; i < columns.size(); ++i) {
+        const auto& column = columns[i];
+
         int column_index = findColumnIndex(
             schema,
-            columns[i].name
+            column.name
         );
 
         if (column_index < 0) {
             throw std::runtime_error(
                 "Unknown column: " +
-                columns[i].name
+                column.name
             );
         }
 
-        printValue(row.values[column_index]);
+        std::string field_name;
+        if (column.alias.empty()) {
+            field_name = column.name;
+        } else {
+            field_name = column.alias;
+        }
+
+        std::cout << "    \"" << field_name << "\": ";
+        printJsonValue(row.values[column_index]);
 
         if (i + 1 != columns.size()) {
-            std::cout << ", ";
+            std::cout << ",";
         }
-    }
-}
-
-void Executor::printSelectedRow(
-    const Row& row,
-    const Command& cmd,
-    const std::vector<ColumnSchema>& schema
-) {
-    bool select_all =
-        cmd.select_columns.size() == 1 &&
-        cmd.select_columns[0].name == "*";
-
-    if (select_all) {
-        printFullRow(row);
-        return;
+        std::cout << "\n";
     }
 
-    printSelectedColumns(
-        row,
-        schema,
-        cmd.select_columns
-    );
+    std::cout << "  }";
 }
 
-void Executor::printValue(const Value& value) {
+void Executor::printJsonValue(const Value& value) {
     switch (value.getType()) {
 
     case Value::Type::kInt:
@@ -327,7 +329,7 @@ void Executor::printValue(const Value& value) {
         return;
 
     case Value::Type::kString:
-        std::cout << value.asString();
+        std::cout << "\"" << value.asString() << "\"";
         return;
 
     case Value::Type::kNull:

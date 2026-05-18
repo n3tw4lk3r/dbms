@@ -31,15 +31,19 @@ private:
 
     Database* resolveDatabase(const Command& cmd);
 
-    void printFullRow(const Row& row);
-
-    void printSelectedColumns(
-        const Row& row,
-        const std::vector<ColumnSchema>& schema,
-        const std::vector<SelectColumn>& columns
+    void printJsonRows(
+        const std::vector<const Row*>& rows,
+        const Command& cmd,
+        const std::vector<ColumnSchema>& schema
     );
 
-    void printValue(const Value& value);
+    void printJsonRow(
+        const Row& row,
+        const Command& cmd,
+        const std::vector<ColumnSchema>& schema
+    );
+
+    void printJsonValue(const Value& value);
 
     bool matchConditions(
         const std::vector<Condition>& conditions,
