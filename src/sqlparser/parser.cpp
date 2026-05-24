@@ -92,6 +92,42 @@ std::string Parser::normalize(const std::string& token) {
     return result;
 }
 
+bool Parser::isValidIdentifier(
+    const std::string& token
+) const {
+    if (token.empty()) {
+        return false;
+    }
+
+    if (std::isdigit(static_cast<unsigned char>(token[0]))) {
+        return false;
+    }
+
+    for (char ch : token) {
+        if (std::isalnum(
+            static_cast<unsigned char>(ch)) ||
+            ch == '_'
+        ) {
+            continue;
+        }
+
+        return false;
+    }
+
+    return true;
+}
+
+void Parser::validateIdentifier(
+    const std::string& token
+) const {
+    if (!isValidIdentifier(token)) {
+        throw std::runtime_error(
+            "Invalid identifier: " +
+            token
+        );
+    }
+}
+
 bool Parser::isKeyword(const std::string& token) const {
     static constexpr std::array<std::string, 23> keywords = {
         "CREATE",
@@ -389,8 +425,11 @@ Command Parser::parseCreate(const std::vector<std::string>& tokens) {
     }
 
     if (tokens[1] == "DATABASE") {
+        validateIdentifier(tokens[2]);
+
         cmd.type = CommandType::kCreateDatabase;
         cmd.database_name = tokens[2];
+
         return cmd;
     }
 
@@ -556,11 +595,19 @@ void Parser::parseTableName(
     std::string& table_name
 ) {
     size_t dot_pos = fullName.find('.');
+
     if (dot_pos != std::string::npos) {
         database_name = fullName.substr(0, dot_pos);
         table_name = fullName.substr(dot_pos + 1);
+
+        validateIdentifier(database_name);
+        validateIdentifier(table_name);
+
     } else {
         table_name = fullName;
+
+        validateIdentifier(table_name);
+
         database_name.clear();
     }
 }
