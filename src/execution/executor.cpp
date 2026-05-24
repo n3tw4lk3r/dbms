@@ -534,6 +534,10 @@ bool Executor::likeValues(
     const Value& value,
     const Value& pattern
 ) {
+    if (value.isNull() || pattern.isNull()) {
+        return false;
+    }
+
     if (value.getType() != Value::Type::kString ||
         pattern.getType() != Value::Type::kString
     ) {

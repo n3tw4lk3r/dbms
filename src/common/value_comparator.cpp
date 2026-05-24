@@ -7,6 +7,18 @@ bool ValueComparator::compare(
     const Value& rhs,
     const std::string& operator_str
 ) {
+    if (lhs.isNull() || rhs.isNull()) {
+        if (operator_str == "==") {
+            return lhs.isNull() && rhs.isNull();
+        }
+
+        if (operator_str == "!=") {
+            return lhs.isNull() != rhs.isNull();
+        }
+
+        return false;
+    }
+    
     if (lhs.getType() != rhs.getType()) {
         return false;
     }
@@ -77,6 +89,10 @@ bool ValueComparator::between(
     const Value& lhs,
     const Value& rhs
 ) {
+    if (value.isNull() || lhs.isNull() || rhs.isNull()) {
+        return false;
+    }
+
     if (value.getType() != lhs.getType() ||
         value.getType() != rhs.getType()) {
         return false;
