@@ -56,6 +56,26 @@ private:
         const std::string& name
     );
 
+    void validateColumnExists(
+        const std::vector<ColumnSchema>& schema,
+        const std::string& column_name
+    );
+
+    void validateSelectColumns(
+        const Command& cmd,
+        const std::vector<ColumnSchema>& schema
+    );
+
+    void validateAssignments(
+        const Command& cmd,
+        const std::vector<ColumnSchema>& schema
+    );
+
+    void validateConditions(
+        const std::vector<Condition>& conditions,
+        const std::vector<ColumnSchema>& schema
+    );
+    
     Value resolveOperand(
         const Operand& operand,
         const Row& row,

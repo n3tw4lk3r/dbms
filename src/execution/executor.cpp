@@ -118,20 +118,26 @@ void Executor::executeDropTable(const Command& cmd) {
 
 void Executor::executeInsert(const Command& cmd) {
     Database* db = resolveDatabase(cmd);
-
+    
     Table* table = db->getTable(cmd.table_name);
-
     if (!table) {
         throw std::runtime_error("Table not found");
     }
+    
+    const auto& schema = table->getSchema();
+    for (const auto& column_name : cmd.column_names) {
+        validateColumnExists(
+            schema,
+            column_name
+        );
+    }
+
 
     for (const auto& values : cmd.values) {
         table->insertRow(buildInsertRow(*table, cmd, values));
     }
 
-    std::cout
-        << cmd.values.size()
-        << " rows inserted\n";
+    std::cout << cmd.values.size() << " rows inserted\n";
 }
 
 void Executor::executeSelect(const Command& cmd) {
@@ -143,8 +149,11 @@ void Executor::executeSelect(const Command& cmd) {
     }
 
     const auto& schema = table->getSchema();
+    
+    validateSelectColumns(cmd, schema);
+    validateConditions(cmd.conditions, schema);
+    
     std::vector<const Row*> result_rows;
-
     if (canUseIndexLookup(*table, cmd.conditions)) {
         Row* row = tryFindIndexedRow(*table, cmd.conditions);
 
@@ -189,9 +198,11 @@ void Executor::executeUpdate(const Command& cmd) {
 
     auto& rows = table->getRowsMutable();
     const auto& schema = table->getSchema();
-
+    
+    validateAssignments(cmd, schema);
+    validateConditions(cmd.conditions, schema);
+    
     size_t updated = 0;
-
     for (const auto& row_ptr : rows) {
         Row& row = *row_ptr;
 
@@ -207,9 +218,7 @@ void Executor::executeUpdate(const Command& cmd) {
         ++updated;
     }
 
-    std::cout
-        << updated
-        << " rows updated\n";
+    std::cout << updated << " rows updated\n";
 }
 
 void Executor::executeDelete(const Command& cmd) {
@@ -223,6 +232,8 @@ void Executor::executeDelete(const Command& cmd) {
 
     auto& rows = table->getRowsMutable();
     const auto& schema = table->getSchema();
+
+    validateConditions(cmd.conditions, schema);
 
     size_t deleted = 0;
     for (const auto& row_ptr : rows) {
@@ -240,9 +251,7 @@ void Executor::executeDelete(const Command& cmd) {
         ++deleted;
     }
 
-    std::cout
-        << deleted
-        << " rows deleted\n";
+    std::cout << deleted << " rows deleted\n";
 }
 
 Database* Executor::resolveDatabase(const Command& cmd) {
@@ -424,6 +433,78 @@ int Executor::findColumnIndex(
     }
 
     return -1;
+}
+
+void Executor::validateColumnExists(
+    const std::vector<ColumnSchema>& schema,
+    const std::string& column_name
+) {
+    if (findColumnIndex(schema, column_name) < 0) {
+        throw std::runtime_error(
+            "Unknown column: " +
+            column_name
+        );
+    }
+}
+
+void Executor::validateSelectColumns(
+    const Command& cmd,
+    const std::vector<ColumnSchema>& schema
+) {
+    bool select_all =
+        cmd.select_columns.size() == 1 &&
+        cmd.select_columns[0].name == "*";
+
+    if (select_all) {
+        return;
+    }
+
+    for (const auto& column : cmd.select_columns) {
+        validateColumnExists(
+            schema,
+            column.name
+        );
+    }
+}
+
+void Executor::validateAssignments(
+    const Command& cmd,
+    const std::vector<ColumnSchema>& schema
+) {
+    for (const auto& assignment : cmd.assignments) {
+        validateColumnExists(
+            schema,
+            assignment.column
+        );
+    }
+}
+
+void Executor::validateConditions(
+    const std::vector<Condition>& conditions,
+    const std::vector<ColumnSchema>& schema
+) {
+    for (const auto& condition : conditions) {
+        if (condition.lhs.is_column) {
+            validateColumnExists(
+                schema,
+                condition.lhs.column
+            );
+        }
+
+        if (condition.rhs.is_column) {
+            validateColumnExists(
+                schema,
+                condition.rhs.column
+            );
+        }
+
+        if (condition.range_end.is_column) {
+            validateColumnExists(
+                schema,
+                condition.range_end.column
+            );
+        }
+    }
 }
 
 Value Executor::resolveOperand(
