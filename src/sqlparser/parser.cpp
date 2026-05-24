@@ -1,22 +1,9 @@
+#include <array>
 #include <stdexcept>
 
 #include "sqlparser/parser.hpp"
 
 namespace dbms {
-
-std::string Parser::normalize(const std::string& token) {
-    std::string result;
-
-    for (char ch : token) {
-        if (ch == '(' || ch == ')' || ch == ',' || ch == ';') {
-            continue;
-        }
-
-        result += ch;
-    }
-
-    return result;
-}
 
 std::vector<std::string> Parser::tokenize(const std::string& input) {
     std::vector<std::string> tokens;
@@ -47,6 +34,7 @@ std::vector<std::string> Parser::tokenize(const std::string& input) {
                 std::string two {ch, input[i + 1]};
                 if (two == "==" || two == "!=" || two == "<=" || two == ">=") {
                     if (!current.empty()) {
+                        current = tryNormalizeToken(current);
                         tokens.push_back(current);
                         current.clear();
                     }
@@ -61,6 +49,7 @@ std::vector<std::string> Parser::tokenize(const std::string& input) {
 
         if (std::isspace(ch)) {
             if (!current.empty()) {
+                current = tryNormalizeToken(current);
                 tokens.push_back(current);
                 current.clear();
             }
@@ -69,6 +58,7 @@ std::vector<std::string> Parser::tokenize(const std::string& input) {
 
         if (ch == '(' || ch == ')' || ch == ',' || ch == ';') {
             if (!current.empty()) {
+                current = tryNormalizeToken(current);
                 tokens.push_back(current);
                 current.clear();
             }
@@ -81,10 +71,108 @@ std::vector<std::string> Parser::tokenize(const std::string& input) {
     }
 
     if (!current.empty()) {
+        current = tryNormalizeToken(current);
         tokens.push_back(current);
     }
 
     return tokens;
+}
+
+std::string Parser::normalize(const std::string& token) {
+    std::string result;
+
+    for (char ch : token) {
+        if (ch == '(' || ch == ')' || ch == ',' || ch == ';') {
+            continue;
+        }
+
+        result += ch;
+    }
+
+    return result;
+}
+
+bool Parser::isKeyword(const std::string& token) const {
+    static constexpr std::array<std::string, 23> keywords = {
+        "CREATE",
+        "DATABASE",
+        "DROP",
+        "USE",
+        "TABLE",
+        "INSERT",
+        "INTO",
+        "VALUE",
+        "SELECT",
+        "FROM",
+        "WHERE",
+        "UPDATE",
+        "SET",
+        "DELETE",
+        "AS",
+        "BETWEEN",
+        "AND",
+        "LIKE",
+        "NOT_NULL",
+        "INDEXED",
+        "INT",
+        "STRING",
+        "NULL"
+    };
+
+    std::string upper;
+    for (char ch : token) {
+        upper += std::toupper(static_cast<unsigned char>(ch));
+    }
+
+    for (const auto& keyword : keywords) {
+        if (upper == keyword) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+std::string Parser::normalizeKeyword(
+    const std::string& token
+) const {
+    bool has_lower = false;
+    bool has_upper = false;
+
+    for (char ch : token) {
+        if (std::islower(static_cast<unsigned char>(ch))) {
+            has_lower = true;
+        }
+
+        if (std::isupper(static_cast<unsigned char>(ch))) {
+            has_upper = true;
+        }
+    }
+
+    if (has_lower && has_upper) {
+        throw std::runtime_error(
+            "Mixed-case keywords are not allowed: " +
+            token
+        );
+    }
+
+    std::string result;
+    for (char ch : token) {
+        result += std::toupper(
+            static_cast<unsigned char>(ch)
+        );
+    }
+
+    return result;
+}
+
+std::string Parser::tryNormalizeToken(
+    const std::string& token
+) const {
+    if (isKeyword(token)) {
+        return normalizeKeyword(token);
+    }
+    return token;
 }
 
 Command Parser::parse(const std::string& query) {

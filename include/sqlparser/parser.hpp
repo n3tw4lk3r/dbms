@@ -14,6 +14,10 @@ public:
 private:
     std::vector<std::string> tokenize(const std::string& query);
     std::string normalize(const std::string& token);
+    
+    bool isKeyword(const std::string& token) const;
+    std::string normalizeKeyword(const std::string& token) const;
+    std::string tryNormalizeToken(const std::string& token) const;
 
     Command parseCreate(const std::vector<std::string>& tokens);
     Command parseCreateTable(const std::vector<std::string>& tokens);
