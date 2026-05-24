@@ -299,23 +299,46 @@ Command Parser::parseInsert(const std::vector<std::string>& tokens) {
         ++pos;
     }
 
-    if (tokens[pos] == "VALUE") {
-        ++pos;
+    if (pos >= tokens.size() || tokens[pos] != "VALUE") {
+        throw std::runtime_error("Expected VALUE");
     }
 
+    ++pos;
+
     while (pos < tokens.size()) {
-        if (tokens[pos] == "(") {
-            ++pos;
-            std::vector<Value> row;
+        if (tokens[pos] != "(") {
+            throw std::runtime_error(
+                "Expected '(' in VALUE list"
+            );
+        }
 
-            while (tokens[pos] != ")") {
-                if (tokens[pos] != ",") {
-                    row.push_back(parseValue(tokens[pos]));
-                }
-                ++pos;
+        ++pos;
+        std::vector<Value> row;
+
+        while (pos < tokens.size() && tokens[pos] != ")") {
+            if (tokens[pos] != ",") {
+                row.push_back(parseValue(tokens[pos]));
             }
+            ++pos;
+        }
 
-            cmd.values.push_back(row);
+        if (pos >= tokens.size()) {
+            throw std::runtime_error(
+                "Expected ')' in VALUE list"
+            );
+        }
+
+        cmd.values.push_back(row);
+        ++pos;
+
+        if (pos >= tokens.size()) {
+            break;
+        }
+
+        if (tokens[pos] != ",") {
+            throw std::runtime_error(
+                "Expected ',' between VALUE tuples"
+            );
         }
 
         ++pos;
