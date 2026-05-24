@@ -129,12 +129,37 @@ void Table::updateRow(
         updated_values[column_index] = assignment.value;
     }
 
-    validateRow(updated_values);
+    validateColumnCount(updated_values);
+
+    for (size_t i = 0; i < schema.size(); ++i) {
+        validateColumnType(
+            updated_values[i],
+            schema[i]
+        );
+
+        validateNotNull(
+            updated_values[i],
+            schema[i]
+        );
+    }
+
+    validateUniqueConstraints(
+        updated_values,
+        row.id
+    );
+
+    std::vector<Value> old_values = row.values;
+
     eraseFromIndexes(row);
 
-    row.values = updated_values;
-
-    insertIntoIndexes(row);
+    try {
+        row.values = updated_values;
+        insertIntoIndexes(row);
+    } catch (...) {
+        row.values = old_values;
+        insertIntoIndexes(row);
+        throw;
+    }
 }
 
 void Table::deleteRow(Row& row) {
@@ -204,7 +229,8 @@ void Table::validateNotNull(
 }
 
 void Table::validateUniqueConstraints(
-    const std::vector<Value>& values
+    const std::vector<Value>& values,
+    RowId ignored_row_id
 ) const {
     for (size_t i = 0; i < schema.size(); ++i) {
         const auto& column = schema[i];
@@ -213,16 +239,28 @@ void Table::validateUniqueConstraints(
             continue;
         }
 
-        if (containsIndexedValue(
-                column.name,
-                values[i])
-        ) {
-            throw DatabaseError(
-                "Duplicate value for indexed column '" +
-                column.name +
-                "'"
-            );
+        auto index_it = indexes.find(column.name);
+        if (index_it == indexes.end()) {
+            continue;
         }
+
+        RowId existing_row_id = index_it->second.find(
+            IndexedValue(values[i])
+        );
+
+        if (existing_row_id == 0) {
+            continue;
+        }
+
+        if (existing_row_id == ignored_row_id) {
+            continue;
+        }
+
+        throw DatabaseError(
+            "Duplicate value for indexed column '" +
+            column.name +
+            "'"
+        );
     }
 }
 

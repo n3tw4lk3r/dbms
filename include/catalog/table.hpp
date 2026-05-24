@@ -67,7 +67,8 @@ private:
     ) const;
 
     void validateUniqueConstraints(
-        const std::vector<Value>& values
+        const std::vector<Value>& values,
+        RowId ignored_row_id = 0
     ) const;
 
     int findColumnIndex(const std::string& column_name) const;
