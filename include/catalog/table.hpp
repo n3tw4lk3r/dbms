@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -13,10 +14,17 @@
 namespace dbms {
 
 class Table {
+    friend class Database;
+
 public:
     Table(
         const std::string& name,
-        const std::vector<ColumnSchema>& schema
+        const std::vector<ColumnSchema>& schema,
+        const std::filesystem::path& storage_path
+    );
+
+    Table(
+        const std::filesystem::path& storage_path
     );
 
     const std::string getName() const;
@@ -47,9 +55,16 @@ public:
         const std::vector<Assignment>& assignments
     );
 
-    void deleteRow(Row& row);
+    void deleteRow(RowId row_id);
+    
 
 private:
+    void save() const;
+    void load();
+
+    void compact();
+    void tryCompact();
+
     void validateRow(const std::vector<Value>& values) const;
 
     void validateColumnCount(
@@ -75,14 +90,27 @@ private:
 
     void insertIntoIndexes(const Row& row);
     void eraseFromIndexes(const Row& row);
+    
+    void appendInsert(const Row& row);
+    void appendDelete(RowId row_id);
+    void appendUpdate(const Row& row);
+
+    void saveSchema() const;
 
 private:
-    RowId next_row_id = 1;
     std::string name;
     std::vector<ColumnSchema> schema;
-    std::vector<std::unique_ptr<Row>> rows;
     std::unordered_map<std::string, BTree> indexes;
+    
+    std::vector<std::unique_ptr<Row>> rows;
     std::unordered_map<RowId, Row*> row_lookup;
+    RowId next_row_id = 1;
+    
+    std::filesystem::path storage_path;
+    std::filesystem::path metadata_path;
+    std::filesystem::path data_path;
+
+    size_t operation_count = 0;
 };
 
 } // namespace dbms

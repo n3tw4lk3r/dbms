@@ -136,7 +136,7 @@ void Executor::executeInsert(const Command& cmd) {
     for (const auto& values : cmd.values) {
         table->insertRow(buildInsertRow(*table, cmd, values));
     }
-
+    
     std::cout << cmd.values.size() << " rows inserted\n";
 }
 
@@ -247,7 +247,7 @@ void Executor::executeDelete(const Command& cmd) {
             continue;
         }
 
-        table->deleteRow(row);
+        table->deleteRow(row.id);
         ++deleted;
     }
 

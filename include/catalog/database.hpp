@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -10,7 +11,10 @@ namespace dbms {
 
 class Database {
 public:
-    explicit Database(const std::string& name);
+    Database(
+        const std::string& name,
+        const std::filesystem::path& storage_path
+    );
 
     const std::string getName() const;
     
@@ -24,7 +28,14 @@ public:
 
 private:
     std::string name;
-    std::unordered_map<std::string, std::unique_ptr<Table>> tables;
+    
+    std::unordered_map<
+        std::string,
+        std::unique_ptr<Table>
+    > tables;
+    
+    std::filesystem::path storage_path;
 };
 
 } // namespace dbms
+
