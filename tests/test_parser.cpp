@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <stdexcept>
 
 #include "test_utils.hpp"
 #include "sqlparser/parser.hpp"
@@ -14,7 +13,11 @@ void test_parse_empty(TestStats& stats) {
     
     Parser parser;
     Command cmd = parser.parse("");
-    check(stats, cmd.type == CommandType::kUnknown, "Empty query yields unknown command");
+    check(
+        stats,
+        cmd.type == CommandType::kUnknown,
+        "Empty query yields unknown command"
+    );
 }
 
 void test_parse_create_database(TestStats& stats) {
@@ -23,7 +26,11 @@ void test_parse_create_database(TestStats& stats) {
     Parser parser;
     Command cmd = parser.parse("CREATE DATABASE mydb");
     
-    check(stats, cmd.type == CommandType::kCreateDatabase, "Command type is kCreateDatabase");
+    check(
+        stats,
+        cmd.type == CommandType::kCreateDatabase,
+        "Command type is kCreateDatabase"
+    );
     check(stats, cmd.database_name == "mydb", "Database name is mydb");
 }
 
@@ -33,7 +40,11 @@ void test_parse_drop_database(TestStats& stats) {
     Parser parser;
     Command cmd = parser.parse("DROP DATABASE mydb");
     
-    check(stats, cmd.type == CommandType::kDropDatabase, "Command type is kDropDatabase");
+    check(
+        stats,
+        cmd.type == CommandType::kDropDatabase,
+        "Command type is kDropDatabase"
+    );
     check(stats, cmd.database_name == "mydb", "Database name is mydb");
 }
 
@@ -43,7 +54,11 @@ void test_parse_use_database(TestStats& stats) {
     Parser parser;
     Command cmd = parser.parse("USE mydb");
     
-    check(stats, cmd.type == CommandType::kUseDatabase, "Command type is kUseDatabase");
+    check(
+        stats,
+        cmd.type == CommandType::kUseDatabase,
+        "Command type is kUseDatabase"
+    );
     check(stats, cmd.database_name == "mydb", "Database name is mydb");
 }
 
@@ -51,18 +66,36 @@ void test_parse_create_table(TestStats& stats) {
     test_header("Parse CREATE TABLE");
     
     Parser parser;
-    Command cmd = parser.parse("CREATE TABLE mydb.users (id INT INDEXED, name STRING NOT_NULL)");
+    Command cmd = parser.parse(
+        "CREATE TABLE mydb.users (id INT INDEXED, name STRING NOT_NULL)"
+    );
     
-    check(stats, cmd.type == CommandType::kCreateTable, "Command type is kCreateTable");
+    check(
+        stats,
+        cmd.type == CommandType::kCreateTable,
+        "Command type is kCreateTable"
+    );
     check(stats, cmd.database_name == "mydb", "Database name is mydb");
     check(stats, cmd.table_name == "users", "Table name is users");
     check(stats, cmd.columns.size() == 2, "Two columns");
     check(stats, cmd.columns[0].name == "id", "First column is id");
-    check(stats, cmd.columns[0].type == ColumnType::kInt, "First column type is INT");
+    check(
+        stats,
+        cmd.columns[0].type == ColumnType::kInt,
+        "First column type is INT"
+    );
     check(stats, cmd.columns[0].indexed, "First column is indexed");
-    check(stats, cmd.columns[0].not_null, "First column is not_null (from INDEXED)");
+    check(
+        stats,
+        cmd.columns[0].not_null,
+        "First column is not_null (from INDEXED)"
+    );
     check(stats, cmd.columns[1].name == "name", "Second column is name");
-    check(stats, cmd.columns[1].type == ColumnType::kString, "Second column type is STRING");
+    check(
+        stats,
+        cmd.columns[1].type == ColumnType::kString,
+        "Second column type is STRING"
+    );
     check(stats, cmd.columns[1].not_null, "Second column is not_null");
     check(stats, !cmd.columns[1].indexed, "Second column is not indexed");
 }
@@ -73,7 +106,11 @@ void test_parse_create_table_without_db(TestStats& stats) {
     Parser parser;
     Command cmd = parser.parse("CREATE TABLE users (id INT)");
     
-    check(stats, cmd.type == CommandType::kCreateTable, "Command type is kCreateTable");
+    check(
+        stats,
+        cmd.type == CommandType::kCreateTable,
+        "Command type is kCreateTable"
+    );
     check(stats, cmd.database_name.empty(), "Database name is empty");
     check(stats, cmd.table_name == "users", "Table name is users");
     check(stats, cmd.columns.size() == 1, "One column");
@@ -85,7 +122,11 @@ void test_parse_drop_table(TestStats& stats) {
     Parser parser;
     Command cmd = parser.parse("DROP TABLE mydb.users");
     
-    check(stats, cmd.type == CommandType::kDropTable, "Command type is kDropTable");
+    check(
+        stats,
+        cmd.type == CommandType::kDropTable,
+        "Command type is kDropTable"
+    );
     check(stats, cmd.database_name == "mydb", "Database name is mydb");
     check(stats, cmd.table_name == "users", "Table name is users");
 }
@@ -94,7 +135,9 @@ void test_parse_insert(TestStats& stats) {
     test_header("Parse INSERT");
     
     Parser parser;
-    Command cmd = parser.parse("INSERT INTO users (id, name) VALUE (1, \"john\")");
+    Command cmd = parser.parse(
+        "INSERT INTO users (id, name) VALUE (1, \"john\")"
+    );
     
     check(stats, cmd.type == CommandType::kInsert, "Command type is kInsert");
     check(stats, cmd.table_name == "users", "Table name is users");
@@ -103,9 +146,17 @@ void test_parse_insert(TestStats& stats) {
     check(stats, cmd.column_names[1] == "name", "Second column is name");
     check(stats, cmd.values.size() == 1, "One row of values");
     check(stats, cmd.values[0].size() == 2, "Two values in row");
-    check(stats, cmd.values[0][0].getType() == Value::Type::kInt, "First value is int");
+    check(
+        stats,
+        cmd.values[0][0].getType() == Value::Type::kInt,
+        "First value is int"
+    );
     check(stats, cmd.values[0][0].asInt() == 1, "First value is 1");
-    check(stats, cmd.values[0][1].getType() == Value::Type::kString, "Second value is string");
+    check(
+        stats,
+        cmd.values[0][1].getType() == Value::Type::kString,
+        "Second value is string"
+    );
     check(stats, cmd.values[0][1].asString() == "john", "Second value is john");
 }
 
@@ -113,7 +164,9 @@ void test_parse_insert_multiple_rows(TestStats& stats) {
     test_header("Parse INSERT multiple rows");
     
     Parser parser;
-    Command cmd = parser.parse("INSERT INTO users (a, b) VALUE (1, 2), (3, 4), (5, 6)");
+    Command cmd = parser.parse(
+        "INSERT INTO users (a, b) VALUE (1, 2), (3, 4), (5, 6)"
+    );
     
     check(stats, cmd.type == CommandType::kInsert, "Command type is kInsert");
     check(stats, cmd.values.size() == 3, "Three rows");
@@ -165,13 +218,19 @@ void test_parse_select_with_alias(TestStats& stats) {
     test_header("Parse SELECT with alias");
     
     Parser parser;
-    Command cmd = parser.parse("SELECT id AS user_id, name AS user_name FROM users");
+    Command cmd = parser.parse(
+        "SELECT id AS user_id, name AS user_name FROM users"
+    );
     
     check(stats, cmd.select_columns.size() == 2, "Two columns");
     check(stats, cmd.select_columns[0].name == "id", "First column name");
     check(stats, cmd.select_columns[0].alias == "user_id", "First column alias");
     check(stats, cmd.select_columns[1].name == "name", "Second column name");
-    check(stats, cmd.select_columns[1].alias == "user_name", "Second column alias");
+    check(
+        stats,
+        cmd.select_columns[1].alias == "user_name",
+        "Second column alias"
+    );
 }
 
 void test_parse_select_with_where(TestStats& stats) {
@@ -192,11 +251,21 @@ void test_parse_select_with_multiple_conditions(TestStats& stats) {
     test_header("Parse SELECT with multiple conditions");
     
     Parser parser;
-    Command cmd = parser.parse("SELECT * FROM users WHERE id >= 1 name LIKE \"^[A-Z]\"");
+    Command cmd = parser.parse(
+        "SELECT * FROM users WHERE id >= 1 name LIKE \"^[A-Z]\""
+    );
     
     check(stats, cmd.conditions.size() == 2, "Two conditions");
-    check(stats, cmd.conditions[0].operator_type == ">=", "First operator is >=");
-    check(stats, cmd.conditions[1].operator_type == "LIKE", "Second operator is LIKE");
+    check(
+        stats,
+        cmd.conditions[0].operator_type == ">=",
+        "First operator is >="
+    );
+    check(
+        stats,
+        cmd.conditions[1].operator_type == "LIKE",
+        "Second operator is LIKE"
+    );
 }
 
 void test_parse_select_with_between(TestStats& stats) {
@@ -206,9 +275,17 @@ void test_parse_select_with_between(TestStats& stats) {
     Command cmd = parser.parse("SELECT * FROM users WHERE id BETWEEN 1 AND 10");
     
     check(stats, cmd.conditions.size() == 1, "One condition");
-    check(stats, cmd.conditions[0].operator_type == "BETWEEN", "Operator is BETWEEN");
+    check(
+        stats,
+        cmd.conditions[0].operator_type == "BETWEEN",
+        "Operator is BETWEEN"
+    );
     check(stats, cmd.conditions[0].rhs.value.asInt() == 1, "Range start is 1");
-    check(stats, cmd.conditions[0].range_end.value.asInt() == 10, "Range end is 10");
+    check(
+        stats,
+        cmd.conditions[0].range_end.value.asInt() == 10,
+        "Range end is 10"
+    );
 }
 
 void test_parse_update(TestStats& stats) {
@@ -220,8 +297,16 @@ void test_parse_update(TestStats& stats) {
     check(stats, cmd.type == CommandType::kUpdate, "Command type is kUpdate");
     check(stats, cmd.table_name == "users", "Table name is users");
     check(stats, cmd.assignments.size() == 1, "One assignment");
-    check(stats, cmd.assignments[0].column == "name", "Assignment column is name");
-    check(stats, cmd.assignments[0].value.asString() == "jane", "Assignment value is jane");
+    check(
+        stats,
+        cmd.assignments[0].column == "name",
+        "Assignment column is name"
+    );
+    check(
+        stats,
+        cmd.assignments[0].value.asString() == "jane",
+        "Assignment value is jane"
+    );
     check(stats, cmd.conditions.size() == 1, "One condition");
 }
 
@@ -229,13 +314,23 @@ void test_parse_update_multiple_assignments(TestStats& stats) {
     test_header("Parse UPDATE multiple assignments");
     
     Parser parser;
-    Command cmd = parser.parse("UPDATE users SET name = \"jane\", age = 30 WHERE id == 1");
+    Command cmd = parser.parse(
+        "UPDATE users SET name = \"jane\", age = 30 WHERE id == 1"
+    );
     
     check(stats, cmd.assignments.size() == 2, "Two assignments");
     check(stats, cmd.assignments[0].column == "name", "First assignment column");
-    check(stats, cmd.assignments[0].value.asString() == "jane", "First assignment value");
+    check(
+        stats,
+        cmd.assignments[0].value.asString() == "jane",
+        "First assignment value"
+    );
     check(stats, cmd.assignments[1].column == "age", "Second assignment column");
-    check(stats, cmd.assignments[1].value.asInt() == 30, "Second assignment value");
+    check(
+        stats,
+        cmd.assignments[1].value.asInt() == 30,
+        "Second assignment value"
+    );
 }
 
 void test_parse_delete(TestStats& stats) {
@@ -286,8 +381,16 @@ void test_parse_value_string(TestStats& stats) {
     Parser parser;
     Command cmd = parser.parse("INSERT INTO t (a) VALUE (\"hello world\")");
     
-    check(stats, cmd.values[0][0].getType() == Value::Type::kString, "Type is string");
-    check(stats, cmd.values[0][0].asString() == "hello world", "Value is hello world");
+    check(
+        stats,
+        cmd.values[0][0].getType() == Value::Type::kString,
+        "Type is string"
+    );
+    check(
+        stats,
+        cmd.values[0][0].asString() == "hello world",
+        "Value is hello world"
+    );
 }
 
 void test_parse_value_null(TestStats& stats) {
@@ -329,10 +432,17 @@ void test_parse_keywords_case_insensitive(TestStats& stats) {
     Parser parser;
     
     Command cmd1 = parser.parse("create database mydb");
-    check(stats, cmd1.type == CommandType::kCreateDatabase, "Lowercase create works");
+    check(
+        stats,
+        cmd1.type == CommandType::kCreateDatabase,
+        "Lowercase create works"
+    );
     
     Command cmd2 = parser.parse("CREATE database mydb");
-    check(stats, cmd2.type == CommandType::kCreateDatabase, "Mixed case CREATE works");
+    check(stats,
+        cmd2.type == CommandType::kCreateDatabase,
+        "Mixed case CREATE works"
+    );
     
     Command cmd3 = parser.parse("select * from users");
     check(stats, cmd3.type == CommandType::kSelect, "Lowercase select works");
@@ -348,7 +458,7 @@ void test_parse_invalid_identifier(TestStats& stats) {
     bool caught = false;
     try {
         parser.parse("CREATE DATABASE 123invalid");
-    } catch (const std::runtime_error&) {
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "Invalid identifier starting with digit throws error");
@@ -411,6 +521,9 @@ int main() {
     test_parse_insert_without_columns(stats);
     
     print_test_results(stats);
-    return stats.tests_failed > 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+    if (stats.tests_failed > 0) {
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }
 

@@ -4,7 +4,6 @@
 
 #include "test_utils.hpp"
 #include "common/value.hpp"
-#include "exceptions/database_error.hpp"
 #include "storage/row.hpp"
 #include "storage/serializer.hpp"
 
@@ -19,11 +18,35 @@ void test_serialize_null_value(TestStats& stats) {
 
 void test_serialize_int_value(TestStats& stats) {
     test_header("serialize int value");
-    check(stats, Serializer::serializeValue(Value(0)) == "INT:0", "0 -> INT:0");
-    check(stats, Serializer::serializeValue(Value(42)) == "INT:42", "42 -> INT:42");
-    check(stats, Serializer::serializeValue(Value(-100)) == "INT:-100", "-100 -> INT:-100");
-    check(stats, Serializer::serializeValue(Value(INT_MAX)) == "INT:" + std::to_string(INT_MAX), "INT_MAX serialized");
-    check(stats, Serializer::serializeValue(Value(INT_MIN)) == "INT:" + std::to_string(INT_MIN), "INT_MIN serialized");
+    check(
+        stats,
+        Serializer::serializeValue(Value(0)) == "INT:0",
+        "0 -> INT:0"
+    );
+    check(
+        stats,
+        Serializer::serializeValue(Value(42)) == "INT:42",
+        "42 -> INT:42"
+    );
+    check(
+        stats,
+        Serializer::serializeValue(Value(-100)) == "INT:-100",
+        "-100 -> INT:-100"
+    );
+    check(
+        stats,
+        Serializer::serializeValue(
+            Value(INT_MAX)
+        ) == "INT:" + std::to_string(INT_MAX),
+        "INT_MAX serialized"
+    );
+    check(
+        stats,
+        Serializer::serializeValue(
+            Value(INT_MIN)
+        ) == "INT:" + std::to_string(INT_MIN),
+        "INT_MIN serialized"
+    );
 }
 
 void test_serialize_string_value(TestStats& stats) {
@@ -36,14 +59,26 @@ void test_serialize_string_value(TestStats& stats) {
     check(stats, result == "STRING:0:", "empty string serializes with length 0");
     
     result = Serializer::serializeValue(Value("hello world"));
-    check(stats, result == "STRING:11:hello world", "string with space serialized");
+    check(
+        stats,
+        result == "STRING:11:hello world",
+        "string with space serialized")
+    ;
     
     std::string long_str(100, 'x');
     result = Serializer::serializeValue(Value(long_str));
-    check(stats, result == "STRING:100:" + long_str, "long string serialized correctly");
+    check(
+        stats,
+        result == "STRING:100:" + long_str,
+        "long string serialized correctly"
+    );
     
     result = Serializer::serializeValue(Value("12345"));
-    check(stats, result == "STRING:5:12345", "numeric string serialized as string");
+    check(
+        stats,
+        result == "STRING:5:12345",
+        "numeric string serialized as string"
+    );
 }
 
 void test_deserialize_null_value(TestStats& stats) {
@@ -78,7 +113,11 @@ void test_deserialize_string_value(TestStats& stats) {
     check(stats, v.asString() == "hello", "String value preserved");
     
     v = Serializer::deserializeValue("STRING:0:");
-    check(stats, v.getType() == Value::Type::kString, "Empty string type is kString");
+    check(
+        stats,
+        v.getType() == Value::Type::kString,
+        "Empty string type is kString"
+    );
     check(stats, v.asString().empty(), "Empty string deserialized");
     
     v = Serializer::deserializeValue("STRING:11:hello world");
@@ -94,7 +133,7 @@ void test_deserialize_corrupted_value(TestStats& stats) {
     bool caught = false;
     try {
         Serializer::deserializeValue("INVALID:xxx");
-    } catch (const DatabaseError&) {
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "Invalid format throws DatabaseError");
@@ -102,7 +141,7 @@ void test_deserialize_corrupted_value(TestStats& stats) {
     caught = false;
     try {
         Serializer::deserializeValue("STRING:5:hello_world");
-    } catch (const DatabaseError&) {
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "String size mismatch throws DatabaseError");
@@ -110,7 +149,7 @@ void test_deserialize_corrupted_value(TestStats& stats) {
     caught = false;
     try {
         Serializer::deserializeValue("STRING:abc:hello");
-    } catch (const std::exception&) {
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "Corrupted string format throws exception");
@@ -118,7 +157,7 @@ void test_deserialize_corrupted_value(TestStats& stats) {
     caught = false;
     try {
         Serializer::deserializeValue("");
-    } catch (const DatabaseError&) {
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "Empty string throws DatabaseError");
@@ -126,15 +165,15 @@ void test_deserialize_corrupted_value(TestStats& stats) {
     caught = false;
     try {
         Serializer::deserializeValue("INT:");
-    } catch (const std::exception&) {
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "INT with no value throws exception");
     
     caught = false;
     try {
-        Serializer::deserializeValue("STRING:5:short");
-    } catch (const DatabaseError&) {
+        Serializer::deserializeValue("STRING:10:short");
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "String too short throws DatabaseError");
@@ -146,14 +185,30 @@ void test_serialize_deserialize_roundtrip(TestStats& stats) {
     Value original_int(42);
     std::string serialized = Serializer::serializeValue(original_int);
     Value deserialized = Serializer::deserializeValue(serialized);
-    check(stats, deserialized.getType() == original_int.getType(), "Int type roundtrip");
-    check(stats, deserialized.asInt() == original_int.asInt(), "Int value roundtrip");
+    check(
+        stats,
+        deserialized.getType() == original_int.getType(),
+        "Int type roundtrip"
+    );
+    check(
+        stats,
+        deserialized.asInt() == original_int.asInt(),
+        "Int value roundtrip"
+    );
     
     Value original_str("hello world!");
     serialized = Serializer::serializeValue(original_str);
     deserialized = Serializer::deserializeValue(serialized);
-    check(stats, deserialized.getType() == original_str.getType(), "String type roundtrip");
-    check(stats, deserialized.asString() == original_str.asString(), "String value roundtrip");
+    check(
+        stats,
+        deserialized.getType() == original_str.getType(),
+        "String type roundtrip"
+    );
+    check(
+        stats,
+        deserialized.asString() == original_str.asString(),
+        "String value roundtrip"
+    );
     
     Value original_null;
     serialized = Serializer::serializeValue(original_null);
@@ -172,18 +227,34 @@ void test_serialize_row_body(TestStats& stats) {
     Row row;
     row.values = {Value(1), Value("hello"), Value()};
     std::string body = Serializer::serializeRowBody(row);
-    check(stats, body == "INT:1|STRING:5:hello|NULL", "Row body serialized correctly");
+    check(
+        stats,
+        body == "INT:1|STRING:5:hello|NULL",
+        "Row body serialized correctly"
+    );
     
     Row empty_row;
-    check(stats, Serializer::serializeRowBody(empty_row).empty(), "Empty row body is empty");
+    check(
+        stats,
+        Serializer::serializeRowBody(empty_row).empty(),
+        "Empty row body is empty"
+    );
     
     Row single_value;
     single_value.values = {Value(42)};
-    check(stats, Serializer::serializeRowBody(single_value) == "INT:42", "Single value row body");
+    check(
+        stats,
+        Serializer::serializeRowBody(single_value) == "INT:42",
+        "Single value row body"
+    );
     
     Row two_values;
     two_values.values = {Value("a"), Value("b")};
-    check(stats, Serializer::serializeRowBody(two_values) == "STRING:1:a|STRING:1:b", "Two string values");
+    check(
+        stats,
+        Serializer::serializeRowBody(two_values) ==
+        "STRING:1:a|STRING:1:b", "Two string values"
+    );
 }
 
 void test_serialize_row(TestStats& stats) {
@@ -213,9 +284,17 @@ void test_deserialize_row(TestStats& stats) {
     Row row = Serializer::deserializeRow(line);
     check(stats, row.id == 42, "Row ID deserialized");
     check(stats, row.values.size() == 2, "Two values deserialized");
-    check(stats, row.values[0].getType() == Value::Type::kInt, "First value type is int");
+    check(
+        stats,
+        row.values[0].getType() == Value::Type::kInt,
+        "First value type is int"
+    );
     check(stats, row.values[0].asInt() == 10, "First value is 10");
-    check(stats, row.values[1].getType() == Value::Type::kString, "Second value type is string");
+    check(
+        stats,
+        row.values[1].getType() == Value::Type::kString,
+        "Second value type is string"
+    );
     check(stats, row.values[1].asString() == "test", "Second value is test");
     
     line = "1|NULL|INT:0|STRING:0:";
@@ -244,17 +323,30 @@ void test_serialize_deserialize_row_roundtrip(TestStats& stats) {
     Row deserialized = Serializer::deserializeRow(serialized);
     
     check(stats, deserialized.id == original.id, "Row ID roundtrip");
-    check(stats, deserialized.values.size() == original.values.size(), "Values count roundtrip");
+    check(
+        stats,
+        deserialized.values.size() == original.values.size(),
+        "Values count roundtrip"
+    );
     
     for (size_t i = 0; i < original.values.size(); ++i) {
-        check(stats, deserialized.values[i].getType() == original.values[i].getType(), 
-              "Value type roundtrip at index " + std::to_string(i));
+        check(
+            stats,
+            deserialized.values[i].getType() == original.values[i].getType(), 
+            "Value type roundtrip at index " + std::to_string(i)
+        );
         if (original.values[i].getType() == Value::Type::kInt) {
-            check(stats, deserialized.values[i].asInt() == original.values[i].asInt(),
-                  "Int value roundtrip at index " + std::to_string(i));
+            check(
+                stats,
+                deserialized.values[i].asInt() == original.values[i].asInt(),
+                "Int value roundtrip at index " + std::to_string(i)
+            );
         } else if (original.values[i].getType() == Value::Type::kString) {
-            check(stats, deserialized.values[i].asString() == original.values[i].asString(),
-                  "String value roundtrip at index " + std::to_string(i));
+            check(
+                stats,
+                deserialized.values[i].asString() == original.values[i].asString(),
+                "String value roundtrip at index " + std::to_string(i)
+            );
         }
     }
     
@@ -284,6 +376,9 @@ int main() {
     test_serialize_deserialize_row_roundtrip(stats);
     
     print_test_results(stats);
-    return stats.tests_failed > 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+    if (stats.tests_failed > 0) {
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }
 

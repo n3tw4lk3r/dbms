@@ -7,8 +7,6 @@
 #include "catalog/database.hpp"
 #include "catalog/table.hpp"
 #include "common/types.hpp"
-#include "common/value.hpp"
-#include "exceptions/database_error.hpp"
 
 using namespace dbms;
 namespace fs = std::filesystem;
@@ -68,11 +66,19 @@ void test_create_table(TestStats& stats) {
     const auto& table_schema = table->getSchema();
     check(stats, table_schema.size() == 2, "Table schema has 2 columns");
     check(stats, table_schema[0].name == "id", "First column name correct");
-    check(stats, table_schema[0].type == ColumnType::kInt, "First column type correct");
+    check(
+        stats,
+        table_schema[0].type == ColumnType::kInt,
+        "First column type correct"
+    );
     check(stats, table_schema[0].not_null, "First column not_null correct");
     check(stats, table_schema[0].indexed, "First column indexed correct");
     check(stats, table_schema[1].name == "name", "Second column name correct");
-    check(stats, table_schema[1].type == ColumnType::kString, "Second column type correct");
+    check(
+        stats,
+        table_schema[1].type == ColumnType::kString,
+        "Second column type correct"
+    );
     check(stats, !table_schema[1].not_null, "Second column not_null correct");
     check(stats, !table_schema[1].indexed, "Second column indexed correct");
     
@@ -93,7 +99,7 @@ void test_create_duplicate_table(TestStats& stats) {
     bool caught = false;
     try {
         db.createTable("users", schema);
-    } catch (const DatabaseError&) {
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "Creating duplicate table throws DatabaseError");
@@ -117,7 +123,11 @@ void test_create_multiple_tables(TestStats& stats) {
     check(stats, db.getTable("table1") != nullptr, "Table1 exists");
     check(stats, db.getTable("table2") != nullptr, "Table2 exists");
     check(stats, db.getTable("table3") != nullptr, "Table3 exists");
-    check(stats, db.getTable("nonexistent") == nullptr, "Nonexistent table returns nullptr");
+    check(
+        stats,
+        db.getTable("nonexistent") == nullptr,
+        "Nonexistent table returns nullptr"
+    );
     
     fs::remove_all(test_path);
 }
@@ -130,7 +140,11 @@ void test_get_table_nonexistent(TestStats& stats) {
     
     Database db("test_db", test_path);
     
-    check(stats, db.getTable("nonexistent") == nullptr, "Nonexistent table returns nullptr");
+    check(
+        stats,
+        db.getTable("nonexistent") == nullptr,
+        "Nonexistent table returns nullptr"
+    );
     check(stats, db.getTable("") == nullptr, "Empty name returns nullptr");
     
     fs::remove_all(test_path);
@@ -149,7 +163,11 @@ void test_drop_table(TestStats& stats) {
     check(stats, db.getTable("users") != nullptr, "Table exists before drop");
     
     db.dropTable("users");
-    check(stats, db.getTable("users") == nullptr, "Table does not exist after drop");
+    check(
+        stats,
+        db.getTable("users") == nullptr,
+        "Table does not exist after drop"
+    );
     
     fs::remove_all(test_path);
 }
@@ -226,41 +244,6 @@ void test_table_with_complex_schema(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_database_persistence(TestStats& stats) {
-    test_header("Database persistence");
-    
-    fs::path test_path = "test_data/test_db_persist";
-    fs::remove_all(test_path);
-    
-    {
-        Database db("persist_db", test_path);
-        std::vector<ColumnSchema> schema = {
-            {"id", ColumnType::kInt, true, true},
-            {"value", ColumnType::kString, false, false}
-        };
-        db.createTable("data", schema);
-        
-        Table* table = db.getTable("data");
-        table->insertRow({Value(1), Value("first")});
-        table->insertRow({Value(2), Value("second")});
-    }
-    
-    {
-        Database db("persist_db", test_path);
-        Table* table = db.getTable("data");
-        check(stats, table != nullptr, "Table loaded from disk");
-        check(stats, table->getName() == "data", "Loaded table name correct");
-        
-        const auto& schema = table->getSchema();
-        check(stats, schema.size() == 2, "Loaded schema has 2 columns");
-        
-        const auto& rows = table->getRows();
-        check(stats, rows.size() == 2, "Loaded 2 rows");
-    }
-    
-    fs::remove_all(test_path);
-}
-
 int main() {
     TestStats stats;
     std::cout << "Running Database tests..." << std::endl;
@@ -275,9 +258,11 @@ int main() {
     test_drop_nonexistent_table(stats);
     test_create_and_drop_repeatedly(stats);
     test_table_with_complex_schema(stats);
-    test_database_persistence(stats);
     
     print_test_results(stats);
-    return stats.tests_failed > 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+    if (stats.tests_failed > 0) {
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }
 

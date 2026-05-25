@@ -37,7 +37,11 @@ void test_add_entries_to_leaf(TestStats& stats) {
     node.entries.push_back(entry1);
     
     check(stats, node.entries.size() == 1, "Entry added");
-    check(stats, node.entries[0].key == IndexedValue(Value(10)), "Entry key correct");
+    check(
+        stats,
+        node.entries[0].key == IndexedValue(Value(10)),
+        "Entry key correct"
+    );
     check(stats, node.entries[0].row_id == 100, "Entry row_id correct");
     
     BTreeEntry entry2;
@@ -46,7 +50,11 @@ void test_add_entries_to_leaf(TestStats& stats) {
     node.entries.push_back(entry2);
     
     check(stats, node.entries.size() == 2, "Second entry added");
-    check(stats, node.entries[1].key == IndexedValue(Value(20)), "Second entry key correct");
+    check(
+        stats,
+        node.entries[1].key == IndexedValue(Value(20)),
+        "Second entry key correct"
+    );
 }
 
 void test_add_entries_to_internal(TestStats& stats) {
@@ -79,8 +87,16 @@ void test_multiple_entries(TestStats& stats) {
     }
     
     check(stats, node.entries.size() == 100, "100 entries added");
-    check(stats, node.entries[0].key == IndexedValue(Value(0)), "First entry correct");
-    check(stats, node.entries[99].key == IndexedValue(Value(99)), "Last entry correct");
+    check(
+        stats,
+        node.entries[0].key == IndexedValue(Value(0)),
+        "First entry correct"
+    );
+    check(
+        stats,
+        node.entries[99].key == IndexedValue(Value(99)),
+        "Last entry correct"
+    );
     check(stats, node.entries[50].row_id == 500, "Middle entry row_id correct");
 }
 
@@ -93,7 +109,11 @@ void test_children_ownership(TestStats& stats) {
     parent.children.push_back(std::move(child));
     
     check(stats, parent.children.size() == 1, "Child added to parent");
-    check(stats, parent.children[0].get() == child_ptr, "Child pointer preserved");
+    check(
+        stats,
+        parent.children[0].get() == child_ptr,
+        "Child pointer preserved"
+    );
     check(stats, parent.children[0]->is_leaf, "Child is leaf");
 }
 
@@ -117,9 +137,21 @@ void test_string_keys(TestStats& stats) {
     node.entries.push_back(entry3);
     
     check(stats, node.entries.size() == 3, "Three string entries");
-    check(stats, node.entries[0].key == IndexedValue(Value("apple")), "Apple entry");
-    check(stats, node.entries[1].key == IndexedValue(Value("banana")), "Banana entry");
-    check(stats, node.entries[2].key == IndexedValue(Value("cherry")), "Cherry entry");
+    check(
+        stats,
+        node.entries[0].key == IndexedValue(Value("apple")),
+        "Apple entry"
+    );
+    check(
+        stats,
+        node.entries[1].key == IndexedValue(Value("banana")),
+        "Banana entry"
+    );
+    check(
+        stats,
+        node.entries[2].key == IndexedValue(Value("cherry")),
+        "Cherry entry"
+    );
 }
 
 void test_null_keys(TestStats& stats) {
@@ -171,6 +203,9 @@ int main() {
     test_large_number_of_children(stats);
     
     print_test_results(stats);
-    return stats.tests_failed > 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+    if (stats.tests_failed > 0) {
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }
 

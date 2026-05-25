@@ -1,9 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <filesystem>
 #include <sstream>
-#include <stdexcept>
 
 #include "test_utils.hpp"
 #include "catalog/system.hpp"
@@ -12,9 +10,9 @@
 #include "sqlparser/command.hpp"
 
 using namespace dbms;
-namespace fs = std::filesystem;
 
 struct TestExecutorContext {
+    ScopedDataDirectory guard;
     System system;
     Parser parser;
     Executor executor;
@@ -23,18 +21,16 @@ struct TestExecutorContext {
     std::ostringstream error_output;
     std::streambuf* old_cerr;
     
-    TestExecutorContext() : executor(system) {
+    TestExecutorContext() :
+        executor(system)
+    {
         old_cout = std::cout.rdbuf(output.rdbuf());
         old_cerr = std::cerr.rdbuf(error_output.rdbuf());
-        
-        fs::remove_all("test_executor_data");
-        fs::create_directories("test_executor_data");
     }
     
     ~TestExecutorContext() {
         std::cout.rdbuf(old_cout);
         std::cerr.rdbuf(old_cerr);
-        fs::remove_all("test_executor_data");
     }
     
     void execute(const std::string& query) {
@@ -63,8 +59,11 @@ void test_execute_create_database(TestStats& stats) {
     check(stats, db->getName() == "testdb", "Database name correct");
     
     std::string out = ctx.getOutput();
-    check(stats, out.find("Database testdb created") != std::string::npos, 
-          "Creation message contains database name");
+    check(
+        stats,
+        out.find("Database testdb created") != std::string::npos, 
+        "Creation message contains database name"
+    );
 }
 
 void test_execute_drop_database(TestStats& stats) {
@@ -75,11 +74,18 @@ void test_execute_drop_database(TestStats& stats) {
     ctx.clearOutput();
     
     ctx.execute("DROP DATABASE testdb");
-    check(stats, ctx.system.getDatabase("testdb") == nullptr, "Database dropped");
+    check(
+        stats,
+        ctx.system.getDatabase("testdb") == nullptr,
+        "Database dropped"
+    );
     
     std::string out = ctx.getOutput();
-    check(stats, out.find("Database dropped: testdb") != std::string::npos, 
-          "Drop message contains database name");
+    check(
+        stats,
+        out.find("Database dropped: testdb") != std::string::npos, 
+        "Drop message contains database name"
+    );
 }
 
 void test_execute_drop_nonexistent_database(TestStats& stats) {
@@ -90,7 +96,7 @@ void test_execute_drop_nonexistent_database(TestStats& stats) {
     bool caught = false;
     try {
         ctx.execute("DROP DATABASE nonexistent");
-    } catch (const std::runtime_error&) {
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "Dropping nonexistent database throws runtime_error");
@@ -104,13 +110,23 @@ void test_execute_use_database(TestStats& stats) {
     ctx.clearOutput();
     
     ctx.execute("USE testdb");
-    check(stats, ctx.system.getCurrentDatabase() != nullptr, "Current database set");
-    check(stats, ctx.system.getCurrentDatabase()->getName() == "testdb", 
-          "Current database name correct");
+    check(
+        stats,
+        ctx.system.getCurrentDatabase() != nullptr,
+        "Current database set"
+    );
+    check(
+        stats,
+        ctx.system.getCurrentDatabase()->getName() == "testdb", 
+        "Current database name correct"
+    );
     
     std::string out = ctx.getOutput();
-    check(stats, out.find("Using database testdb") != std::string::npos, 
-          "Use message contains database name");
+    check(
+        stats,
+        out.find("Using database testdb") != std::string::npos, 
+        "Use message contains database name"
+    );
 }
 
 void test_execute_create_table(TestStats& stats) {
@@ -121,7 +137,9 @@ void test_execute_create_table(TestStats& stats) {
     ctx.execute("USE testdb");
     ctx.clearOutput();
     
-    ctx.execute("CREATE TABLE testdb.users (id INT INDEXED, name STRING NOT_NULL)");
+    ctx.execute(
+        "CREATE TABLE testdb.users (id INT INDEXED, name STRING NOT_NULL)"
+    );
     
     Database* db = ctx.system.getCurrentDatabase();
     Table* table = db->getTable("users");
@@ -130,8 +148,11 @@ void test_execute_create_table(TestStats& stats) {
     check(stats, table->getSchema().size() == 2, "Schema has 2 columns");
     
     std::string out = ctx.getOutput();
-    check(stats, out.find("Table users created") != std::string::npos, 
-          "Creation message contains table name");
+    check(
+        stats,
+        out.find("Table users created") != std::string::npos, 
+        "Creation message contains table name"
+    );
 }
 
 void test_execute_create_table_no_database(TestStats& stats) {
@@ -142,10 +163,14 @@ void test_execute_create_table_no_database(TestStats& stats) {
     bool caught = false;
     try {
         ctx.execute("CREATE TABLE users (id INT)");
-    } catch (const std::runtime_error&) {
+    } catch (...) {
         caught = true;
     }
-    check(stats, caught, "Creating table without database throws runtime_error");
+    check(
+        stats,
+        caught,
+        "Creating table without database throws runtime_error"
+    );
 }
 
 void test_execute_drop_table(TestStats& stats) {
@@ -163,8 +188,11 @@ void test_execute_drop_table(TestStats& stats) {
     check(stats, db->getTable("users") == nullptr, "Table dropped");
     
     std::string out = ctx.getOutput();
-    check(stats, out.find("Table dropped: users") != std::string::npos, 
-          "Drop message contains table name");
+    check(
+        stats,
+        out.find("Table dropped: users") != std::string::npos, 
+        "Drop message contains table name"
+    );
 }
 
 void test_execute_insert(TestStats& stats) {
@@ -186,8 +214,11 @@ void test_execute_insert(TestStats& stats) {
     check(stats, rows[0]->values[1].asString() == "alice", "Name value correct");
     
     std::string out = ctx.getOutput();
-    check(stats, out.find("1 rows inserted") != std::string::npos, 
-          "Insert message shows row count");
+    check(
+        stats,
+        out.find("1 rows inserted") != std::string::npos, 
+        "Insert message shows row count"
+    );
 }
 
 void test_execute_insert_multiple_rows(TestStats& stats) {
@@ -198,16 +229,21 @@ void test_execute_insert_multiple_rows(TestStats& stats) {
     ctx.execute("USE testdb");
     ctx.execute("CREATE TABLE testdb.users (id INT INDEXED, name STRING)");
     ctx.clearOutput();
-    
-    ctx.execute("INSERT INTO users (id, name) VALUE (1, \"alice\"), (2, \"bob\"), (3, \"charlie\")");
+   
+    std::string data = "INSERT INTO users (id, name) VALUE (1, \"alice\"),";
+    data += "(2, \"bob\"), (3, \"charlie\")";
+    ctx.execute(data);
     
     Database* db = ctx.system.getCurrentDatabase();
     Table* table = db->getTable("users");
     check(stats, table->getRows().size() == 3, "Three rows inserted");
     
     std::string out = ctx.getOutput();
-    check(stats, out.find("3 rows inserted") != std::string::npos, 
-          "Insert message shows correct count");
+    check(
+        stats,
+        out.find("3 rows inserted") != std::string::npos, 
+        "Insert message shows correct count"
+    );
 }
 
 void test_execute_insert_no_table(TestStats& stats) {
@@ -220,7 +256,7 @@ void test_execute_insert_no_table(TestStats& stats) {
     bool caught = false;
     try {
         ctx.execute("INSERT INTO nonexistent (id) VALUE (1)");
-    } catch (const std::runtime_error&) {
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "Insert into nonexistent table throws runtime_error");
@@ -232,7 +268,9 @@ void test_execute_select(TestStats& stats) {
     TestExecutorContext ctx;
     ctx.execute("CREATE DATABASE testdb");
     ctx.execute("USE testdb");
-    ctx.execute("CREATE TABLE testdb.users (id INT INDEXED, name STRING, age INT)");
+    ctx.execute(
+        "CREATE TABLE testdb.users (id INT INDEXED, name STRING, age INT)"
+    );
     ctx.execute("INSERT INTO users (id, name, age) VALUE (1, \"alice\", 25)");
     ctx.execute("INSERT INTO users (id, name, age) VALUE (2, \"bob\", 30)");
     ctx.clearOutput();
@@ -240,12 +278,36 @@ void test_execute_select(TestStats& stats) {
     ctx.execute("SELECT id, name, age FROM users");
     
     std::string out = ctx.getOutput();
-    check(stats, out.find("\"id\": 1") != std::string::npos, "Output contains id 1");
-    check(stats, out.find("\"name\": \"alice\"") != std::string::npos, "Output contains alice");
-    check(stats, out.find("\"age\": 25") != std::string::npos, "Output contains age 25");
-    check(stats, out.find("\"id\": 2") != std::string::npos, "Output contains id 2");
-    check(stats, out.find("\"name\": \"bob\"") != std::string::npos, "Output contains bob");
-    check(stats, out.find("\"age\": 30") != std::string::npos, "Output contains age 30");
+    check(
+        stats,
+        out.find("\"id\": 1") != std::string::npos,
+        "Output contains id 1"
+    );
+    check(
+        stats,
+        out.find("\"name\": \"alice\"") != std::string::npos,
+        "Output contains alice"
+    );
+    check(
+        stats,
+        out.find("\"age\": 25") != std::string::npos,
+        "Output contains age 25"
+    );
+    check(
+        stats,
+        out.find("\"id\": 2") != std::string::npos,
+        "Output contains id 2"
+    );
+    check(
+        stats,
+        out.find("\"name\": \"bob\"") != std::string::npos,
+        "Output contains bob"
+    );
+    check(
+        stats,
+        out.find("\"age\": 30") != std::string::npos,
+        "Output contains age 30"
+    );
     check(stats, out.find("[") != std::string::npos, "Output is JSON array");
     check(stats, out.find("]") != std::string::npos, "Output is JSON array");
 }
@@ -264,7 +326,11 @@ void test_execute_select_all(TestStats& stats) {
     
     std::string out = ctx.getOutput();
     check(stats, out.find("\"id\": 1") != std::string::npos, "Contains id");
-    check(stats, out.find("\"name\": \"alice\"") != std::string::npos, "Contains name");
+    check(
+        stats,
+        out.find("\"name\": \"alice\"") != std::string::npos,
+        "Contains name"
+    );
 }
 
 void test_execute_select_with_where(TestStats& stats) {
@@ -281,8 +347,16 @@ void test_execute_select_with_where(TestStats& stats) {
     ctx.execute("SELECT * FROM users WHERE id == 1");
     
     std::string out = ctx.getOutput();
-    check(stats, out.find("\"id\": 1") != std::string::npos, "Contains matching row");
-    check(stats, out.find("\"id\": 2") == std::string::npos, "Does not contain non-matching row");
+    check(
+        stats,
+        out.find("\"id\": 1") != std::string::npos,
+        "Contains matching row"
+    );
+    check(
+        stats,
+        out.find("\"id\": 2") == std::string::npos,
+        "Does not contain non-matching row"
+    );
 }
 
 void test_execute_select_with_alias(TestStats& stats) {
@@ -298,9 +372,21 @@ void test_execute_select_with_alias(TestStats& stats) {
     ctx.execute("SELECT id AS user_id, name AS user_name FROM users");
     
     std::string out = ctx.getOutput();
-    check(stats, out.find("\"user_id\": 1") != std::string::npos, "Alias user_id appears");
-    check(stats, out.find("\"user_name\": \"alice\"") != std::string::npos, "Alias user_name appears");
-    check(stats, out.find("\"id\":") == std::string::npos, "Original column name not in output");
+    check(
+        stats,
+        out.find("\"user_id\": 1") != std::string::npos,
+        "Alias user_id appears"
+    );
+    check(
+        stats,
+        out.find("\"user_name\": \"alice\"") != std::string::npos,
+        "Alias user_name appears"
+    );
+    check(
+        stats,
+        out.find("\"id\":") == std::string::npos,
+        "Original column name not in output"
+    );
 }
 
 void test_execute_select_no_table(TestStats& stats) {
@@ -313,7 +399,7 @@ void test_execute_select_no_table(TestStats& stats) {
     bool caught = false;
     try {
         ctx.execute("SELECT * FROM nonexistent");
-    } catch (const std::runtime_error&) {
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "Select from nonexistent table throws runtime_error");
@@ -325,7 +411,9 @@ void test_execute_update(TestStats& stats) {
     TestExecutorContext ctx;
     ctx.execute("CREATE DATABASE testdb");
     ctx.execute("USE testdb");
-    ctx.execute("CREATE TABLE testdb.users (id INT INDEXED, name STRING, age INT)");
+    ctx.execute(
+        "CREATE TABLE testdb.users (id INT INDEXED, name STRING, age INT)"
+    );
     ctx.execute("INSERT INTO users (id, name, age) VALUE (1, \"alice\", 25)");
     ctx.execute("INSERT INTO users (id, name, age) VALUE (2, \"bob\", 30)");
     ctx.clearOutput();
@@ -343,7 +431,11 @@ void test_execute_update(TestStats& stats) {
     check(stats, row->values[2].asInt() == 30, "Other row age unchanged");
     
     std::string out = ctx.getOutput();
-    check(stats, out.find("1 rows updated") != std::string::npos, "Update message correct");
+    check(
+        stats,
+        out.find("1 rows updated") != std::string::npos,
+        "Update message correct"
+    );
 }
 
 void test_execute_update_multiple_rows(TestStats& stats) {
@@ -362,12 +454,28 @@ void test_execute_update_multiple_rows(TestStats& stats) {
     
     Database* db = ctx.system.getCurrentDatabase();
     Table* table = db->getTable("users");
-    check(stats, table->findRowById(1)->values[1].asString() == "alice", "Row 1 unchanged");
-    check(stats, table->findRowById(2)->values[1].asString() == "updated", "Row 2 updated");
-    check(stats, table->findRowById(3)->values[1].asString() == "updated", "Row 3 updated");
+    check(
+        stats,
+        table->findRowById(1)->values[1].asString() == "alice",
+        "Row 1 unchanged"
+    );
+    check(
+        stats,
+        table->findRowById(2)->values[1].asString() == "updated",
+        "Row 2 updated"
+    );
+    check(
+        stats,
+        table->findRowById(3)->values[1].asString() == "updated",
+        "Row 3 updated"
+    );
     
     std::string out = ctx.getOutput();
-    check(stats, out.find("2 rows updated") != std::string::npos, "Two rows updated");
+    check(
+        stats,
+        out.find("2 rows updated") != std::string::npos,
+        "Two rows updated"
+    );
 }
 
 void test_execute_delete(TestStats& stats) {
@@ -392,7 +500,11 @@ void test_execute_delete(TestStats& stats) {
     check(stats, !table->findRowById(3)->deleted, "Row 3 not deleted");
     
     std::string out = ctx.getOutput();
-    check(stats, out.find("1 rows deleted") != std::string::npos, "Delete message correct");
+    check(
+        stats,
+        out.find("1 rows deleted") != std::string::npos,
+        "Delete message correct"
+    );
 }
 
 void test_execute_delete_all(TestStats& stats) {
@@ -415,7 +527,11 @@ void test_execute_delete_all(TestStats& stats) {
     check(stats, table->findRowById(2)->deleted, "Row 2 deleted");
     
     std::string out = ctx.getOutput();
-    check(stats, out.find("2 rows deleted") != std::string::npos, "Two rows deleted");
+    check(
+        stats,
+        out.find("2 rows deleted") != std::string::npos,
+        "Two rows deleted"
+    );
 }
 
 void test_execute_select_with_indexed_lookup(TestStats& stats) {
@@ -433,7 +549,11 @@ void test_execute_select_with_indexed_lookup(TestStats& stats) {
     
     std::string out = ctx.getOutput();
     check(stats, out.find("\"id\": 1") != std::string::npos, "Found by index");
-    check(stats, out.find("\"id\": 2") == std::string::npos, "Other row not found");
+    check(
+        stats,
+        out.find("\"id\": 2") == std::string::npos,
+        "Other row not found"
+    );
 }
 
 void test_execute_between_condition(TestStats& stats) {
@@ -454,7 +574,11 @@ void test_execute_between_condition(TestStats& stats) {
     std::string out = ctx.getOutput();
     check(stats, out.find("\"id\": 2") != std::string::npos, "Age 25 included");
     check(stats, out.find("\"id\": 3") != std::string::npos, "Age 30 included");
-    check(stats, out.find("\"id\": 4") == std::string::npos, "Age 35 excluded (upper bound exclusive)");
+    check(
+        stats,
+        out.find("\"id\": 4") == std::string::npos,
+        "Age 35 excluded (upper bound exclusive)"
+    );
     check(stats, out.find("\"id\": 1") == std::string::npos, "Age 20 excluded");
 }
 
@@ -473,8 +597,16 @@ void test_execute_select_deleted_rows_excluded(TestStats& stats) {
     ctx.execute("SELECT * FROM users");
     
     std::string out = ctx.getOutput();
-    check(stats, out.find("\"id\": 1") != std::string::npos, "Active row present");
-    check(stats, out.find("\"id\": 2") == std::string::npos, "Deleted row excluded");
+    check(
+        stats,
+        out.find("\"id\": 1") != std::string::npos,
+        "Active row present"
+    );
+    check(
+        stats,
+        out.find("\"id\": 2") == std::string::npos,
+        "Deleted row excluded"
+    );
 }
 
 void test_execute_update_deleted_rows_excluded(TestStats& stats) {
@@ -493,21 +625,31 @@ void test_execute_update_deleted_rows_excluded(TestStats& stats) {
     
     Database* db = ctx.system.getCurrentDatabase();
     Table* table = db->getTable("users");
-    check(stats, table->findRowById(1)->values[1].asString() == "changed", "Active row updated");
-    check(stats, table->findRowById(2)->values[1].asString() == "bob", "Deleted row unchanged");
+    check(
+        stats,
+        table->findRowById(1)->values[1].asString() == "changed",
+        "Active row updated"
+    );
+    check(
+        stats,
+        table->findRowById(2)->values[1].asString() == "bob",
+        "Deleted row unchanged"
+    );
 }
 
 void test_execute_unknown_command(TestStats& stats) {
     test_header("Execute unknown command");
     
-    TestExecutorContext ctx;
+    ScopedDataDirectory guard;
+    System system;
+    Executor executor(system);
     
     bool caught = false;
     try {
         Command cmd;
         cmd.type = CommandType::kUnknown;
-        ctx.executor.execute(cmd);
-    } catch (const std::runtime_error&) {
+        executor.execute(cmd);
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "Unknown command throws runtime_error");
@@ -543,6 +685,9 @@ int main() {
     test_execute_unknown_command(stats);
     
     print_test_results(stats);
-    return stats.tests_failed > 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+    if (stats.tests_failed > 0) {
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }
 

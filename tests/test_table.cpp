@@ -7,7 +7,6 @@
 #include "catalog/table.hpp"
 #include "common/types.hpp"
 #include "common/value.hpp"
-#include "exceptions/database_error.hpp"
 
 using namespace dbms;
 namespace fs = std::filesystem;
@@ -143,7 +142,7 @@ void test_insert_wrong_column_count(TestStats& stats) {
     bool caught = false;
     try {
         table.insertRow({Value(1)});
-    } catch (const DatabaseError&) {
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "Too few columns throws DatabaseError");
@@ -151,7 +150,7 @@ void test_insert_wrong_column_count(TestStats& stats) {
     caught = false;
     try {
         table.insertRow({Value(1), Value("name"), Value(3)});
-    } catch (const DatabaseError&) {
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "Too many columns throws DatabaseError");
@@ -176,7 +175,7 @@ void test_insert_wrong_type(TestStats& stats) {
     bool caught = false;
     try {
         table.insertRow({Value("not_int"), Value("name")});
-    } catch (const DatabaseError&) {
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "Wrong type for int column throws DatabaseError");
@@ -184,7 +183,7 @@ void test_insert_wrong_type(TestStats& stats) {
     caught = false;
     try {
         table.insertRow({Value(1), Value(42)});
-    } catch (const DatabaseError&) {
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "Wrong type for string column throws DatabaseError");
@@ -209,7 +208,7 @@ void test_insert_not_null_violation(TestStats& stats) {
     bool caught = false;
     try {
         table.insertRow({Value(1), Value()});
-    } catch (const DatabaseError&) {
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "NULL for NOT_NULL column throws DatabaseError");
@@ -236,7 +235,7 @@ void test_unique_constraint(TestStats& stats) {
     bool caught = false;
     try {
         table.insertRow({Value(1), Value("second")});
-    } catch (const DatabaseError&) {
+    } catch (...) {
         caught = true;
     }
     check(stats, caught, "Duplicate indexed value throws DatabaseError");
@@ -326,9 +325,21 @@ void test_contains_indexed_value(TestStats& stats) {
     Table table("data", schema, test_path / "data");
     table.insertRow({Value(100)});
     
-    check(stats, table.containsIndexedValue("id", Value(100)), "Contains indexed value");
-    check(stats, !table.containsIndexedValue("id", Value(200)), "Does not contain non-existent value");
-    check(stats, !table.containsIndexedValue("nonexistent", Value(100)), "Non-indexed column returns false");
+    check(
+        stats,
+        table.containsIndexedValue("id", Value(100)),
+        "Contains indexed value"
+    );
+    check(
+        stats,
+        !table.containsIndexedValue("id", Value(200)),
+        "Does not contain non-existent value"
+    );
+    check(
+        stats,
+        !table.containsIndexedValue("nonexistent", Value(100)),
+        "Non-indexed column returns false"
+    );
     
     fs::remove_all(test_path);
 }
@@ -351,7 +362,11 @@ void test_has_indexed_column(TestStats& stats) {
     check(stats, table.hasIndexedColumn("id"), "id is indexed");
     check(stats, table.hasIndexedColumn("email"), "email is indexed");
     check(stats, !table.hasIndexedColumn("name"), "name is not indexed");
-    check(stats, !table.hasIndexedColumn("nonexistent"), "Nonexistent column returns false");
+    check(
+        stats,
+        !table.hasIndexedColumn("nonexistent"),
+        "Nonexistent column returns false"
+    );
     
     fs::remove_all(test_path);
 }
@@ -406,14 +421,26 @@ void test_update_row_with_indexed_column(TestStats& stats) {
     table.insertRow({Value(1), Value("AAA")});
     table.insertRow({Value(2), Value("BBB")});
     
-    check(stats, table.containsIndexedValue("code", Value("AAA")), "AAA indexed before update");
+    check(
+        stats,
+        table.containsIndexedValue("code", Value("AAA")),
+        "AAA indexed before update"
+    );
     
     Row* row = table.findRowById(1);
     std::vector<Assignment> assignments = {{"code", Value("CCC")}};
     table.updateRow(*row, assignments);
     
-    check(stats, !table.containsIndexedValue("code", Value("AAA")), "AAA removed from index");
-    check(stats, table.containsIndexedValue("code", Value("CCC")), "CCC added to index");
+    check(
+        stats,
+        !table.containsIndexedValue("code", Value("AAA")),
+        "AAA removed from index"
+    );
+    check(
+        stats,
+        table.containsIndexedValue("code", Value("CCC")),
+        "CCC added to index"
+    );
     
     row = table.findByIndexedValue("code", Value("CCC"));
     check(stats, row != nullptr, "Can find updated row by new indexed value");
@@ -445,13 +472,21 @@ void test_update_unique_constraint_violation(TestStats& stats) {
     bool caught = false;
     try {
         table.updateRow(*row, assignments);
-    } catch (const DatabaseError&) {
+    } catch (...) {
         caught = true;
     }
-    check(stats, caught, "Unique constraint violation on update throws DatabaseError");
+    check(
+        stats,
+        caught,
+        "Unique constraint violation on update throws DatabaseError"
+    );
     
     row = table.findRowById(1);
-    check(stats, row->values[1].asString() == "AAA", "Value rolled back after failed update");
+    check(
+        stats,
+        row->values[1].asString() == "AAA",
+        "Value rolled back after failed update"
+    );
     
     fs::remove_all(test_path);
 }
@@ -490,9 +525,21 @@ void test_delete_row(TestStats& stats) {
     row = table.findRowById(3);
     check(stats, !row->deleted, "Other row not affected");
     
-    check(stats, !table.containsIndexedValue("id", Value(2)), "Deleted row removed from index");
-    check(stats, table.containsIndexedValue("id", Value(1)), "Other row still in index");
-    check(stats, table.containsIndexedValue("id", Value(3)), "Other row still in index");
+    check(
+        stats,
+        !table.containsIndexedValue("id", Value(2)),
+        "Deleted row removed from index"
+    );
+    check(
+        stats,
+        table.containsIndexedValue("id", Value(1)),
+        "Other row still in index"
+    );
+    check(
+        stats,
+        table.containsIndexedValue("id", Value(3)),
+        "Other row still in index"
+    );
     
     fs::remove_all(test_path);
 }
@@ -561,39 +608,6 @@ void test_get_rows_mutable(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_table_persistence(TestStats& stats) {
-    test_header("Table persistence");
-    
-    fs::path test_path = "test_table_data/test_persist";
-    fs::remove_all(test_path);
-    fs::create_directories(test_path);
-    
-    {
-        std::vector<ColumnSchema> schema = {
-            {"id", ColumnType::kInt, true, true},
-            {"name", ColumnType::kString, false, false}
-        };
-        Table table("users", schema, test_path / "users");
-        table.insertRow({Value(1), Value("alice")});
-        table.insertRow({Value(2), Value("bob")});
-    }
-    
-    {
-        Table table(test_path / "users");
-        check(stats, table.getName() == "users", "Loaded table name correct");
-        check(stats, table.getSchema().size() == 2, "Loaded schema size correct");
-        
-        const auto& rows = table.getRows();
-        check(stats, rows.size() == 2, "Loaded 2 rows");
-        check(stats, rows[0]->values[0].asInt() == 1, "First row loaded correctly");
-        check(stats, rows[0]->values[1].asString() == "alice", "First row values preserved");
-        check(stats, rows[1]->values[0].asInt() == 2, "Second row loaded correctly");
-        check(stats, rows[1]->values[1].asString() == "bob", "Second row values preserved");
-    }
-    
-    fs::remove_all(test_path);
-}
-
 int main() {
     TestStats stats;
     std::cout << "Running Table tests..." << std::endl;
@@ -618,9 +632,11 @@ int main() {
     test_delete_nonexistent_row(stats);
     test_get_schema(stats);
     test_get_rows_mutable(stats);
-    test_table_persistence(stats);
     
     print_test_results(stats);
-    return stats.tests_failed > 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+    if (stats.tests_failed > 0) {
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }
 

@@ -17,12 +17,24 @@ void test_value_constructor(TestStats& stats) {
     test_header("Value constructor");
     
     IndexedValue iv_int(Value(42));
-    check(stats, iv_int.getValue().getType() == Value::Type::kInt, "Int type preserved");
+    check(
+        stats,
+        iv_int.getValue().getType() == Value::Type::kInt,
+        "Int type preserved"
+    );
     check(stats, iv_int.getValue().asInt() == 42, "Int value preserved");
     
     IndexedValue iv_str(Value("hello"));
-    check(stats, iv_str.getValue().getType() == Value::Type::kString, "String type preserved");
-    check(stats, iv_str.getValue().asString() == "hello", "String value preserved");
+    check(
+        stats,
+        iv_str.getValue().getType() == Value::Type::kString,
+        "String type preserved"
+    );
+    check(
+        stats,
+        iv_str.getValue().asString() == "hello",
+        "String value preserved"
+    );
     
     IndexedValue iv_null;
     check(stats, iv_null.getValue().isNull(), "Null value preserved");
@@ -178,7 +190,11 @@ void test_get_value_returns_reference(TestStats& stats) {
     Value v_str("test");
     IndexedValue iv_str(v_str);
     const Value& ref_str = iv_str.getValue();
-    check(stats, ref_str.getType() == Value::Type::kString, "String reference type");
+    check(
+        stats,
+        ref_str.getType() == Value::Type::kString,
+        "String reference type"
+    );
     check(stats, ref_str.asString() == "test", "String reference value");
 }
 
@@ -235,6 +251,9 @@ int main() {
     test_large_comparisons(stats);
     
     print_test_results(stats);
-    return stats.tests_failed > 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+    if (stats.tests_failed > 0) {
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }
 

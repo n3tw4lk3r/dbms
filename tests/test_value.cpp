@@ -29,7 +29,11 @@ void test_int_constructor(TestStats& stats) {
     check(stats, v1.asInt() == 42, "asInt returns 42");
     
     Value v_neg(-100);
-    check(stats, v_neg.getType() == Value::Type::kInt, "Negative int type is kInt");
+    check(
+        stats,
+        v_neg.getType() == Value::Type::kInt,
+        "Negative int type is kInt"
+    );
     check(stats, v_neg.asInt() == -100, "Negative int value preserved");
     
     Value v_max(INT_MAX);
@@ -44,7 +48,11 @@ void test_string_constructor(TestStats& stats) {
     
     Value v_empty("");
     check(stats, !v_empty.isNull(), "Empty string is not null");
-    check(stats, v_empty.getType() == Value::Type::kString, "Empty string type is kString");
+    check(
+        stats,
+        v_empty.getType() == Value::Type::kString,
+        "Empty string type is kString"
+    );
     check(stats, v_empty.asString().empty(), "Empty string is empty");
     
     Value v1("hello");
@@ -52,10 +60,18 @@ void test_string_constructor(TestStats& stats) {
     check(stats, v1.asString() == "hello", "String value preserved");
     
     Value v_special("!@#$%^&*()_+-=[]{}|;':\",./<>?");
-    check(stats, v_special.asString() == "!@#$%^&*()_+-=[]{}|;':\",./<>?", "Special chars preserved");
+    check(
+        stats,
+        v_special.asString() == "!@#$%^&*()_+-=[]{}|;':\",./<>?",
+        "Special chars preserved"
+    );
     
     Value v_long(std::string(1000, 'x'));
-    check(stats, v_long.asString().size() == 1000, "Long string length preserved");
+    check(
+        stats,
+        v_long.asString().size() == 1000,
+        "Long string length preserved"
+    );
     
     Value v_unicode("привет мир 世界");
     check(stats, v_unicode.asString() == "привет мир 世界", "Unicode preserved");
@@ -89,9 +105,21 @@ void test_value_type_consistency(TestStats& stats) {
     check(stats, v_int.asInt() == 100, "Int value consistent on second call");
     
     Value v_str("test");
-    check(stats, v_str.getType() == Value::Type::kString, "String type consistent");
-    check(stats, v_str.asString() == "test", "String value consistent on first call");
-    check(stats, v_str.asString() == "test", "String value consistent on second call");
+    check(
+        stats,
+        v_str.getType() == Value::Type::kString,
+        "String type consistent"
+    );
+    check(
+        stats,
+        v_str.asString() == "test",
+        "String value consistent on first call"
+    );
+    check(
+        stats,
+        v_str.asString() == "test",
+        "String value consistent on second call"
+    );
 }
 
 void test_value_copy(TestStats& stats) {
@@ -99,13 +127,25 @@ void test_value_copy(TestStats& stats) {
     
     Value original_int(42);
     Value copy_int = original_int;
-    check(stats, copy_int.getType() == Value::Type::kInt, "Copied int type preserved");
+    check(
+        stats,
+        copy_int.getType() == Value::Type::kInt,
+        "Copied int type preserved"
+    );
     check(stats, copy_int.asInt() == 42, "Copied int value preserved");
     
     Value original_str("original");
     Value copy_str = original_str;
-    check(stats, copy_str.getType() == Value::Type::kString, "Copied string type preserved");
-    check(stats, copy_str.asString() == "original", "Copied string value preserved");
+    check(
+        stats,
+        copy_str.getType() == Value::Type::kString,
+        "Copied string type preserved"
+    );
+    check(
+        stats,
+        copy_str.asString() == "original",
+        "Copied string value preserved"
+    );
     
     Value original_null;
     Value copy_null = original_null;
@@ -120,18 +160,28 @@ void test_value_assignment(TestStats& stats) {
     Value v3;
     
     v1 = v2;
-    check(stats, v1.getType() == Value::Type::kString, "Assignment changes type");
+    check(
+        stats,
+        v1.getType() == Value::Type::kString,
+        "Assignment changes type"
+    );
     check(stats, v1.asString() == "hello", "Assignment changes value");
     
     v2 = v3;
     check(stats, v2.isNull(), "Assignment to null works");
     
     v1 = Value(99);
-    check(stats, v1.getType() == Value::Type::kInt, "Assignment from temporary int works");
+    check(
+        stats,
+        v1.getType() == Value::Type::kInt,
+        "Assignment from temporary int works"
+    );
     check(stats, v1.asInt() == 99, "Temporary int value preserved");
     
     v1 = Value("temp");
-    check(stats, v1.getType() == Value::Type::kString, "Assignment from temporary string works");
+    check(stats, v1.getType() == Value::Type::kString,
+        "Assignment from temporary string works"
+    );
     check(stats, v1.asString() == "temp", "Temporary string value preserved");
 }
 
@@ -186,6 +236,9 @@ int main() {
     test_multiple_instances(stats);
     
     print_test_results(stats);
-    return stats.tests_failed > 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+    if (stats.tests_failed > 0) {
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }
 
