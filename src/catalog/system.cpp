@@ -1,5 +1,7 @@
 #include "catalog/system.hpp"
 
+#include "exceptions/database_error.hpp"
+
 namespace dbms {
 
 System::System() {
@@ -23,7 +25,12 @@ System::System() {
 }
 
 void System::createDatabase(const std::string& name) {
+    if (databases.contains(name)) {
+        throw DatabaseError("Database already exists");
+    }
+
     std::filesystem::path database_path = storage_root / name;
+
     std::filesystem::create_directories(database_path);
 
     databases[name] = std::make_unique<Database>(

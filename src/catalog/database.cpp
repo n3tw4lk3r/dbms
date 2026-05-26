@@ -24,11 +24,11 @@ Database::Database(
             continue;
         }
 
-        std::string table_name =
-            entry.path().stem().string();
+        std::string table_name = entry.path().stem().string();
+        std::filesystem::path table_path = storage_path / table_name;
 
         tables[table_name] = std::make_unique<Table>(
-            entry.path()
+            table_path
         );
     }
 }
@@ -65,15 +65,21 @@ Table* Database::getTable(const std::string& table_name) {
 
     return it->second.get();
 }
-
 void Database::dropTable(const std::string& table_name) {
     auto it = tables.find(table_name);
 
     if (it == tables.end()) {
         return;
     }
-    
-    std::filesystem::remove(storage_path / table_name);
+
+    std::filesystem::remove(
+        storage_path / (table_name + ".meta")
+    );
+
+    std::filesystem::remove(
+        storage_path / (table_name + ".data")
+    );
+
     tables.erase(it);
 }
 

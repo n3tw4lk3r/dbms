@@ -357,7 +357,7 @@ void Executor::printJsonValue(const Value& value) {
         return;
 
     case Value::Type::kNull:
-        std::cout << "NULL";
+        std::cout << "null";
         return;
     }
 }

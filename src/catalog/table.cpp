@@ -548,7 +548,7 @@ void Table::eraseFromIndexes(const Row& row) {
 
 
 void Table::appendInsert(const Row& row) {
-    std::ofstream file(storage_path, std::ios::app);
+    std::ofstream file(data_path, std::ios::app);
 
     if (!file.is_open()) {
         throw DatabaseError("Failed to open table file");
@@ -558,7 +558,7 @@ void Table::appendInsert(const Row& row) {
 }
 
 void Table::appendDelete(RowId row_id) {
-    std::ofstream file(storage_path, std::ios::app);
+    std::ofstream file(data_path, std::ios::app);
 
     if (!file.is_open()) {
         throw DatabaseError("Failed to open table file");
@@ -568,7 +568,7 @@ void Table::appendDelete(RowId row_id) {
 }
 
 void Table::appendUpdate(const Row& row) {
-    std::ofstream file(storage_path, std::ios::app);
+    std::ofstream file(data_path, std::ios::app);
 
     if (!file.is_open()) {
         throw DatabaseError("Failed to open table file");
