@@ -49,13 +49,42 @@ target_compile_options(dbms
 
 target_compile_features(dbms PRIVATE cxx_std_20)
 
-file(GLOB_RECURSE TEST_SOURCES
-    tests/*.cpp
+add_library(test_utils STATIC
+    tests/test_utils.cpp
+)
+
+target_include_directories(test_utils
+    PUBLIC
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/tests
+)
+
+target_compile_options(test_utils
+    PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+)
+
+target_compile_features(test_utils PUBLIC cxx_std_20)
+
+file(GLOB TEST_SOURCES
+    tests/test_btree.cpp
+    tests/test_btree_node.cpp
+    tests/test_database.cpp
+    tests/test_executor.cpp
+    tests/test_indexed_value.cpp
+    tests/test_parser.cpp
+    tests/test_serializer.cpp
+    tests/test_system.cpp
+    tests/test_table.cpp
+    tests/test_value.cpp
+    tests/test_value_comparator.cpp
 )
 
 foreach(TEST_FILE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
-    set(TEST_TARGET "test_${TEST_NAME}")
+    set(TEST_TARGET "${TEST_NAME}")
     
     add_executable(${TEST_TARGET} ${TEST_FILE})
     
@@ -68,6 +97,7 @@ foreach(TEST_FILE ${TEST_SOURCES})
     target_link_libraries(${TEST_TARGET}
         PRIVATE
             dbms_lib
+            test_utils
     )
     
     target_compile_options(${TEST_TARGET}
