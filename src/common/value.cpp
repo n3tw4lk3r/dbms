@@ -1,5 +1,7 @@
 #include "common/value.hpp"
 
+#include "exceptions/database_error.hpp"
+
 namespace dbms {
 
 Value::Value() :
@@ -23,10 +25,18 @@ Value::Type Value::getType() const {
 }
 
 int Value::asInt() const {
+    if (type != Type::kInt) {
+        throw DatabaseError("Value is not INT");
+    }
+
     return int_value;
 }
 
 const std::string Value::asString() const {
+    if (type != Type::kString) {
+        throw DatabaseError("Value is not STRING");
+    }
+
     return string_value;
 }
 

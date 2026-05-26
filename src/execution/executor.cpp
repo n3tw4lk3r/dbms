@@ -331,13 +331,48 @@ void Executor::printJsonValue(const Value& value) {
         std::cout << value.asInt();
         return;
 
-    case Value::Type::kString:
-        std::cout << "\"" << value.asString() << "\"";
-        return;
-
     case Value::Type::kNull:
         std::cout << "null";
         return;
+
+    case Value::Type::kString: {
+        std::cout << "\"";
+
+        const std::string str = value.asString();
+
+        for (char ch : str) {
+            switch (ch) {
+
+            case '\\':
+                std::cout << "\\\\";
+                break;
+
+            case '"':
+                std::cout << "\\\"";
+                break;
+
+            case '\n':
+                std::cout << "\\n";
+                break;
+
+            case '\r':
+                std::cout << "\\r";
+                break;
+
+            case '\t':
+                std::cout << "\\t";
+                break;
+
+            default:
+                std::cout << ch;
+                break;
+            }
+        }
+
+        std::cout << "\"";
+        return;
+    }
+
     }
 }
 
@@ -521,7 +556,8 @@ bool Executor::likeValues(
         return false;
     }
 
-    if (value.getType() != Value::Type::kString ||
+    if (
+        value.getType() != Value::Type::kString ||
         pattern.getType() != Value::Type::kString
     ) {
         return false;
@@ -534,8 +570,12 @@ bool Executor::likeValues(
             value.asString(),
             regex
         );
-    } catch (...) {
-        return false;
+
+    } catch (const std::regex_error& error) {
+        throw std::runtime_error(
+            "Invalid regex pattern: " +
+            std::string(error.what())
+        );
     }
 }
 

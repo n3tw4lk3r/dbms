@@ -256,13 +256,18 @@ void Table::load() {
     indexes.clear();
 
     size_t column_count = 0;
-    meta >> column_count;
+
+    if (!(meta >> column_count)) {
+        throw DatabaseError("Corrupted metadata file");
+    }
 
     std::string line;
     std::getline(meta, line);
 
     for (size_t i = 0; i < column_count; ++i) {
-        std::getline(meta, line);
+        if (!std::getline(meta, line)) {
+            throw DatabaseError("Unexpected end of metadata file");
+        }
 
         std::stringstream ss(line);
 
@@ -271,17 +276,25 @@ void Table::load() {
         std::string not_null;
         std::string indexed;
 
-        std::getline(ss, name, '|');
-        std::getline(ss, type, '|');
-        std::getline(ss, not_null, '|');
-        std::getline(ss, indexed, '|');
+        if (
+            !std::getline(ss, name, '|') ||
+            !std::getline(ss, type, '|') ||
+            !std::getline(ss, not_null, '|') ||
+            !std::getline(ss, indexed, '|')
+        ) {
+            throw DatabaseError("Corrupted column metadata");
+        }
 
         ColumnSchema column;
 
-        column.name = name;
-        column.type = static_cast<ColumnType>(std::stoi(type));
-        column.not_null = static_cast<bool>(std::stoi(not_null));
-        column.indexed = static_cast<bool>(std::stoi(indexed));
+        try {
+            column.name = name;
+            column.type = static_cast<ColumnType>(std::stoi(type));
+            column.not_null = static_cast<bool>(std::stoi(not_null));
+            column.indexed = static_cast<bool>(std::stoi(indexed));
+        } catch (...) {
+            throw DatabaseError("Invalid column metadata");
+        }
 
         schema.push_back(column);
 
@@ -293,6 +306,7 @@ void Table::load() {
     std::ifstream data(data_path);
 
     if (!data.is_open()) {
+        next_row_id = 1;
         return;
     }
 
@@ -306,14 +320,26 @@ void Table::load() {
         std::stringstream ss(line);
 
         std::string op;
-        std::getline(ss, op, '|');
+
+        if (!std::getline(ss, op, '|')) {
+            throw DatabaseError("Corrupted operation record");
+        }
 
         if (op == "D") {
             std::string row_id_token;
 
-            std::getline(ss, row_id_token, '|');
+            if (!std::getline(ss, row_id_token, '|')) {
+                throw DatabaseError("Corrupted delete record");
+            }
 
-            RowId row_id = std::stoull(row_id_token);
+            RowId row_id = 0;
+
+            try {
+                row_id = std::stoull(row_id_token);
+            } catch (...) {
+                throw DatabaseError("Invalid row id in delete record");
+            }
+
             Row* row = findRowById(row_id);
 
             if (row) {
@@ -328,43 +354,55 @@ void Table::load() {
             throw DatabaseError("Unknown operation type");
         }
 
-        std::string row_id_token;
-        std::getline(ss, row_id_token, '|');
+        std::string serialized_row;
 
-        RowId row_id = std::stoull(row_id_token);
-
-        max_row_id = std::max(max_row_id, row_id);
-
-        std::vector<Value> values;
-        for (size_t i = 0; i < schema.size(); ++i) {
-            std::string token;
-            std::getline(ss, token, '|');
-            values.push_back(Serializer::deserializeValue(token));
+        if (!std::getline(ss, serialized_row)) {
+            throw DatabaseError("Corrupted row record");
         }
+
+        Row parsed;
+
+        try {
+            parsed = Serializer::deserializeRow(serialized_row);
+        } catch (const std::exception& error) {
+            throw DatabaseError(
+                std::string("Failed to deserialize row: ") +
+                error.what()
+            );
+        }
+
+        if (parsed.values.size() != schema.size()) {
+            throw DatabaseError("Row does not match schema");
+        }
+
+        max_row_id = std::max(max_row_id, parsed.id);
 
         if (op == "I") {
             auto row = std::make_unique<Row>();
 
-            row->id = row_id;
-            row->values = values;
+            row->id = parsed.id;
+            row->values = parsed.values;
 
             Row* row_ptr = row.get();
 
             rows.push_back(std::move(row));
-            row_lookup[row_id] = row_ptr;
+            row_lookup[row_ptr->id] = row_ptr;
+
             insertIntoIndexes(*row_ptr);
 
             continue;
         }
 
-        Row* row = findRowById(row_id);
+        Row* row = findRowById(parsed.id);
 
         if (!row) {
             throw DatabaseError("Update for unknown row");
         }
 
         eraseFromIndexes(*row);
-        row->values = values;
+
+        row->values = parsed.values;
+
         insertIntoIndexes(*row);
     }
 
@@ -462,7 +500,7 @@ void Table::validateNotNull(
     const Value& value,
     const ColumnSchema& column
 ) const {
-    if (column.not_null && value.isNull()) {
+    if ((column.not_null || column.indexed) && value.isNull()) {
         throw DatabaseError(
             "Column '" +
             column.name +
@@ -579,7 +617,10 @@ void Table::appendUpdate(const Row& row) {
 
 
 void Table::saveSchema() const {
-    std::ofstream file(metadata_path);
+    std::filesystem::path temp_path = metadata_path;
+    temp_path += ".tmp";
+
+    std::ofstream file(temp_path);
 
     if (!file.is_open()) {
         throw DatabaseError("Failed to open metadata file");
@@ -594,6 +635,23 @@ void Table::saveSchema() const {
             << column.not_null << "|"
             << column.indexed << "\n";
     }
+
+    file.flush();
+
+    if (!file.good()) {
+        throw DatabaseError("Failed to write metadata");
+    }
+
+    file.close();
+
+    if (std::filesystem::exists(metadata_path)) {
+        std::filesystem::remove(metadata_path);
+    }
+
+    std::filesystem::rename(
+        temp_path,
+        metadata_path
+    );
 }
 
 } // namespace dbms

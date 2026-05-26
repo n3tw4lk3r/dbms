@@ -2,27 +2,48 @@
 
 namespace dbms {
 
-std::vector<std::string> QueryBuffer::append(const std::string& line) {
+std::vector<std::string> QueryBuffer::append(
+    const std::string& line
+) {
     buffer += line;
     buffer += '\n';
 
     std::vector<std::string> queries;
-    size_t pos = 0;
 
-    bool should_exit = false;
-    while (!should_exit) {
-        size_t semicolon = buffer.find(';', pos);
+    size_t start = 0;
 
-        if (semicolon == std::string::npos) {
-            should_exit = true;
-            break;
+    bool in_string = false;
+    bool escaped = false;
+
+    for (size_t i = 0; i < buffer.size(); ++i) {
+        char ch = buffer[i];
+
+        if (escaped) {
+            escaped = false;
+            continue;
         }
 
-        queries.push_back(buffer.substr(pos, semicolon - pos));
-        pos = semicolon + 1;
+        if (ch == '\\') {
+            escaped = true;
+            continue;
+        }
+
+        if (ch == '"') {
+            in_string = !in_string;
+            continue;
+        }
+
+        if (ch == ';' && !in_string) {
+            queries.push_back(
+                buffer.substr(start, i - start)
+            );
+
+            start = i + 1;
+        }
     }
 
-    buffer = buffer.substr(pos);
+    buffer = buffer.substr(start);
+
     return queries;
 }
 

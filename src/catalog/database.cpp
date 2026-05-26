@@ -1,5 +1,7 @@
 #include "catalog/database.hpp"
 
+#include <unordered_set>
+
 #include "exceptions/database_error.hpp"
 
 namespace dbms {
@@ -41,7 +43,20 @@ void Database::createTable(
     const std::vector<ColumnSchema>& schema
 ) {
     std::filesystem::path table_path = storage_path / table_name;
-    
+ 
+    std::unordered_set<std::string> names;
+
+    for (const auto& column : schema) {
+        if (names.contains(column.name)) {
+            throw DatabaseError(
+                "Duplicate column: " +
+                column.name
+            );
+        }
+
+        names.insert(column.name);
+    }
+
     if (tables.contains(table_name)) {
         throw DatabaseError("Table already exists");
     }

@@ -1,8 +1,6 @@
 #include "storage/serializer.hpp"
 #include "exceptions/database_error.hpp"
 
-#include <sstream>
-
 namespace dbms {
 
 std::string Serializer::serializeValue(const Value& value) {
@@ -70,17 +68,86 @@ std::string Serializer::serializeRow(const Row& row) {
 }
 
 Row Serializer::deserializeRow(const std::string& line) {
-    std::stringstream ss(line);
-
-    std::string id_token;
-    std::getline(ss, id_token, '|');
-
     Row row;
-    row.id = std::stoull(id_token);
 
-    std::string token;
-    while (std::getline(ss, token, '|')) {
-        row.values.push_back(deserializeValue(token));
+    size_t pos = line.find('|');
+
+    if (pos == std::string::npos) {
+        throw DatabaseError("Corrupted row");
+    }
+
+    row.id = std::stoull(line.substr(0, pos));
+
+    size_t current = pos + 1;
+    while (current < line.size()) {
+        if (line.compare(current, 4, "INT:") == 0) {
+            size_t next = line.find('|', current);
+
+            std::string token;
+
+            if (next == std::string::npos) {
+                token = line.substr(current);
+                current = line.size();
+            } else {
+                token = line.substr(current, next - current);
+                current = next + 1;
+            }
+
+            row.values.push_back(deserializeValue(token));
+            continue;
+        }
+
+        if (line.compare(current, 4, "NULL") == 0) {
+            row.values.push_back(Value());
+
+            size_t next = line.find('|', current);
+            if (next == std::string::npos) {
+                current = line.size();
+            } else {
+                current = next + 1;
+            }
+
+            continue;
+        }
+
+        if (line.compare(current, 7, "STRING:") == 0) {
+            size_t len_begin = current + 7;
+            size_t len_end = line.find(':', len_begin);
+
+            if (len_end == std::string::npos) {
+                throw DatabaseError("Corrupted string token");
+            }
+
+            size_t len = std::stoull(
+                line.substr(len_begin, len_end - len_begin)
+            );
+
+            size_t data_begin = len_end + 1;
+
+            if (data_begin + len > line.size()) {
+                throw DatabaseError("Corrupted string length");
+            }
+
+            std::string value = line.substr(
+                data_begin,
+                len
+            );
+
+            row.values.push_back(Value(value));
+
+            current = data_begin + len;
+
+            if (
+                current < line.size() &&
+                line[current] == '|'
+            ) {
+                ++current;
+            }
+
+            continue;
+        }
+
+        throw DatabaseError("Unknown serialized token");
     }
 
     return row;
