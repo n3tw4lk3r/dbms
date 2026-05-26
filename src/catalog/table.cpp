@@ -400,7 +400,7 @@ void Table::compact() {
 void Table::tryCompact() {
     ++operation_count;
 
-    constexpr size_t kCompactThreshold = 100;
+    static constexpr size_t kCompactThreshold = 100;
 
     if (operation_count >= kCompactThreshold) {
         compact();

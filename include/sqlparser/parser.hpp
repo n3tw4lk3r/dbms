@@ -58,9 +58,9 @@ private:
     void ThrowParseError(const std::string& message) const;
 
 private:
-    constexpr static size_t kMaxIdentifierLength = 128;
-    constexpr static size_t kMaxStringLength = 4096;
-    constexpr static size_t kMaxTokens = 10000;
+    static constexpr size_t kMaxIdentifierLength = 128;
+    static constexpr size_t kMaxStringLength = 4096;
+    static constexpr size_t kMaxTokens = 10000;
 
 };
 
