@@ -15,10 +15,8 @@ private:
     std::vector<std::string> tokenize(const std::string& query);
     std::string normalize(const std::string& token);
     
-    bool isValidIdentifier(const std::string& token) const;
     void validateIdentifier(const std::string& token) const;   
     
-    bool isKeyword(const std::string& token) const;
     std::string normalizeKeyword(const std::string& token) const;
     std::string tryNormalizeToken(const std::string& token) const;
 
@@ -38,12 +36,32 @@ private:
         const std::vector<std::string>& tokens,
         size_t pos
     );
+    
     Operand parseOperand(const std::string& token);
+
     void parseTableName(
         const std::string& fullName,
         std::string& database_name,
         std::string& table_name
     );
+
+    bool isKeyword(const std::string& token) const;
+    bool isValidIdentifier(const std::string& token) const;
+    bool IsSpace(const char ch) const;
+    bool IsDigit(const char ch) const;
+    bool IsAlpha(const char ch) const;
+    bool IsAlnum(const char ch) const;
+    bool IsOperatorToken(const std::string& token) const;
+
+    char ToUpper(const char ch) const;
+
+    void ThrowParseError(const std::string& message) const;
+
+private:
+    constexpr static size_t kMaxIdentifierLength = 128;
+    constexpr static size_t kMaxStringLength = 4096;
+    constexpr static size_t kMaxTokens = 10000;
+
 };
 
 } // namespace dbms
