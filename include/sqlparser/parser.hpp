@@ -53,9 +53,9 @@ private:
     bool IsAlnum(const char ch) const;
     bool IsOperatorToken(const std::string& token) const;
 
-    char ToUpper(const char ch) const;
+    char toUpper(const char ch) const;
 
-    void ThrowParseError(const std::string& message) const;
+    void throwParseError(const std::string& message) const;
 
 private:
     static constexpr size_t kMaxIdentifierLength = 128;
