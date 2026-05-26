@@ -573,8 +573,10 @@ Command Parser::parseSelect(
 
                 ++pos;
 
-                if (pos < tokens.size() &&
-                    tokens[pos] == "AS") {
+                if (
+                    pos < tokens.size() &&
+                    tokens[pos] == "AS"
+                ) {
 
                     ++pos;
 

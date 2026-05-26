@@ -197,11 +197,17 @@ void test_create_and_drop_repeatedly(TestStats& stats) {
     
     for (int i = 0; i < 5; ++i) {
         db.createTable("cycle_table", schema);
-        check(stats, db.getTable("cycle_table") != nullptr, 
-              "Table exists after create iteration " + std::to_string(i));
+        check(
+            stats,
+            db.getTable("cycle_table") != nullptr, 
+            "Table exists after create iteration " + std::to_string(i)
+        );
         db.dropTable("cycle_table");
-        check(stats, db.getTable("cycle_table") == nullptr, 
-              "Table removed after drop iteration " + std::to_string(i));
+        check(
+            stats,
+            db.getTable("cycle_table") == nullptr, 
+            "Table removed after drop iteration " + std::to_string(i)
+        );
     }
     
     fs::remove_all(test_path);

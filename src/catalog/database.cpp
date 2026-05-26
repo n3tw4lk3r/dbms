@@ -13,8 +13,9 @@ Database::Database(
 {
     std::filesystem::create_directories(storage_path);
 
-    for (const auto& entry :
-        std::filesystem::directory_iterator(storage_path)
+    for (
+        const auto& entry :
+            std::filesystem::directory_iterator(storage_path)
     ) {
         if (!entry.is_regular_file()) {
             continue;
@@ -27,9 +28,7 @@ Database::Database(
         std::string table_name = entry.path().stem().string();
         std::filesystem::path table_path = storage_path / table_name;
 
-        tables[table_name] = std::make_unique<Table>(
-            table_path
-        );
+        tables[table_name] = std::make_unique<Table>(table_path);
     }
 }
 

@@ -8,14 +8,13 @@ System::System() {
     std::filesystem::create_directories(storage_root);
 
     for (const auto& entry :
-        std::filesystem::directory_iterator(storage_root)
+            std::filesystem::directory_iterator(storage_root)
     ) {
         if (!entry.is_directory()) {
             continue;
         }
 
-        std::string database_name =
-            entry.path().filename().string();
+        std::string database_name = entry.path().filename().string();
 
         databases[database_name] = std::make_unique<Database>(
             database_name,

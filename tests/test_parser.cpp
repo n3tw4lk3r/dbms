@@ -439,7 +439,8 @@ void test_parse_keywords_case_insensitive(TestStats& stats) {
     );
     
     Command cmd2 = parser.parse("CREATE database mydb");
-    check(stats,
+    check(
+        stats,
         cmd2.type == CommandType::kCreateDatabase,
         "Mixed case CREATE works"
     );

@@ -93,23 +93,22 @@ bool ValueComparator::between(
         return false;
     }
 
-    if (value.getType() != lhs.getType() ||
-        value.getType() != rhs.getType()) {
+    if (
+        value.getType() != lhs.getType() ||
+        value.getType() != rhs.getType()
+    ) {
         return false;
     }
 
     if (value.getType() == Value::Type::kInt) {
         int x = value.asInt();
 
-        return lhs.asInt() <= x &&
-               x < rhs.asInt();
+        return lhs.asInt() <= x && x < rhs.asInt();
     }
 
     if (value.getType() == Value::Type::kString) {
         const auto& x = value.asString();
-
-        return lhs.asString() <= x &&
-               x < rhs.asString();
+        return lhs.asString() <= x && x < rhs.asString();
     }
 
     return false;

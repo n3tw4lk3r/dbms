@@ -26,9 +26,7 @@ Table::Table(
     }
 }
 
-Table::Table(
-    const std::filesystem::path& storage_path
-) :
+Table::Table(const std::filesystem::path& storage_path) :
     storage_path(storage_path)
 {
     load();
@@ -404,9 +402,7 @@ void Table::tryCompact() {
 
     constexpr size_t kCompactThreshold = 100;
 
-    if (operation_count >=
-        kCompactThreshold
-    ) {
+    if (operation_count >= kCompactThreshold) {
         compact();
         operation_count = 0;
     }
@@ -439,8 +435,10 @@ void Table::validateColumnType(
         return;
     }
 
-    if (column.type == ColumnType::kInt &&
-        value.getType() != Value::Type::kInt) {
+    if (
+        column.type == ColumnType::kInt &&
+        value.getType() != Value::Type::kInt
+    ) {
         throw DatabaseError(
             "Expected INT value for column '" +
             column.name +
@@ -448,8 +446,10 @@ void Table::validateColumnType(
         );
     }
 
-    if (column.type == ColumnType::kString &&
-        value.getType() != Value::Type::kString) {
+    if (
+        column.type == ColumnType::kString &&
+        value.getType() != Value::Type::kString
+    ) {
         throw DatabaseError(
             "Expected STRING value for column '" +
             column.name +

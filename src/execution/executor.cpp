@@ -59,10 +59,7 @@ void Executor::execute(const Command& cmd) {
 void Executor::executeCreateDatabase(const Command& cmd) {
     system.createDatabase(cmd.database_name);
 
-    std::cout
-        << "Database "
-        << cmd.database_name
-        << " created\n";
+    std::cout << "Database " << cmd.database_name << " created\n";
 }
 
 void Executor::executeDropDatabase(const Command& cmd) {
@@ -74,30 +71,19 @@ void Executor::executeDropDatabase(const Command& cmd) {
 
     system.dropDatabase(cmd.database_name);
 
-    std::cout
-        << "Database dropped: "
-        << cmd.database_name
-        << "\n";
+    std::cout << "Database dropped: " << cmd.database_name << "\n";
 }
 
 void Executor::executeUseDatabase(const Command& cmd) {
     system.useDatabase(cmd.database_name);
-
-    std::cout
-        << "Using database "
-        << cmd.database_name
-        << "\n";
+    std::cout << "Using database " << cmd.database_name << "\n";
 }
 
 void Executor::executeCreateTable(const Command& cmd) {
     Database* db = resolveDatabase(cmd);
-
     db->createTable(cmd.table_name, cmd.columns);
 
-    std::cout
-        << "Table "
-        << cmd.table_name
-        << " created\n";
+    std::cout << "Table " << cmd.table_name << " created\n";
 }
 
 void Executor::executeDropTable(const Command& cmd) {
@@ -109,27 +95,20 @@ void Executor::executeDropTable(const Command& cmd) {
     }
 
     db->dropTable(cmd.table_name);
-
-    std::cout
-        << "Table dropped: "
-        << cmd.table_name
-        << "\n";
+    std::cout << "Table dropped: " << cmd.table_name << "\n";
 }
 
 void Executor::executeInsert(const Command& cmd) {
     Database* db = resolveDatabase(cmd);
-    
     Table* table = db->getTable(cmd.table_name);
+
     if (!table) {
         throw std::runtime_error("Table not found");
     }
     
     const auto& schema = table->getSchema();
     for (const auto& column_name : cmd.column_names) {
-        validateColumnExists(
-            schema,
-            column_name
-        );
+        validateColumnExists(schema, column_name);
     }
 
 
@@ -157,11 +136,13 @@ void Executor::executeSelect(const Command& cmd) {
     if (canUseIndexLookup(*table, cmd.conditions)) {
         Row* row = tryFindIndexedRow(*table, cmd.conditions);
 
-        if (row && matchConditions(
-            cmd.conditions,
-            *row,
-            schema
-        )) {
+        if (
+            row && matchConditions(
+                cmd.conditions,
+                *row,
+                schema
+            )
+        ) {
             result_rows.push_back(row);
         }
 
@@ -189,7 +170,6 @@ void Executor::executeSelect(const Command& cmd) {
 
 void Executor::executeUpdate(const Command& cmd) {
     Database* db = resolveDatabase(cmd);
-
     Table* table = db->getTable(cmd.table_name);
 
     if (!table) {
@@ -223,7 +203,6 @@ void Executor::executeUpdate(const Command& cmd) {
 
 void Executor::executeDelete(const Command& cmd) {
     Database* db = resolveDatabase(cmd);
-
     Table* table = db->getTable(cmd.table_name);
 
     if (!table) {
@@ -391,10 +370,12 @@ bool Executor::matchConditions(
                 schema
             );
 
-            if (!ValueComparator::between(
-                left,
-                right,
-                range_end)
+            if (
+                !ValueComparator::between(
+                    left,
+                    right,
+                    range_end
+                )
             ) {
                 return false;
             }
@@ -410,10 +391,12 @@ bool Executor::matchConditions(
             continue;
         }
 
-        if (!ValueComparator::compare(
-            left,
-            right,
-            condition.operator_type)
+        if (
+            !ValueComparator::compare(
+                left,
+                right,
+                condition.operator_type
+            )
         ) {
             return false;
         }
@@ -451,8 +434,7 @@ void Executor::validateSelectColumns(
     const Command& cmd,
     const std::vector<ColumnSchema>& schema
 ) {
-    bool select_all =
-        cmd.select_columns.size() == 1 &&
+    bool select_all = cmd.select_columns.size() == 1 &&
         cmd.select_columns[0].name == "*";
 
     if (select_all) {
@@ -521,8 +503,9 @@ Value Executor::resolveOperand(
         operand.column
     );
 
-    if (column_index < 0 || column_index >=
-        static_cast<int>(row.values.size())
+    if (
+        column_index < 0 || column_index >=
+            static_cast<int>(row.values.size())
     ) {
         return Value();
     }

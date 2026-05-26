@@ -111,8 +111,9 @@ void BTree::insertNonFull(
         --i;
     }
 
-    if (node->children[i] ->entries.size() ==
-        (min_degree << 1) - 1
+    if (
+        node->children[i] ->entries.size() ==
+            (min_degree << 1) - 1
     ) {
         splitChild(node, i);
         if (entry.key > node->entries[i].key) {
@@ -139,9 +140,10 @@ void BTree::splitChild(BTreeNode* parent, size_t child_index) {
     child->entries.resize(min_degree - 1);
 
     if (!child->is_leaf) {
-        for (size_t i = min_degree;
-             i < child->children.size();
-             ++i
+        for (
+            size_t i = min_degree;
+            i < child->children.size();
+            ++i
         ) {
             sibling->children.push_back(
                 std::move(child->children[i])
@@ -168,7 +170,8 @@ BTreeEntry* BTree::search(
 ) const {
     size_t i = 0;
 
-    while (i < node->entries.size() &&
+    while (
+        i < node->entries.size() &&
         key > node->entries[i].key
     ) {
         ++i;
@@ -191,7 +194,8 @@ size_t BTree::findKeyIndex(
 ) const {
     size_t index = 0;
 
-    while (index < node->entries.size() &&
+    while (
+        index < node->entries.size() &&
         node->entries[index].key < key
     ) {
         ++index;
@@ -283,16 +287,17 @@ BTreeEntry BTree::getSuccessor(BTreeNode* node) {
 }
 
 void BTree::fillChild(BTreeNode* node, size_t child_index) {
-    if (child_index > 0 && node->children[child_index - 1]
-        ->entries.size() >= min_degree
+    if (
+        child_index > 0 && node->children[child_index - 1]
+            ->entries.size() >= min_degree
     ) {
         borrowFromPrevious(node, child_index);
         return;
     }
 
-    if (child_index < node->entries.size() &&
-        node->children[child_index + 1]->entries.size() >=
-        min_degree
+    if (
+        child_index < node->entries.size() &&
+        node->children[child_index + 1]->entries.size() >= min_degree
     ) {
 
         borrowFromNext(node, child_index);
