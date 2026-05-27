@@ -99,7 +99,7 @@ void test_execute_drop_nonexistent_database(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "Dropping nonexistent database throws runtime_error");
+    check(stats, caught, "Dropping nonexistent database throws error");
 }
 
 void test_execute_use_database(TestStats& stats) {
@@ -169,7 +169,7 @@ void test_execute_create_table_no_database(TestStats& stats) {
     check(
         stats,
         caught,
-        "Creating table without database throws runtime_error"
+        "Creating table without database throws error"
     );
 }
 
@@ -259,7 +259,7 @@ void test_execute_insert_no_table(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "Insert into nonexistent table throws runtime_error");
+    check(stats, caught, "Insert into nonexistent table throws error");
 }
 
 void test_execute_select(TestStats& stats) {
@@ -402,7 +402,7 @@ void test_execute_select_no_table(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "Select from nonexistent table throws runtime_error");
+    check(stats, caught, "Select from nonexistent table throws error");
 }
 
 void test_execute_update(TestStats& stats) {
@@ -652,7 +652,7 @@ void test_execute_unknown_command(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "Unknown command throws runtime_error");
+    check(stats, caught, "Unknown command throws error");
 }
 
 int main() {

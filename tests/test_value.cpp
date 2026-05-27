@@ -12,8 +12,6 @@ void test_default_constructor(TestStats& stats) {
     Value v;
     check(stats, v.isNull(), "Default constructed value is null");
     check(stats, v.getType() == Value::Type::kNull, "Default type is kNull");
-    check(stats, v.asInt() == 0, "Default int value is 0");
-    check(stats, v.asString().empty(), "Default string value is empty");
 }
 
 void test_int_constructor(TestStats& stats) {
@@ -41,6 +39,7 @@ void test_int_constructor(TestStats& stats) {
     
     Value v_min(INT_MIN);
     check(stats, v_min.asInt() == INT_MIN, "INT_MIN preserved");
+
 }
 
 void test_string_constructor(TestStats& stats) {
@@ -221,6 +220,60 @@ void test_multiple_instances(TestStats& stats) {
     check(stats, b.asInt() == 20, "b unaffected by a change");
 }
 
+void test_value_conversion_errors(TestStats& stats) { 
+    {
+        Value v;
+
+        bool caught = false;
+        try {
+            v.asInt();
+        } catch (...) {
+            caught = true;
+        };
+        check(stats, caught, "Calling asInt() on null value throws error");
+        
+        caught = false;
+        try {
+            v.asString();
+        } catch (...) {
+            caught = true;
+        }
+        check(stats, caught, "Calling asString() on null value throws error");
+    }
+
+    {
+        Value v(123);
+        check(stats, v.asInt() == 123, "Calling asInt() on int value returns int");
+        
+        bool caught = false;
+        try {
+            v.asString();
+        } catch (...) {
+            caught = true;
+        }
+        check(stats, caught, "Calling asString() on int value throws error");
+    }
+
+    {
+        Value v("abc");
+        
+        bool caught = false;
+        try {
+            v.asInt();
+        } catch (...) {
+            caught = true;
+        }
+        check(stats, caught, "Calling asInt() on string alue throws error");
+        
+        check(
+            stats,
+            v.asString() == "abc",
+            "Calling asString() on int value returns string"
+        );
+    }
+
+}
+
 int main() {
     TestStats stats;
     std::cout << "Running Value tests..." << std::endl;
@@ -234,7 +287,8 @@ int main() {
     test_value_assignment(stats);
     test_boundary_values(stats);
     test_multiple_instances(stats);
-    
+    test_value_conversion_errors(stats);
+
     print_test_results(stats);
     if (stats.tests_failed > 0) {
         return EXIT_FAILURE;

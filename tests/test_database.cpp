@@ -102,7 +102,7 @@ void test_create_duplicate_table(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "Creating duplicate table throws DatabaseError");
+    check(stats, caught, "Creating duplicate table throws error");
     
     fs::remove_all(test_path);
 }

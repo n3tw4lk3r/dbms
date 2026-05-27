@@ -117,7 +117,7 @@ void test_use_nonexistent_database(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "Using nonexistent database throws runtime_error");
+    check(stats, caught, "Using nonexistent database throws error");
     check(
         stats,
         system.getCurrentDatabase() == nullptr, 

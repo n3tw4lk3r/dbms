@@ -145,7 +145,7 @@ void test_insert_wrong_column_count(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "Too few columns throws DatabaseError");
+    check(stats, caught, "Too few columns throws error");
     
     caught = false;
     try {
@@ -153,7 +153,7 @@ void test_insert_wrong_column_count(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "Too many columns throws DatabaseError");
+    check(stats, caught, "Too many columns throws error");
     
     fs::remove_all(test_path);
 }
@@ -178,7 +178,7 @@ void test_insert_wrong_type(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "Wrong type for int column throws DatabaseError");
+    check(stats, caught, "Wrong type for int column throws error");
     
     caught = false;
     try {
@@ -186,7 +186,7 @@ void test_insert_wrong_type(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "Wrong type for string column throws DatabaseError");
+    check(stats, caught, "Wrong type for string column throws error");
     
     fs::remove_all(test_path);
 }
@@ -211,7 +211,7 @@ void test_insert_not_null_violation(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "NULL for NOT_NULL column throws DatabaseError");
+    check(stats, caught, "NULL for NOT_NULL column throws error");
     
     fs::remove_all(test_path);
 }
@@ -238,7 +238,7 @@ void test_unique_constraint(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "Duplicate indexed value throws DatabaseError");
+    check(stats, caught, "Duplicate indexed value throws error");
     
     fs::remove_all(test_path);
 }
@@ -478,7 +478,7 @@ void test_update_unique_constraint_violation(TestStats& stats) {
     check(
         stats,
         caught,
-        "Unique constraint violation on update throws DatabaseError"
+        "Unique constraint violation on update throws error"
     );
     
     row = table.findRowById(1);

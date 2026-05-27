@@ -136,7 +136,7 @@ void test_deserialize_corrupted_value(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "Invalid format throws DatabaseError");
+    check(stats, caught, "Invalid format throws error");
     
     caught = false;
     try {
@@ -144,7 +144,7 @@ void test_deserialize_corrupted_value(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "String size mismatch throws DatabaseError");
+    check(stats, caught, "String size mismatch throws error");
     
     caught = false;
     try {
@@ -152,7 +152,7 @@ void test_deserialize_corrupted_value(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "Corrupted string format throws exception");
+    check(stats, caught, "Corrupted string format throws error");
     
     caught = false;
     try {
@@ -160,7 +160,7 @@ void test_deserialize_corrupted_value(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "Empty string throws DatabaseError");
+    check(stats, caught, "Empty string throws error");
     
     caught = false;
     try {
@@ -168,7 +168,7 @@ void test_deserialize_corrupted_value(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "INT with no value throws exception");
+    check(stats, caught, "INT with no value throws error");
     
     caught = false;
     try {
@@ -176,7 +176,7 @@ void test_deserialize_corrupted_value(TestStats& stats) {
     } catch (...) {
         caught = true;
     }
-    check(stats, caught, "String too short throws DatabaseError");
+    check(stats, caught, "String too short throws error");
 }
 
 void test_serialize_deserialize_roundtrip(TestStats& stats) {
