@@ -136,7 +136,7 @@ void Table::updateRow(
         int column_index = findColumnIndex(assignment.column);
 
         if (column_index < 0) {
-            throw DatabaseError(
+            throw SchemaError(
                 "Unknown column: " +
                 assignment.column
             );
@@ -202,7 +202,7 @@ void Table::save() const {
     std::ofstream file(temp_path, std::ios::trunc);
 
     if (!file.is_open()) {
-        throw DatabaseError("Failed to open table file");
+        throw StorageError("Failed to open table file");
     }
 
     file << name << "\n";
@@ -231,7 +231,7 @@ void Table::save() const {
     file.flush();
 
     if (!file.good()) {
-        throw DatabaseError("Failed to write table file");
+        throw StorageError("Failed to write table file");
     }
 
     file.close();
@@ -247,7 +247,7 @@ void Table::load() {
     std::ifstream meta(metadata_path);
 
     if (!meta.is_open()) {
-        throw DatabaseError("Failed to open metadata file");
+        throw StorageError("Failed to open metadata file");
     }
 
     schema.clear();
@@ -258,7 +258,7 @@ void Table::load() {
     size_t column_count = 0;
 
     if (!(meta >> column_count)) {
-        throw DatabaseError("Corrupted metadata file");
+        throw DataCorruptionError("Corrupted metadata file");
     }
 
     std::string line;
@@ -266,7 +266,7 @@ void Table::load() {
 
     for (size_t i = 0; i < column_count; ++i) {
         if (!std::getline(meta, line)) {
-            throw DatabaseError("Unexpected end of metadata file");
+            throw DataCorruptionError("Unexpected end of metadata file");
         }
 
         std::stringstream ss(line);
@@ -282,7 +282,7 @@ void Table::load() {
             !std::getline(ss, not_null, '|') ||
             !std::getline(ss, indexed, '|')
         ) {
-            throw DatabaseError("Corrupted column metadata");
+            throw DataCorruptionError("Corrupted column metadata");
         }
 
         ColumnSchema column;
@@ -293,7 +293,7 @@ void Table::load() {
             column.not_null = static_cast<bool>(std::stoi(not_null));
             column.indexed = static_cast<bool>(std::stoi(indexed));
         } catch (...) {
-            throw DatabaseError("Invalid column metadata");
+            throw DataCorruptionError("Invalid column metadata");
         }
 
         schema.push_back(column);
@@ -322,14 +322,14 @@ void Table::load() {
         std::string op;
 
         if (!std::getline(ss, op, '|')) {
-            throw DatabaseError("Corrupted operation record");
+            throw DataCorruptionError("Corrupted operation record");
         }
 
         if (op == "D") {
             std::string row_id_token;
 
             if (!std::getline(ss, row_id_token, '|')) {
-                throw DatabaseError("Corrupted delete record");
+                throw DataCorruptionError("Corrupted delete record");
             }
 
             RowId row_id = 0;
@@ -337,7 +337,7 @@ void Table::load() {
             try {
                 row_id = std::stoull(row_id_token);
             } catch (...) {
-                throw DatabaseError("Invalid row id in delete record");
+                throw DataCorruptionError("Invalid row id in delete record");
             }
 
             Row* row = findRowById(row_id);
@@ -351,13 +351,13 @@ void Table::load() {
         }
 
         if (op != "I" && op != "U") {
-            throw DatabaseError("Unknown operation type");
+            throw DataCorruptionError("Unknown operation type");
         }
 
         std::string serialized_row;
 
         if (!std::getline(ss, serialized_row)) {
-            throw DatabaseError("Corrupted row record");
+            throw DataCorruptionError("Corrupted row record");
         }
 
         Row parsed;
@@ -365,14 +365,14 @@ void Table::load() {
         try {
             parsed = Serializer::deserializeRow(serialized_row);
         } catch (const std::exception& error) {
-            throw DatabaseError(
+            throw DataCorruptionError(
                 std::string("Failed to deserialize row: ") +
                 error.what()
             );
         }
 
         if (parsed.values.size() != schema.size()) {
-            throw DatabaseError("Row does not match schema");
+            throw SchemaError("Row does not match schema");
         }
 
         max_row_id = std::max(max_row_id, parsed.id);
@@ -396,7 +396,7 @@ void Table::load() {
         Row* row = findRowById(parsed.id);
 
         if (!row) {
-            throw DatabaseError("Update for unknown row");
+            throw NotFoundError("Update for unknown row");
         }
 
         eraseFromIndexes(*row);
@@ -416,7 +416,7 @@ void Table::compact() {
     std::ofstream file(temp_path);
 
     if (!file.is_open()) {
-        throw DatabaseError("Failed to create compacted file");
+        throw StorageError("Failed to create compacted file");
     }
 
     for (const auto& row_ptr : rows) {
@@ -461,7 +461,7 @@ void Table::validateColumnCount(
     const std::vector<Value>& values
 ) const {
     if (values.size() != schema.size()) {
-        throw DatabaseError("Column count does not match schema");
+        throw SchemaError("Column count does not match schema");
     }
 }
 
@@ -477,7 +477,7 @@ void Table::validateColumnType(
         column.type == ColumnType::kInt &&
         value.getType() != Value::Type::kInt
     ) {
-        throw DatabaseError(
+        throw TypeError(
             "Expected INT value for column '" +
             column.name +
             "'"
@@ -488,7 +488,7 @@ void Table::validateColumnType(
         column.type == ColumnType::kString &&
         value.getType() != Value::Type::kString
     ) {
-        throw DatabaseError(
+        throw TypeError(
             "Expected STRING value for column '" +
             column.name +
             "'"
@@ -501,7 +501,7 @@ void Table::validateNotNull(
     const ColumnSchema& column
 ) const {
     if ((column.not_null || column.indexed) && value.isNull()) {
-        throw DatabaseError(
+        throw ConstraintViolationError(
             "Column '" +
             column.name +
             "' cannot be NULL"
@@ -537,7 +537,7 @@ void Table::validateUniqueConstraints(
             continue;
         }
 
-        throw DatabaseError(
+        throw ConstraintViolationError(
             "Duplicate value for indexed column '" +
             column.name +
             "'"
@@ -589,7 +589,7 @@ void Table::appendInsert(const Row& row) {
     std::ofstream file(data_path, std::ios::app);
 
     if (!file.is_open()) {
-        throw DatabaseError("Failed to open table file");
+        throw StorageError("Failed to open table file");
     }
 
     file << "I|" << Serializer::serializeRow(row) << "\n";
@@ -599,7 +599,7 @@ void Table::appendDelete(RowId row_id) {
     std::ofstream file(data_path, std::ios::app);
 
     if (!file.is_open()) {
-        throw DatabaseError("Failed to open table file");
+        throw StorageError("Failed to open table file");
     }
 
     file << "D|" << row_id << "\n";
@@ -609,7 +609,7 @@ void Table::appendUpdate(const Row& row) {
     std::ofstream file(data_path, std::ios::app);
 
     if (!file.is_open()) {
-        throw DatabaseError("Failed to open table file");
+        throw StorageError("Failed to open table file");
     }
 
     file << "U|" << Serializer::serializeRow(row) << "\n";
@@ -623,7 +623,7 @@ void Table::saveSchema() const {
     std::ofstream file(temp_path);
 
     if (!file.is_open()) {
-        throw DatabaseError("Failed to open metadata file");
+        throw StorageError("Failed to open metadata file");
     }
 
     file << schema.size() << "\n";
@@ -639,7 +639,7 @@ void Table::saveSchema() const {
     file.flush();
 
     if (!file.good()) {
-        throw DatabaseError("Failed to write metadata");
+        throw StorageError("Failed to write metadata");
     }
 
     file.close();

@@ -1,11 +1,12 @@
+#include "sqlparser/parser.hpp"
+
 #include <algorithm>
 #include <array>
 #include <charconv>
 #include <cctype>
 #include <set>
-#include <stdexcept>
 
-#include "sqlparser/parser.hpp"
+#include "exceptions/database_error.hpp"
 
 namespace dbms {
 
@@ -35,7 +36,7 @@ Command Parser::parse(const std::string& query) {
     } else if (tokens[0] == "DELETE") {
         cmd = parseDelete(tokens);
     } else {
-        throwParseError("Unknown command: " + tokens[0]);
+        throw ParserError("Unknown command: " + tokens[0]);
     }
 
     return cmd;
@@ -43,7 +44,7 @@ Command Parser::parse(const std::string& query) {
 
 std::vector<std::string> Parser::tokenize(const std::string& input) {
     if (input.empty()) {
-        throwParseError("Empty query");
+        throw ParserError("Empty query");
     }
 
     std::vector<std::string> tokens;
@@ -60,14 +61,14 @@ std::vector<std::string> Parser::tokenize(const std::string& input) {
         }
 
         if (current.size() > kMaxStringLength) {
-            throwParseError("Token too large");
+            throw ParserError("Token too large");
         }
 
         current = tryNormalizeToken(current);
         tokens.push_back(current);
 
         if (tokens.size() > kMaxTokens) {
-            throwParseError("Too many tokens");
+            throw ParserError("Too many tokens");
         }
 
         current.clear();
@@ -79,7 +80,7 @@ std::vector<std::string> Parser::tokenize(const std::string& input) {
         if (in_string) {
             if (ch == '"') {
                 if (current.size() > kMaxStringLength) {
-                    throwParseError("String literal too large");
+                    throw ParserError("String literal too large");
                 }
 
                 tokens.push_back("\"" + current + "\"");
@@ -90,7 +91,7 @@ std::vector<std::string> Parser::tokenize(const std::string& input) {
             }
 
             if (ch == '\0') {
-                throwParseError("Embedded null byte");
+                throw ParserError("Embedded null byte");
             }
 
             current += ch;
@@ -140,20 +141,20 @@ std::vector<std::string> Parser::tokenize(const std::string& input) {
         }
 
         if (ch == '\0') {
-            throwParseError("Embedded null byte");
+            throw ParserError("Embedded null byte");
         }
 
         current += ch;
     }
 
     if (in_string) {
-        throwParseError("Unterminated string literal");
+        throw ParserError("Unterminated string literal");
     }
 
     push_current();
 
     if (tokens.empty()) {
-        throwParseError("No tokens");
+        throw ParserError("No tokens");
     }
 
     return tokens;
@@ -176,11 +177,11 @@ std::string Parser::normalize(const std::string& token) {
 
 void Parser::validateIdentifier(const std::string& token) const {
     if (!isValidIdentifier(token)) {
-        throwParseError("Invalid identifier: " + token);
+        throw ParserError("Invalid identifier: " + token);
     }
 
     if (isKeyword(token)) {
-        throwParseError(
+        throw ParserError(
             "Identifier cannot be a keyword: " + token
         );
     }
@@ -203,7 +204,7 @@ std::string Parser::normalizeKeyword(
     }
 
     if (has_lower && has_upper) {
-        throwParseError("Mixed-case keyword: " + token);
+        throw ParserError("Mixed-case keyword: " + token);
     }
 
     std::string result;
@@ -228,7 +229,7 @@ std::string Parser::tryNormalizeToken(
 
 Command Parser::parseUse(const std::vector<std::string>& tokens) {
     if (tokens.size() != 2) {
-        throwParseError("USE requires exactly one database name");
+        throw ParserError("USE requires exactly one database name");
     }
 
     Command cmd;
@@ -245,7 +246,7 @@ Command Parser::parseDrop(
     const std::vector<std::string>& tokens
 ) {
     if (tokens.size() != 3) {
-        throwParseError("DROP syntax error");
+        throw ParserError("DROP syntax error");
     }
 
     Command cmd;
@@ -267,7 +268,7 @@ Command Parser::parseDrop(
         return cmd;
     }
 
-    throwParseError("Expected DATABASE or TABLE after DROP");
+    throw ParserError("Expected DATABASE or TABLE after DROP");
 
     return cmd;
 }
@@ -276,12 +277,12 @@ Command Parser::parseCreate(
     const std::vector<std::string>& tokens
 ) {
     if (tokens.size() < 3) {
-        throwParseError("Incomplete CREATE statement");
+        throw ParserError("Incomplete CREATE statement");
     }
 
     if (tokens[1] == "DATABASE") {
         if (tokens.size() != 3) {
-            throwParseError("CREATE DATABASE syntax error");
+            throw ParserError("CREATE DATABASE syntax error");
         }
 
         validateIdentifier(tokens[2]);
@@ -297,7 +298,7 @@ Command Parser::parseCreate(
         return parseCreateTable(tokens);
     }
 
-    throwParseError("Expected DATABASE or TABLE after CREATE");
+    throw ParserError("Expected DATABASE or TABLE after CREATE");
 
     return {};
 }
@@ -306,7 +307,7 @@ Command Parser::parseCreateTable(
     const std::vector<std::string>& tokens
 ) {
     if (tokens.size() < 5) {
-        throwParseError("Incomplete CREATE TABLE statement");
+        throw ParserError("Incomplete CREATE TABLE statement");
     }
 
     Command cmd;
@@ -317,7 +318,7 @@ Command Parser::parseCreateTable(
     size_t pos = 3;
 
     if (tokens[pos] != "(") {
-        throwParseError("Expected '(' after table name");
+        throw ParserError("Expected '(' after table name");
     }
 
     ++pos;
@@ -331,7 +332,7 @@ Command Parser::parseCreateTable(
         }
 
         if (pos + 1 >= tokens.size()) {
-            throwParseError("Incomplete column definition");
+            throw ParserError("Incomplete column definition");
         }
 
         ColumnSchema column;
@@ -340,7 +341,7 @@ Command Parser::parseCreateTable(
         validateIdentifier(column.name);
 
         if (unique_columns.contains(column.name)) {
-            throwParseError("Duplicate column: " + column.name);
+            throw ParserError("Duplicate column: " + column.name);
         }
 
         unique_columns.insert(column.name);
@@ -352,7 +353,7 @@ Command Parser::parseCreateTable(
         } else if (type == "STRING") {
             column.type = ColumnType::kString;
         } else {
-            throwParseError("Unknown column type: " + type);
+            throw ParserError("Unknown column type: " + type);
         }
 
         ++pos;
@@ -368,7 +369,7 @@ Command Parser::parseCreateTable(
                 column.indexed = true;
                 column.not_null = true;
             } else {
-                throwParseError(
+                throw ParserError(
                     "Unknown column modifier: " +
                     tokens[pos]
                 );
@@ -380,7 +381,7 @@ Command Parser::parseCreateTable(
         cmd.columns.push_back(column);
 
         if (pos >= tokens.size()) {
-            throwParseError("Unexpected end of CREATE TABLE");
+            throw ParserError("Unexpected end of CREATE TABLE");
         }
 
         if (tokens[pos] == ",") {
@@ -393,15 +394,15 @@ Command Parser::parseCreateTable(
             break;
         }
 
-        throwParseError("Expected ',' or ')'");
+        throw ParserError("Expected ',' or ')'");
     }
 
     if (cmd.columns.empty()) {
-        throwParseError("Table must contain at least one column");
+        throw ParserError("Table must contain at least one column");
     }
 
     if (pos != tokens.size()) {
-        throwParseError("Unexpected tokens after CREATE TABLE");
+        throw ParserError("Unexpected tokens after CREATE TABLE");
     }
 
     return cmd;
@@ -411,11 +412,11 @@ Command Parser::parseInsert(
     const std::vector<std::string>& tokens
 ) {
     if (tokens.size() < 6) {
-        throwParseError("Incomplete INSERT statement");
+        throw ParserError("Incomplete INSERT statement");
     }
 
     if (tokens[1] != "INTO") {
-        throwParseError("Expected INTO");
+        throw ParserError("Expected INTO");
     }
 
     Command cmd;
@@ -426,7 +427,7 @@ Command Parser::parseInsert(
     ++pos;
 
     if (pos >= tokens.size()) {
-        throwParseError("Unexpected end after table name");
+        throw ParserError("Unexpected end after table name");
     }
 
     if (tokens[pos] == "(") {
@@ -445,7 +446,7 @@ Command Parser::parseInsert(
                 validateIdentifier(tokens[pos]);
 
                 if (unique_columns.contains(tokens[pos])) {
-                    throwParseError(
+                    throw ParserError(
                         "Duplicate column name: " +
                         tokens[pos]
                     );
@@ -458,7 +459,7 @@ Command Parser::parseInsert(
 
             } else {
                 if (tokens[pos] != ",") {
-                    throwParseError("Expected ',' between columns");
+                    throw ParserError("Expected ',' between columns");
                 }
 
                 expect_identifier = true;
@@ -468,19 +469,19 @@ Command Parser::parseInsert(
         }
 
         if (expect_identifier) {
-            throwParseError("Trailing comma in column list");
+            throw ParserError("Trailing comma in column list");
         }
     }
 
     if (pos >= tokens.size() || tokens[pos] != "VALUE") {
-        throwParseError("Expected VALUE");
+        throw ParserError("Expected VALUE");
     }
 
     ++pos;
 
     while (pos < tokens.size()) {
         if (tokens[pos] != "(") {
-            throwParseError("Expected '(' in VALUE tuple");
+            throw ParserError("Expected '(' in VALUE tuple");
         }
 
         ++pos;
@@ -499,7 +500,7 @@ Command Parser::parseInsert(
                 expect_value = false;
             } else {
                 if (tokens[pos] != ",") {
-                    throwParseError("Expected ',' between values");
+                    throw ParserError("Expected ',' between values");
                 }
 
                 expect_value = true;
@@ -509,14 +510,14 @@ Command Parser::parseInsert(
         }
 
         if (expect_value) {
-            throwParseError("Trailing comma in VALUE tuple");
+            throw ParserError("Trailing comma in VALUE tuple");
         }
 
         if (
             !cmd.column_names.empty() &&
             row.size() != cmd.column_names.size()
         ) {
-            throwParseError("Column/value count mismatch");
+            throw ParserError("Column/value count mismatch");
         }
 
         cmd.values.push_back(std::move(row));
@@ -526,14 +527,14 @@ Command Parser::parseInsert(
         }
 
         if (tokens[pos] != ",") {
-            throwParseError("Expected ',' between VALUE tuples");
+            throw ParserError("Expected ',' between VALUE tuples");
         }
 
         ++pos;
     }
 
     if (cmd.values.empty()) {
-        throwParseError("INSERT requires at least one row");
+        throw ParserError("INSERT requires at least one row");
     }
 
     return cmd;
@@ -543,7 +544,7 @@ Command Parser::parseSelect(
     const std::vector<std::string>& tokens
 ) {
     if (tokens.size() < 4) {
-        throwParseError("Incomplete SELECT statement");
+        throw ParserError("Incomplete SELECT statement");
     }
 
     Command cmd;
@@ -581,11 +582,11 @@ Command Parser::parseSelect(
                     ++pos;
 
                     if (pos >= tokens.size()) {
-                        throwParseError("Expected alias after AS");
+                        throw ParserError("Expected alias after AS");
                     }
 
                     if (tokens[pos] == "*") {
-                        throwParseError(
+                        throw ParserError(
                             "'*' allowed only as standalone select expression"
                         );
                     }
@@ -600,7 +601,7 @@ Command Parser::parseSelect(
 
             } else {
                 if (tokens[pos] != ",") {
-                    throwParseError("Expected ',' between columns");
+                    throw ParserError("Expected ',' between columns");
                 }
 
                 expect_column = true;
@@ -609,18 +610,18 @@ Command Parser::parseSelect(
         }
 
         if (expect_column) {
-            throwParseError("Trailing comma in SELECT list");
+            throw ParserError("Trailing comma in SELECT list");
         }
     }
 
     if (pos >= tokens.size() || tokens[pos] != "FROM") {
-        throwParseError("Expected FROM");
+        throw ParserError("Expected FROM");
     }
 
     ++pos;
 
     if (pos >= tokens.size()) {
-        throwParseError("Expected table name after FROM");
+        throw ParserError("Expected table name after FROM");
     }
 
     parseTableName(tokens[pos], cmd.database_name, cmd.table_name);
@@ -628,13 +629,13 @@ Command Parser::parseSelect(
 
     if (pos < tokens.size()) {
         if (tokens[pos] != "WHERE") {
-            throwParseError("Unexpected token after table name");
+            throw ParserError("Unexpected token after table name");
         }
 
         ++pos;
 
         if (pos >= tokens.size()) {
-            throwParseError("WHERE requires conditions");
+            throw ParserError("WHERE requires conditions");
         }
 
         cmd.conditions = parseConditions(tokens, pos);
@@ -647,11 +648,11 @@ Command Parser::parseUpdate(
     const std::vector<std::string>& tokens
 ) {
     if (tokens.size() < 6) {
-        throwParseError("Incomplete UPDATE statement");
+        throw ParserError("Incomplete UPDATE statement");
     }
 
     if (tokens[2] != "SET") {
-        throwParseError("Expected SET");
+        throw ParserError("Expected SET");
     }
 
     Command cmd;
@@ -668,7 +669,7 @@ Command Parser::parseUpdate(
             ++pos;
 
             if (pos >= tokens.size()) {
-                throwParseError("WHERE requires conditions");
+                throw ParserError("WHERE requires conditions");
             }
 
             cmd.conditions = parseConditions(tokens, pos);
@@ -682,7 +683,7 @@ Command Parser::parseUpdate(
             assignment.column = tokens[pos];
 
             if (assigned_columns.contains(assignment.column)) {
-                throwParseError(
+                throw ParserError(
                     "Duplicate assignment: " +
                     assignment.column
                 );
@@ -692,13 +693,13 @@ Command Parser::parseUpdate(
             ++pos;
 
             if (pos >= tokens.size() || tokens[pos] != "=") {
-                throwParseError("Expected '='");
+                throw ParserError("Expected '='");
             }
 
             ++pos;
 
             if (pos >= tokens.size()) {
-                throwParseError("Expected value after '='");
+                throw ParserError("Expected value after '='");
             }
 
             assignment.value = parseValue(tokens[pos]);
@@ -707,7 +708,7 @@ Command Parser::parseUpdate(
 
         } else {
             if (tokens[pos] != ",") {
-                throwParseError("Expected ',' between assignments");
+                throw ParserError("Expected ',' between assignments");
             }
 
             expect_assignment = true;
@@ -717,11 +718,11 @@ Command Parser::parseUpdate(
     }
 
     if (expect_assignment) {
-        throwParseError("Trailing comma in SET clause");
+        throw ParserError("Trailing comma in SET clause");
     }
 
     if (cmd.assignments.empty()) {
-        throwParseError("UPDATE requires assignments");
+        throw ParserError("UPDATE requires assignments");
     }
 
     return cmd;
@@ -731,11 +732,11 @@ Command Parser::parseDelete(
     const std::vector<std::string>& tokens
 ) {
     if (tokens.size() < 3) {
-        throwParseError("Incomplete DELETE statement");
+        throw ParserError("Incomplete DELETE statement");
     }
 
     if (tokens[1] != "FROM") {
-        throwParseError("Expected FROM");
+        throw ParserError("Expected FROM");
     }
 
     Command cmd;
@@ -747,13 +748,13 @@ Command Parser::parseDelete(
 
     if (pos < tokens.size()) {
         if (tokens[pos] != "WHERE") {
-            throwParseError("Unexpected token after table name");
+            throw ParserError("Unexpected token after table name");
         }
 
         ++pos;
 
         if (pos >= tokens.size()) {
-            throwParseError("WHERE requires conditions");
+            throw ParserError("WHERE requires conditions");
         }
 
         cmd.conditions = parseConditions(tokens, pos);
@@ -780,7 +781,7 @@ std::vector<Condition> Parser::parseConditions(
         }
 
         if (pos >= tokens.size()) {
-            throwParseError("Incomplete condition");
+            throw ParserError("Incomplete condition");
         }
 
         Condition condition;
@@ -789,13 +790,13 @@ std::vector<Condition> Parser::parseConditions(
         ++pos;
 
         if (pos >= tokens.size()) {
-            throwParseError("Missing operator in condition");
+            throw ParserError("Missing operator in condition");
         }
 
         const std::string op = tokens[pos];
 
         if (!IsOperatorToken(op)) {
-            throwParseError("Invalid operator: " + op);
+            throw ParserError("Invalid operator: " + op);
         }
 
         condition.operator_type = op;
@@ -803,20 +804,20 @@ std::vector<Condition> Parser::parseConditions(
 
         if (op == "BETWEEN") {
             if (pos >= tokens.size()) {
-                throwParseError("BETWEEN requires lower bound");
+                throw ParserError("BETWEEN requires lower bound");
             }
 
             condition.rhs = parseOperand(tokens[pos]);
             ++pos;
 
             if (pos >= tokens.size() || tokens[pos] != "AND") {
-                throwParseError("BETWEEN requires AND");
+                throw ParserError("BETWEEN requires AND");
             }
 
             ++pos;
 
             if (pos >= tokens.size()) {
-                throwParseError("BETWEEN requires upper bound");
+                throw ParserError("BETWEEN requires upper bound");
             }
 
             condition.range_end = parseOperand(tokens[pos]);
@@ -824,7 +825,7 @@ std::vector<Condition> Parser::parseConditions(
 
         } else {
             if (pos >= tokens.size()) {
-                throwParseError("Operator requires RHS operand");
+                throw ParserError("Operator requires RHS operand");
             }
 
             condition.rhs = parseOperand(tokens[pos]);
@@ -836,7 +837,7 @@ std::vector<Condition> Parser::parseConditions(
     }
 
     if (conditions.empty()) {
-        throwParseError("Empty WHERE clause");
+        throw ParserError("Empty WHERE clause");
     }
 
     return conditions;
@@ -883,11 +884,11 @@ Value Parser::parseValue(const std::string& token) {
         );
 
         if (result.ec == std::errc::result_out_of_range) {
-            throwParseError("Integer overflow: " + token);
+            throw ParserError("Integer overflow: " + token);
         }
 
         if (result.ec != std::errc() || result.ptr != end) {
-            throwParseError("Invalid integer: " + token);
+            throw ParserError("Invalid integer: " + token);
         }
 
         return Value(value);
@@ -943,7 +944,7 @@ Operand Parser::parseOperand(const std::string& token) {
             result.ec != std::errc() ||
             result.ptr != token.data() + token.size()
         ) {
-            throwParseError("Invalid integer: " + token);
+            throw ParserError("Invalid integer: " + token);
         }
 
         op.value = Value(value);
@@ -964,7 +965,7 @@ void Parser::parseTableName(
     std::string& table_name
 ) {
     if (full_name.empty()) {
-        throwParseError("Empty table name");
+        throw ParserError("Empty table name");
     }
 
     const size_t first_dot = full_name.find('.');
@@ -981,11 +982,11 @@ void Parser::parseTableName(
     const size_t second_dot = full_name.find('.', first_dot + 1);
 
     if (second_dot != std::string::npos) {
-        throwParseError("Too many dots in table name");
+        throw ParserError("Too many dots in table name");
     }
 
     if (first_dot == 0 || first_dot == full_name.size() - 1) {
-        throwParseError("Malformed qualified table name");
+        throw ParserError("Malformed qualified table name");
     }
 
     database_name = full_name.substr(0, first_dot);
@@ -1092,10 +1093,6 @@ char Parser::toUpper(const char ch) const {
     return static_cast<char>(
         std::toupper(static_cast<unsigned char>(ch))
     );
-}
-
-void Parser::throwParseError(const std::string& message) const {
-    throw std::runtime_error("Parser error: " + message);
 }
 
 } // namespace dbms

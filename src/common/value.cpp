@@ -26,7 +26,7 @@ Value::Type Value::getType() const {
 
 int Value::asInt() const {
     if (type != Type::kInt) {
-        throw DatabaseError("Value is not INT");
+        throw TypeError("Value is not INT");
     }
 
     return int_value;
@@ -34,7 +34,7 @@ int Value::asInt() const {
 
 const std::string Value::asString() const {
     if (type != Type::kString) {
-        throw DatabaseError("Value is not STRING");
+        throw TypeError("Value is not STRING");
     }
 
     return string_value;
@@ -45,3 +45,4 @@ bool Value::isNull() const {
 }
 
 } // namespace dbms
+

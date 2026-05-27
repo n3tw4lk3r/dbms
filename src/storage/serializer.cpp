@@ -1,4 +1,5 @@
 #include "storage/serializer.hpp"
+
 #include "exceptions/database_error.hpp"
 
 namespace dbms {
@@ -19,7 +20,7 @@ std::string Serializer::serializeValue(const Value& value) {
 
     }
 
-    throw DatabaseError("Unknown value type");
+    throw TypeError("Unknown value type");
 }
 
 Value Serializer::deserializeValue(const std::string& token) {
@@ -32,19 +33,19 @@ Value Serializer::deserializeValue(const std::string& token) {
     }
 
     if (token.rfind("STRING:", 0) != 0) {
-        throw DatabaseError("Corrupted value format");
+        throw DataCorruptionError("Corrupted value format");
     }
 
     size_t size_delimeter = token.find(':', 7);
     if (size_delimeter == std::string::npos) {
-        throw DatabaseError("Corrupted string format");
+        throw DataCorruptionError("Corrupted string format");
     }
 
     size_t len = std::stoull(token.substr(7, size_delimeter - 7));
     std::string value = token.substr(size_delimeter + 1);
 
     if (value.size() != len) {
-        throw DatabaseError("String size mismatch");
+        throw DataCorruptionError("String size mismatch");
     }
 
     return Value(value);
@@ -73,7 +74,7 @@ Row Serializer::deserializeRow(const std::string& line) {
     size_t pos = line.find('|');
 
     if (pos == std::string::npos) {
-        throw DatabaseError("Corrupted row");
+        throw DataCorruptionError("Corrupted row");
     }
 
     row.id = std::stoull(line.substr(0, pos));
@@ -115,7 +116,7 @@ Row Serializer::deserializeRow(const std::string& line) {
             size_t len_end = line.find(':', len_begin);
 
             if (len_end == std::string::npos) {
-                throw DatabaseError("Corrupted string token");
+                throw DataCorruptionError("Corrupted string token");
             }
 
             size_t len = std::stoull(
@@ -125,7 +126,7 @@ Row Serializer::deserializeRow(const std::string& line) {
             size_t data_begin = len_end + 1;
 
             if (data_begin + len > line.size()) {
-                throw DatabaseError("Corrupted string length");
+                throw DataCorruptionError("Corrupted string length");
             }
 
             std::string value = line.substr(
@@ -147,7 +148,7 @@ Row Serializer::deserializeRow(const std::string& line) {
             continue;
         }
 
-        throw DatabaseError("Unknown serialized token");
+        throw DataCorruptionError("Unknown serialized token");
     }
 
     return row;

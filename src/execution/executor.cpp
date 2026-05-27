@@ -2,9 +2,9 @@
 
 #include <iostream>
 #include <regex>
-#include <stdexcept>
 
 #include "common/value_comparator.hpp"
+#include "exceptions/database_error.hpp"
 
 namespace dbms {
 
@@ -52,7 +52,7 @@ void Executor::execute(const Command& cmd) {
         return;
 
     default:
-        throw std::runtime_error("Unknown command");
+        throw ExecutionError("Unknown command");
     }
 }
 
@@ -66,7 +66,7 @@ void Executor::executeDropDatabase(const Command& cmd) {
     Database* db = system.getDatabase(cmd.database_name);
 
     if (!db) {
-        throw std::runtime_error("Database not found");
+        throw NotFoundError("Database not found");
     }
 
     system.dropDatabase(cmd.database_name);
@@ -91,7 +91,7 @@ void Executor::executeDropTable(const Command& cmd) {
     Table* table = db->getTable(cmd.table_name);
 
     if (!table) {
-        throw std::runtime_error("Table not found");
+        throw NotFoundError("Table not found");
     }
 
     db->dropTable(cmd.table_name);
@@ -103,7 +103,7 @@ void Executor::executeInsert(const Command& cmd) {
     Table* table = db->getTable(cmd.table_name);
 
     if (!table) {
-        throw std::runtime_error("Table not found");
+        throw NotFoundError("Table not found");
     }
     
     const auto& schema = table->getSchema();
@@ -124,7 +124,7 @@ void Executor::executeSelect(const Command& cmd) {
     Table* table = db->getTable(cmd.table_name);
 
     if (!table) {
-        throw std::runtime_error("Table not found");
+        throw NotFoundError("Table not found");
     }
 
     const auto& schema = table->getSchema();
@@ -173,7 +173,7 @@ void Executor::executeUpdate(const Command& cmd) {
     Table* table = db->getTable(cmd.table_name);
 
     if (!table) {
-        throw std::runtime_error("Table not found");
+        throw NotFoundError("Table not found");
     }
 
     auto& rows = table->getRowsMutable();
@@ -206,7 +206,7 @@ void Executor::executeDelete(const Command& cmd) {
     Table* table = db->getTable(cmd.table_name);
 
     if (!table) {
-        throw std::runtime_error("Table not found");
+        throw NotFoundError("Table not found");
     }
 
     auto& rows = table->getRowsMutable();
@@ -243,7 +243,7 @@ Database* Executor::resolveDatabase(const Command& cmd) {
     }
 
     if (!db) {
-        throw std::runtime_error("No database selected");
+        throw ExecutionError("No database selected");
     }
 
     return db;
@@ -299,7 +299,7 @@ void Executor::printJsonRow(
         );
 
         if (column_index < 0) {
-            throw std::runtime_error(
+            throw SchemaError(
                 "Unknown column: " +
                 column.name
             );
@@ -458,7 +458,7 @@ void Executor::validateColumnExists(
     const std::string& column_name
 ) {
     if (findColumnIndex(schema, column_name) < 0) {
-        throw std::runtime_error(
+        throw SchemaError(
             "Unknown column: " +
             column_name
         );
@@ -572,7 +572,7 @@ bool Executor::likeValues(
         );
 
     } catch (const std::regex_error& error) {
-        throw std::runtime_error(
+        throw ExecutionError(
             "Invalid regex pattern: " +
             std::string(error.what())
         );
@@ -630,7 +630,7 @@ std::vector<Value> Executor::buildInsertRow(
     }
 
     if (cmd.column_names.size() != values.size()) {
-        throw std::runtime_error(
+        throw ExecutionError(
             "Column count does not match value count"
         );
     }
@@ -644,7 +644,7 @@ std::vector<Value> Executor::buildInsertRow(
         );
 
         if (column_index < 0) {
-            throw std::runtime_error(
+            throw SchemaError(
                 "Unknown column: " +
                 cmd.column_names[i]
             );

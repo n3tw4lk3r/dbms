@@ -48,7 +48,7 @@ void Database::createTable(
 
     for (const auto& column : schema) {
         if (names.contains(column.name)) {
-            throw DatabaseError(
+            throw DuplicateError(
                 "Duplicate column: " +
                 column.name
             );
@@ -58,7 +58,7 @@ void Database::createTable(
     }
 
     if (tables.contains(table_name)) {
-        throw DatabaseError("Table already exists");
+        throw DuplicateError("Table already exists");
     }
     
     tables[table_name] = std::make_unique<Table>(

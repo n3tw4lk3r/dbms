@@ -55,8 +55,6 @@ private:
 
     char toUpper(const char ch) const;
 
-    void throwParseError(const std::string& message) const;
-
 private:
     static constexpr size_t kMaxIdentifierLength = 128;
     static constexpr size_t kMaxStringLength = 4096;

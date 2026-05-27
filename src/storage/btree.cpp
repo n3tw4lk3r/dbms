@@ -1,7 +1,8 @@
 #include "storage/btree.hpp"
 
-#include <stdexcept>
 #include <utility>
+
+#include "exceptions/database_error.hpp"
 
 namespace dbms {
 
@@ -12,7 +13,7 @@ BTree::BTree(size_t min_degree) :
 
 void BTree::insert(const IndexedValue& key, RowId row_id) {
     if (contains(key)) {
-        throw std::runtime_error("Duplicate indexed key");
+        throw DuplicateError("Duplicate indexed key");
     }
 
     BTreeEntry entry;

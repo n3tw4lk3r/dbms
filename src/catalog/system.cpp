@@ -25,7 +25,7 @@ System::System() {
 
 void System::createDatabase(const std::string& name) {
     if (databases.contains(name)) {
-        throw DatabaseError("Database already exists");
+        throw DuplicateError("Database already exists");
     }
 
     std::filesystem::path database_path = storage_root / name;
@@ -52,7 +52,7 @@ void System::useDatabase(const std::string& name) {
     Database* db = getDatabase(name);
 
     if (!db) {
-        throw std::runtime_error("Database not found");
+        throw NotFoundError("Database not found");
     }
 
     current_database = db;
