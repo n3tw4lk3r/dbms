@@ -50,7 +50,7 @@ target_compile_options(dbms
 target_compile_features(dbms PRIVATE cxx_std_20)
 
 add_library(test_utils STATIC
-    tests/test_utils.cpp
+    tests/utils.cpp
 )
 
 target_include_directories(test_utils

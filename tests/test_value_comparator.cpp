@@ -2,13 +2,13 @@
 #include <iostream>
 #include <string>
 
-#include "test_utils.hpp"
 #include "common/value.hpp"
 #include "common/value_comparator.hpp"
+#include "utils.hpp"
 
 using namespace dbms;
 
-void test_compare_int_eq(TestStats& stats) {
+void test_value_comparator_compare_int_eq(TestStats& stats) {
     test_header("compare int ==");
     
     check(
@@ -38,7 +38,7 @@ void test_compare_int_eq(TestStats& stats) {
     );
 }
 
-void test_compare_int_ne(TestStats& stats) {
+void test_value_comparator_compare_int_ne(TestStats& stats) {
     test_header("compare int !=");
     
     check(
@@ -63,7 +63,7 @@ void test_compare_int_ne(TestStats& stats) {
     );
 }
 
-void test_compare_int_lt(TestStats& stats) {
+void test_value_comparator_compare_int_lt(TestStats& stats) {
     test_header("compare int <");
     
     check(
@@ -96,7 +96,7 @@ void test_compare_int_lt(TestStats& stats) {
     );
 }
 
-void test_compare_int_gt(TestStats& stats) {
+void test_value_comparator_compare_int_gt(TestStats& stats) {
     test_header("compare int >");
     
     check(
@@ -126,7 +126,7 @@ void test_compare_int_gt(TestStats& stats) {
     );
 }
 
-void test_compare_int_le(TestStats& stats) {
+void test_value_comparator_compare_int_le(TestStats& stats) {
     test_header("compare int <=");
     
     check(
@@ -156,7 +156,7 @@ void test_compare_int_le(TestStats& stats) {
     );
 }
 
-void test_compare_int_ge(TestStats& stats) {
+void test_value_comparator_compare_int_ge(TestStats& stats) {
     test_header("compare int >=");
     
     check(
@@ -181,7 +181,7 @@ void test_compare_int_ge(TestStats& stats) {
     );
 }
 
-void test_compare_string_eq(TestStats& stats) {
+void test_value_comparator_compare_string_eq(TestStats& stats) {
     test_header("compare string ==");
     
     check(
@@ -206,7 +206,7 @@ void test_compare_string_eq(TestStats& stats) {
     );
 }
 
-void test_compare_string_ne(TestStats& stats) {
+void test_value_comparator_compare_string_ne(TestStats& stats) {
     test_header("compare string !=");
     
     check(
@@ -226,7 +226,7 @@ void test_compare_string_ne(TestStats& stats) {
     );
 }
 
-void test_compare_string_lt(TestStats& stats) {
+void test_value_comparator_compare_string_lt(TestStats& stats) {
     test_header("compare string <");
     
     check(
@@ -256,7 +256,7 @@ void test_compare_string_lt(TestStats& stats) {
     );
 }
 
-void test_compare_string_gt(TestStats& stats) {
+void test_value_comparator_compare_string_gt(TestStats& stats) {
     test_header("compare string >");
     
     check(
@@ -281,7 +281,7 @@ void test_compare_string_gt(TestStats& stats) {
     );
 }
 
-void test_compare_string_le(TestStats& stats) {
+void test_value_comparator_compare_string_le(TestStats& stats) {
     test_header("compare string <=");
     
     check(
@@ -306,7 +306,7 @@ void test_compare_string_le(TestStats& stats) {
     );
 }
 
-void test_compare_string_ge(TestStats& stats) {
+void test_value_comparator_compare_string_ge(TestStats& stats) {
     test_header("compare string >=");
     
     check(
@@ -326,7 +326,7 @@ void test_compare_string_ge(TestStats& stats) {
     );
 }
 
-void test_compare_null(TestStats& stats) {
+void test_value_comparator_compare_null(TestStats& stats) {
     test_header("compare with null");
     
     Value null1;
@@ -392,7 +392,7 @@ void test_compare_null(TestStats& stats) {
     );
 }
 
-void test_compare_cross_type(TestStats& stats) {
+void test_value_comparator_compare_cross_type(TestStats& stats) {
     test_header("compare cross-type");
     
     check(
@@ -427,7 +427,7 @@ void test_compare_cross_type(TestStats& stats) {
     );
 }
 
-void test_compare_unknown_operator(TestStats& stats) {
+void test_value_comparator_compare_unknown_operator(TestStats& stats) {
     test_header("compare unknown operator");
     
     check(
@@ -452,7 +452,7 @@ void test_compare_unknown_operator(TestStats& stats) {
     );
 }
 
-void test_between_int(TestStats& stats) {
+void test_value_comparator_between_int(TestStats& stats) {
     test_header("between int");
     
     check(
@@ -487,7 +487,7 @@ void test_between_int(TestStats& stats) {
     );
 }
 
-void test_between_string(TestStats& stats) {
+void test_value_comparator_between_string(TestStats& stats) {
     test_header("between string");
     
     check(
@@ -516,7 +516,7 @@ void test_between_string(TestStats& stats) {
         "a between a and b");
 }
 
-void test_between_null(TestStats& stats) {
+void test_value_comparator_between_null(TestStats& stats) {
     test_header("between null");
     
     check(
@@ -541,7 +541,7 @@ void test_between_null(TestStats& stats) {
     );
 }
 
-void test_between_cross_type(TestStats& stats) {
+void test_value_comparator_between_cross_type(TestStats& stats) {
     test_header("between cross-type");
     
     check(
@@ -561,7 +561,7 @@ void test_between_cross_type(TestStats& stats) {
     );
 }
 
-void test_edge_cases(TestStats& stats) {
+void test_value_comparator_edge_cases(TestStats& stats) {
     test_header("Edge cases");
     
     check(
@@ -600,26 +600,26 @@ int main() {
     TestStats stats;
     std::cout << "Running ValueComparator tests..." << std::endl;
     
-    test_compare_int_eq(stats);
-    test_compare_int_ne(stats);
-    test_compare_int_lt(stats);
-    test_compare_int_gt(stats);
-    test_compare_int_le(stats);
-    test_compare_int_ge(stats);
-    test_compare_string_eq(stats);
-    test_compare_string_ne(stats);
-    test_compare_string_lt(stats);
-    test_compare_string_gt(stats);
-    test_compare_string_le(stats);
-    test_compare_string_ge(stats);
-    test_compare_null(stats);
-    test_compare_cross_type(stats);
-    test_compare_unknown_operator(stats);
-    test_between_int(stats);
-    test_between_string(stats);
-    test_between_null(stats);
-    test_between_cross_type(stats);
-    test_edge_cases(stats);
+    test_value_comparator_compare_int_eq(stats);
+    test_value_comparator_compare_int_ne(stats);
+    test_value_comparator_compare_int_lt(stats);
+    test_value_comparator_compare_int_gt(stats);
+    test_value_comparator_compare_int_le(stats);
+    test_value_comparator_compare_int_ge(stats);
+    test_value_comparator_compare_string_eq(stats);
+    test_value_comparator_compare_string_ne(stats);
+    test_value_comparator_compare_string_lt(stats);
+    test_value_comparator_compare_string_gt(stats);
+    test_value_comparator_compare_string_le(stats);
+    test_value_comparator_compare_string_ge(stats);
+    test_value_comparator_compare_null(stats);
+    test_value_comparator_compare_cross_type(stats);
+    test_value_comparator_compare_unknown_operator(stats);
+    test_value_comparator_between_int(stats);
+    test_value_comparator_between_string(stats);
+    test_value_comparator_between_null(stats);
+    test_value_comparator_between_cross_type(stats);
+    test_value_comparator_edge_cases(stats);
     
     print_test_results(stats);
     if (stats.tests_failed > 0) {

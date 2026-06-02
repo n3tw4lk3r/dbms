@@ -2,14 +2,14 @@
 #include <memory>
 #include <string>
 
-#include "test_utils.hpp"
+#include "common/value.hpp"
 #include "storage/btree_node.hpp"
 #include "storage/indexed_value.hpp"
-#include "common/value.hpp"
+#include "utils.hpp"
 
 using namespace dbms;
 
-void test_leaf_node(TestStats& stats) {
+void test_btree_node_leaf_node(TestStats& stats) {
     test_header("Leaf node creation");
     
     BTreeNode node(true);
@@ -18,7 +18,7 @@ void test_leaf_node(TestStats& stats) {
     check(stats, node.children.empty(), "Leaf node children initially empty");
 }
 
-void test_internal_node(TestStats& stats) {
+void test_btree_node_internal_node(TestStats& stats) {
     test_header("Internal node creation");
     
     BTreeNode node(false);
@@ -27,7 +27,7 @@ void test_internal_node(TestStats& stats) {
     check(stats, node.children.empty(), "Internal node children initially empty");
 }
 
-void test_add_entries_to_leaf(TestStats& stats) {
+void test_btree_node_add_entries_to_leaf(TestStats& stats) {
     test_header("Add entries to leaf");
     
     BTreeNode node(true);
@@ -57,7 +57,7 @@ void test_add_entries_to_leaf(TestStats& stats) {
     );
 }
 
-void test_add_entries_to_internal(TestStats& stats) {
+void test_btree_node_add_entries_to_internal(TestStats& stats) {
     test_header("Add entries to internal node");
     
     BTreeNode node(false);
@@ -75,7 +75,7 @@ void test_add_entries_to_internal(TestStats& stats) {
     check(stats, node.children.size() == 2, "Internal node has two children");
 }
 
-void test_multiple_entries(TestStats& stats) {
+void test_btree_node_multiple_entries(TestStats& stats) {
     test_header("Multiple entries");
     
     BTreeNode node(true);
@@ -100,7 +100,7 @@ void test_multiple_entries(TestStats& stats) {
     check(stats, node.entries[50].row_id == 500, "Middle entry row_id correct");
 }
 
-void test_children_ownership(TestStats& stats) {
+void test_btree_node_children_ownership(TestStats& stats) {
     test_header("Children ownership");
     
     BTreeNode parent(false);
@@ -117,7 +117,7 @@ void test_children_ownership(TestStats& stats) {
     check(stats, parent.children[0]->is_leaf, "Child is leaf");
 }
 
-void test_string_keys(TestStats& stats) {
+void test_btree_node_string_keys(TestStats& stats) {
     test_header("String keys");
     
     BTreeNode node(true);
@@ -154,7 +154,7 @@ void test_string_keys(TestStats& stats) {
     );
 }
 
-void test_null_keys(TestStats& stats) {
+void test_btree_node_null_keys(TestStats& stats) {
     test_header("Null keys");
     
     BTreeNode node(true);
@@ -168,7 +168,7 @@ void test_null_keys(TestStats& stats) {
     check(stats, node.entries[0].row_id == 1, "Row ID preserved with null key");
 }
 
-void test_large_number_of_children(TestStats& stats) {
+void test_btree_node_large_number_of_children(TestStats& stats) {
     test_header("Large number of children");
     
     BTreeNode parent(false);
@@ -192,15 +192,15 @@ int main() {
     TestStats stats;
     std::cout << "Running BTreeNode tests..." << std::endl;
     
-    test_leaf_node(stats);
-    test_internal_node(stats);
-    test_add_entries_to_leaf(stats);
-    test_add_entries_to_internal(stats);
-    test_multiple_entries(stats);
-    test_children_ownership(stats);
-    test_string_keys(stats);
-    test_null_keys(stats);
-    test_large_number_of_children(stats);
+    test_btree_node_leaf_node(stats);
+    test_btree_node_internal_node(stats);
+    test_btree_node_add_entries_to_leaf(stats);
+    test_btree_node_add_entries_to_internal(stats);
+    test_btree_node_multiple_entries(stats);
+    test_btree_node_children_ownership(stats);
+    test_btree_node_string_keys(stats);
+    test_btree_node_null_keys(stats);
+    test_btree_node_large_number_of_children(stats);
     
     print_test_results(stats);
     if (stats.tests_failed > 0) {

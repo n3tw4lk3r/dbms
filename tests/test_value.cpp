@@ -2,19 +2,19 @@
 #include <iostream>
 #include <string>
 
-#include "test_utils.hpp"
 #include "common/value.hpp"
+#include "utils.hpp"
 
 using namespace dbms;
 
-void test_default_constructor(TestStats& stats) {
+void test_value_default_constructor(TestStats& stats) {
     test_header("Default constructor");
     Value v;
     check(stats, v.isNull(), "Default constructed value is null");
     check(stats, v.getType() == Value::Type::kNull, "Default type is kNull");
 }
 
-void test_int_constructor(TestStats& stats) {
+void test_value_int_constructor(TestStats& stats) {
     test_header("Int constructor");
     
     Value v0(0);
@@ -42,7 +42,7 @@ void test_int_constructor(TestStats& stats) {
 
 }
 
-void test_string_constructor(TestStats& stats) {
+void test_value_string_constructor(TestStats& stats) {
     test_header("String constructor");
     
     Value v_empty("");
@@ -76,7 +76,7 @@ void test_string_constructor(TestStats& stats) {
     check(stats, v_unicode.asString() == "привет мир 世界", "Unicode preserved");
 }
 
-void test_null_value_properties(TestStats& stats) {
+void test_value_null_value_properties(TestStats& stats) {
     test_header("Null value properties");
     Value v;
     check(stats, v.isNull(), "isNull true for null");
@@ -184,7 +184,7 @@ void test_value_assignment(TestStats& stats) {
     check(stats, v1.asString() == "temp", "Temporary string value preserved");
 }
 
-void test_boundary_values(TestStats& stats) {
+void test_value_boundary_values(TestStats& stats) {
     test_header("Boundary values");
     
     Value zero_int(0);
@@ -202,7 +202,7 @@ void test_boundary_values(TestStats& stats) {
     check(stats, very_small.asInt() == INT_MIN, "INT_MIN preserved");
 }
 
-void test_multiple_instances(TestStats& stats) {
+void test_value_multiple_instances(TestStats& stats) {
     test_header("Multiple instances independence");
     
     Value a(10);
@@ -243,7 +243,11 @@ void test_value_conversion_errors(TestStats& stats) {
 
     {
         Value v(123);
-        check(stats, v.asInt() == 123, "Calling asInt() on int value returns int");
+        check(
+            stats,
+            v.asInt() == 123,
+            "Calling asInt() on int value returns int"
+        );
         
         bool caught = false;
         try {
@@ -278,15 +282,15 @@ int main() {
     TestStats stats;
     std::cout << "Running Value tests..." << std::endl;
     
-    test_default_constructor(stats);
-    test_int_constructor(stats);
-    test_string_constructor(stats);
-    test_null_value_properties(stats);
+    test_value_default_constructor(stats);
+    test_value_int_constructor(stats);
+    test_value_string_constructor(stats);
+    test_value_null_value_properties(stats);
     test_value_type_consistency(stats);
     test_value_copy(stats);
     test_value_assignment(stats);
-    test_boundary_values(stats);
-    test_multiple_instances(stats);
+    test_value_boundary_values(stats);
+    test_value_multiple_instances(stats);
     test_value_conversion_errors(stats);
 
     print_test_results(stats);

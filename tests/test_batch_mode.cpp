@@ -4,8 +4,8 @@
 #include <string>
 #include <filesystem>
 
-#include "test_utils.hpp"
 #include "io/repl.hpp"
+#include "utils.hpp"
 
 using namespace dbms;
 namespace fs = std::filesystem;
@@ -56,7 +56,7 @@ void run_batch_from_file(
     std::remove(filename.c_str());
 }
 
-void test_batch_exit_immediately(TestStats& stats) {
+void test_batch_mode_exit_immediately(TestStats& stats) {
     test_header("Batch: exit immediately");
     
     ScopedDataDirectory guard;
@@ -77,7 +77,7 @@ void test_batch_exit_immediately(TestStats& stats) {
     );
 }
 
-void test_batch_create_database(TestStats& stats) {
+void test_batch_mode_create_database(TestStats& stats) {
     test_header("Batch: CREATE DATABASE");
     
     ScopedDataDirectory guard;
@@ -103,7 +103,7 @@ void test_batch_create_database(TestStats& stats) {
     );
 }
 
-void test_batch_create_and_use(TestStats& stats) {
+void test_batch_mode_create_and_use(TestStats& stats) {
     test_header("Batch: CREATE and USE database");
     
     ScopedDataDirectory guard;
@@ -130,7 +130,7 @@ void test_batch_create_and_use(TestStats& stats) {
     );
 }
 
-void test_batch_create_table(TestStats& stats) {
+void test_batch_mode_create_table(TestStats& stats) {
     test_header("Batch: CREATE TABLE");
     
     ScopedDataDirectory guard;
@@ -158,7 +158,7 @@ void test_batch_create_table(TestStats& stats) {
     );
 }
 
-void test_batch_insert_and_select(TestStats& stats) {
+void test_batch_mode_insert_and_select(TestStats& stats) {
     test_header("Batch: INSERT and SELECT");
     
     ScopedDataDirectory guard;
@@ -204,7 +204,7 @@ void test_batch_insert_and_select(TestStats& stats) {
     );
 }
 
-void test_batch_empty_input(TestStats& stats) {
+void test_batch_mode_empty_input(TestStats& stats) {
     test_header("Batch: empty input");
     
     ScopedDataDirectory guard;
@@ -220,7 +220,7 @@ void test_batch_empty_input(TestStats& stats) {
     );
 }
 
-void test_batch_invalid_command(TestStats& stats) {
+void test_batch_mode_invalid_command(TestStats& stats) {
     test_header("Batch: invalid command");
     
     ScopedDataDirectory guard;
@@ -241,7 +241,7 @@ void test_batch_invalid_command(TestStats& stats) {
     );
 }
 
-void test_batch_semicolon_separated_queries(TestStats& stats) {
+void test_batch_mode_semicolon_separated_queries(TestStats& stats) {
     test_header("Batch: semicolon separated queries");
     
     ScopedDataDirectory guard;
@@ -271,7 +271,7 @@ void test_batch_semicolon_separated_queries(TestStats& stats) {
     );
 }
 
-void test_batch_multiline_query(TestStats& stats) {
+void test_batch_mode_multiline_query(TestStats& stats) {
     test_header("Batch: multiline query");
     
     ScopedDataDirectory guard;
@@ -303,7 +303,7 @@ void test_batch_multiline_query(TestStats& stats) {
     );
 }
 
-void test_batch_from_file_basic(TestStats& stats) {
+void test_batch_mode_from_file_basic(TestStats& stats) {
     test_header("Batch from file: basic operations");
     
     ScopedDataDirectory guard;
@@ -340,7 +340,7 @@ void test_batch_from_file_basic(TestStats& stats) {
     );
 }
 
-void test_batch_from_file_full_workflow(TestStats& stats) {
+void test_batch_mode_from_file_full_workflow(TestStats& stats) {
     test_header("Batch from file: full workflow");
     
     ScopedDataDirectory guard;
@@ -413,7 +413,7 @@ void test_batch_from_file_full_workflow(TestStats& stats) {
     );
 }
 
-void test_batch_from_file_multiline_query(TestStats& stats) {
+void test_batch_mode_from_file_multiline_query(TestStats& stats) {
     test_header("Batch from file: multiline query");
     
     ScopedDataDirectory guard;
@@ -463,7 +463,7 @@ void test_batch_from_file_multiline_query(TestStats& stats) {
     );
 }
 
-void test_batch_from_file_with_errors(TestStats& stats) {
+void test_batch_mode_from_file_with_errors(TestStats& stats) {
     test_header("Batch from file: handling errors");
     
     ScopedDataDirectory guard;
@@ -500,7 +500,7 @@ void test_batch_from_file_with_errors(TestStats& stats) {
     );
 }
 
-void test_batch_from_file_empty(TestStats& stats) {
+void test_batch_mode_from_file_empty(TestStats& stats) {
     test_header("Batch from file: empty file");
     
     ScopedDataDirectory guard;
@@ -521,20 +521,20 @@ int main() {
     TestStats stats;
     std::cout << "Running Batch Mode tests..." << std::endl;
     
-    test_batch_exit_immediately(stats);
-    test_batch_empty_input(stats);
-    test_batch_create_database(stats);
-    test_batch_create_and_use(stats);
-    test_batch_create_table(stats);
-    test_batch_insert_and_select(stats);
-    test_batch_invalid_command(stats);
-    test_batch_semicolon_separated_queries(stats);
-    test_batch_multiline_query(stats);
-    test_batch_from_file_basic(stats);
-    test_batch_from_file_full_workflow(stats);
-    test_batch_from_file_multiline_query(stats);
-    test_batch_from_file_with_errors(stats);
-    test_batch_from_file_empty(stats);
+    test_batch_mode_exit_immediately(stats);
+    test_batch_mode_empty_input(stats);
+    test_batch_mode_create_database(stats);
+    test_batch_mode_create_and_use(stats);
+    test_batch_mode_create_table(stats);
+    test_batch_mode_insert_and_select(stats);
+    test_batch_mode_invalid_command(stats);
+    test_batch_mode_semicolon_separated_queries(stats);
+    test_batch_mode_multiline_query(stats);
+    test_batch_mode_from_file_basic(stats);
+    test_batch_mode_from_file_full_workflow(stats);
+    test_batch_mode_from_file_multiline_query(stats);
+    test_batch_mode_from_file_with_errors(stats);
+    test_batch_mode_from_file_empty(stats);
     
     print_test_results(stats);
     if (stats.tests_failed > 0) {

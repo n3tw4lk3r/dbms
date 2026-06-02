@@ -1,9 +1,9 @@
 #include <iostream>
 #include <string>
 
-#include "test_utils.hpp"
 #include "catalog/system.hpp"
 #include "catalog/database.hpp"
+#include "utils.hpp"
 
 using namespace dbms;
 
@@ -20,7 +20,7 @@ void test_system_initialization(TestStats& stats) {
     );
 }
 
-void test_create_database(TestStats& stats) {
+void test_system_create_database(TestStats& stats) {
     test_header("Create database");
     
     ScopedDataDirectory guard;
@@ -38,7 +38,7 @@ void test_create_database(TestStats& stats) {
     );
 }
 
-void test_create_multiple_databases(TestStats& stats) {
+void test_system_create_multiple_databases(TestStats& stats) {
     test_header("Create multiple databases");
     
     ScopedDataDirectory guard;
@@ -68,7 +68,7 @@ void test_create_multiple_databases(TestStats& stats) {
     );
 }
 
-void test_get_nonexistent_database(TestStats& stats) {
+void test_system_get_nonexistent_database(TestStats& stats) {
     test_header("Get nonexistent database");
     
     ScopedDataDirectory guard;
@@ -86,7 +86,7 @@ void test_get_nonexistent_database(TestStats& stats) {
     );
 }
 
-void test_use_database(TestStats& stats) {
+void test_system_use_database(TestStats& stats) {
     test_header("Use database");
     
     ScopedDataDirectory guard;
@@ -104,7 +104,7 @@ void test_use_database(TestStats& stats) {
     );
 }
 
-void test_use_nonexistent_database(TestStats& stats) {
+void test_system_use_nonexistent_database(TestStats& stats) {
     test_header("Use nonexistent database");
     
     ScopedDataDirectory guard;
@@ -125,7 +125,7 @@ void test_use_nonexistent_database(TestStats& stats) {
     );
 }
 
-void test_switch_database(TestStats& stats) {
+void test_system_switch_database(TestStats& stats) {
     test_header("Switch database");
     
     ScopedDataDirectory guard;
@@ -149,7 +149,7 @@ void test_switch_database(TestStats& stats) {
     );
 }
 
-void test_drop_database(TestStats& stats) {
+void test_system_drop_database(TestStats& stats) {
     test_header("Drop database");
     
     ScopedDataDirectory guard;
@@ -175,7 +175,7 @@ void test_drop_database(TestStats& stats) {
     );
 }
 
-void test_drop_current_database(TestStats& stats) {
+void test_system_drop_current_database(TestStats& stats) {
     test_header("Drop current database");
     
     ScopedDataDirectory guard;
@@ -198,7 +198,7 @@ void test_drop_current_database(TestStats& stats) {
     );
 }
 
-void test_drop_nonexistent_database(TestStats& stats) {
+void test_system_drop_nonexistent_database(TestStats& stats) {
     test_header("Drop nonexistent database");
     
     ScopedDataDirectory guard;
@@ -208,7 +208,7 @@ void test_drop_nonexistent_database(TestStats& stats) {
     check(stats, true, "Dropping nonexistent database does not throw");
 }
 
-void test_create_database_with_tables(TestStats& stats) {
+void test_system_create_database_with_tables(TestStats& stats) {
     test_header("Create database and add tables");
     
     ScopedDataDirectory guard;
@@ -228,7 +228,7 @@ void test_create_database_with_tables(TestStats& stats) {
     check(stats, db->getTable("products") != nullptr, "Products table exists");
 }
 
-void test_get_current_database_when_none(TestStats& stats) {
+void test_system_get_current_database_when_none(TestStats& stats) {
     test_header("Get current database when none selected");
     
     ScopedDataDirectory guard;
@@ -253,17 +253,17 @@ int main() {
     std::cout << "Running System tests..." << std::endl;
     
     test_system_initialization(stats);
-    test_create_database(stats);
-    test_create_multiple_databases(stats);
-    test_get_nonexistent_database(stats);
-    test_use_database(stats);
-    test_use_nonexistent_database(stats);
-    test_switch_database(stats);
-    test_drop_database(stats);
-    test_drop_current_database(stats);
-    test_drop_nonexistent_database(stats);
-    test_create_database_with_tables(stats);
-    test_get_current_database_when_none(stats);
+    test_system_create_database(stats);
+    test_system_create_multiple_databases(stats);
+    test_system_get_nonexistent_database(stats);
+    test_system_use_database(stats);
+    test_system_use_nonexistent_database(stats);
+    test_system_switch_database(stats);
+    test_system_drop_database(stats);
+    test_system_drop_current_database(stats);
+    test_system_drop_nonexistent_database(stats);
+    test_system_create_database_with_tables(stats);
+    test_system_get_current_database_when_none(stats);
     
     print_test_results(stats);
     if (stats.tests_failed > 0) {

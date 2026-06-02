@@ -2,21 +2,21 @@
 #include <iostream>
 #include <string>
 
-#include "test_utils.hpp"
 #include "common/value.hpp"
 #include "storage/row.hpp"
 #include "storage/serializer.hpp"
+#include "utils.hpp"
 
 using namespace dbms;
 
-void test_serialize_null_value(TestStats& stats) {
+void test_serializer_serialize_null_value(TestStats& stats) {
     test_header("serialize null value");
     Value v;
     std::string result = Serializer::serializeValue(v);
     check(stats, result == "NULL", "null serializes to NULL");
 }
 
-void test_serialize_int_value(TestStats& stats) {
+void test_serializer_serialize_int_value(TestStats& stats) {
     test_header("serialize int value");
     check(
         stats,
@@ -49,7 +49,7 @@ void test_serialize_int_value(TestStats& stats) {
     );
 }
 
-void test_serialize_string_value(TestStats& stats) {
+void test_serializer_serialize_string_value(TestStats& stats) {
     test_header("serialize string value");
     
     std::string result = Serializer::serializeValue(Value("hello"));
@@ -81,14 +81,14 @@ void test_serialize_string_value(TestStats& stats) {
     );
 }
 
-void test_deserialize_null_value(TestStats& stats) {
+void test_serializer_deserialize_null_value(TestStats& stats) {
     test_header("deserialize null value");
     Value v = Serializer::deserializeValue("NULL");
     check(stats, v.isNull(), "NULL deserializes to null");
     check(stats, v.getType() == Value::Type::kNull, "Type is kNull");
 }
 
-void test_deserialize_int_value(TestStats& stats) {
+void test_serializer_deserialize_int_value(TestStats& stats) {
     test_header("deserialize int value");
     
     Value v = Serializer::deserializeValue("INT:42");
@@ -105,7 +105,7 @@ void test_deserialize_int_value(TestStats& stats) {
     check(stats, v.asInt() == 2147483647, "Large int deserialized");
 }
 
-void test_deserialize_string_value(TestStats& stats) {
+void test_serializer_deserialize_string_value(TestStats& stats) {
     test_header("deserialize string value");
     
     Value v = Serializer::deserializeValue("STRING:5:hello");
@@ -127,7 +127,7 @@ void test_deserialize_string_value(TestStats& stats) {
     check(stats, v.asString() == "12345", "Numeric string preserved");
 }
 
-void test_deserialize_corrupted_value(TestStats& stats) {
+void test_serializer_deserialize_corrupted_value(TestStats& stats) {
     test_header("deserialize corrupted value");
     
     bool caught = false;
@@ -179,7 +179,7 @@ void test_deserialize_corrupted_value(TestStats& stats) {
     check(stats, caught, "String too short throws error");
 }
 
-void test_serialize_deserialize_roundtrip(TestStats& stats) {
+void test_serializer_serialize_deserialize_roundtrip(TestStats& stats) {
     test_header("serialize/deserialize roundtrip");
     
     Value original_int(42);
@@ -221,7 +221,7 @@ void test_serialize_deserialize_roundtrip(TestStats& stats) {
     check(stats, deserialized.asInt() == -999, "Negative int roundtrip");
 }
 
-void test_serialize_row_body(TestStats& stats) {
+void test_serializer_serialize_row_body(TestStats& stats) {
     test_header("serialize row body");
     
     Row row;
@@ -257,7 +257,7 @@ void test_serialize_row_body(TestStats& stats) {
     );
 }
 
-void test_serialize_row(TestStats& stats) {
+void test_serializer_serialize_row(TestStats& stats) {
     test_header("serialize row");
     
     Row row;
@@ -277,7 +277,7 @@ void test_serialize_row(TestStats& stats) {
     check(stats, serialized == "999|NULL", "Row with null serialized");
 }
 
-void test_deserialize_row(TestStats& stats) {
+void test_serializer_deserialize_row(TestStats& stats) {
     test_header("deserialize row");
     
     std::string line = "42|INT:10|STRING:4:test";
@@ -312,7 +312,7 @@ void test_deserialize_row(TestStats& stats) {
     check(stats, row.values[0].isNull(), "Value is null");
 }
 
-void test_serialize_deserialize_row_roundtrip(TestStats& stats) {
+void test_serializer_serialize_deserialize_row_roundtrip(TestStats& stats) {
     test_header("row roundtrip");
     
     Row original;
@@ -362,18 +362,18 @@ int main() {
     TestStats stats;
     std::cout << "Running Serializer tests..." << std::endl;
     
-    test_serialize_null_value(stats);
-    test_serialize_int_value(stats);
-    test_serialize_string_value(stats);
-    test_deserialize_null_value(stats);
-    test_deserialize_int_value(stats);
-    test_deserialize_string_value(stats);
-    test_deserialize_corrupted_value(stats);
-    test_serialize_deserialize_roundtrip(stats);
-    test_serialize_row_body(stats);
-    test_serialize_row(stats);
-    test_deserialize_row(stats);
-    test_serialize_deserialize_row_roundtrip(stats);
+    test_serializer_serialize_null_value(stats);
+    test_serializer_serialize_int_value(stats);
+    test_serializer_serialize_string_value(stats);
+    test_serializer_deserialize_null_value(stats);
+    test_serializer_deserialize_int_value(stats);
+    test_serializer_deserialize_string_value(stats);
+    test_serializer_deserialize_corrupted_value(stats);
+    test_serializer_serialize_deserialize_roundtrip(stats);
+    test_serializer_serialize_row_body(stats);
+    test_serializer_serialize_row(stats);
+    test_serializer_deserialize_row(stats);
+    test_serializer_serialize_deserialize_row_roundtrip(stats);
     
     print_test_results(stats);
     if (stats.tests_failed > 0) {

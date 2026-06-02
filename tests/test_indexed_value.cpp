@@ -1,19 +1,19 @@
 #include <iostream>
 #include <string>
 
-#include "test_utils.hpp"
 #include "common/value.hpp"
 #include "storage/indexed_value.hpp"
+#include "utils.hpp"
 
 using namespace dbms;
 
-void test_default_constructor(TestStats& stats) {
+void test_indexed_value_default_constructor(TestStats& stats) {
     test_header("Default constructor");
     IndexedValue iv;
     check(stats, iv.getValue().isNull(), "Default indexed value is null");
 }
 
-void test_value_constructor(TestStats& stats) {
+void test_indexed_value_value_constructor(TestStats& stats) {
     test_header("Value constructor");
     
     IndexedValue iv_int(Value(42));
@@ -40,7 +40,7 @@ void test_value_constructor(TestStats& stats) {
     check(stats, iv_null.getValue().isNull(), "Null value preserved");
 }
 
-void test_int_comparison_less(TestStats& stats) {
+void test_indexed_value_int_comparison_less(TestStats& stats) {
     test_header("Int comparison less");
     
     IndexedValue small(Value(1));
@@ -60,7 +60,7 @@ void test_int_comparison_less(TestStats& stats) {
     check(stats, neg < small, "-5 < 1");
 }
 
-void test_int_comparison_greater(TestStats& stats) {
+void test_indexed_value_int_comparison_greater(TestStats& stats) {
     test_header("Int comparison greater");
     
     IndexedValue small(Value(1));
@@ -78,7 +78,7 @@ void test_int_comparison_greater(TestStats& stats) {
     check(stats, large > neg, "100 > -5");
 }
 
-void test_int_comparison_equal(TestStats& stats) {
+void test_indexed_value_int_comparison_equal(TestStats& stats) {
     test_header("Int comparison equal");
     
     IndexedValue one(Value(1));
@@ -93,7 +93,7 @@ void test_int_comparison_equal(TestStats& stats) {
     check(stats, !(one == neg_one), "1 != -1");
 }
 
-void test_string_comparison_less(TestStats& stats) {
+void test_indexed_value_string_comparison_less(TestStats& stats) {
     test_header("String comparison less");
     
     IndexedValue apple(Value("apple"));
@@ -108,7 +108,7 @@ void test_string_comparison_less(TestStats& stats) {
     check(stats, upper < apple, "APPLE < apple (ASCII order)");
 }
 
-void test_string_comparison_greater(TestStats& stats) {
+void test_indexed_value_string_comparison_greater(TestStats& stats) {
     test_header("String comparison greater");
     
     IndexedValue apple(Value("apple"));
@@ -121,7 +121,7 @@ void test_string_comparison_greater(TestStats& stats) {
     check(stats, !(apple > cherry), "apple not > cherry");
 }
 
-void test_string_comparison_equal(TestStats& stats) {
+void test_indexed_value_string_comparison_equal(TestStats& stats) {
     test_header("String comparison equal");
     
     IndexedValue hello(Value("hello"));
@@ -135,7 +135,7 @@ void test_string_comparison_equal(TestStats& stats) {
     check(stats, empty1 == empty2, "empty == empty");
 }
 
-void test_cross_type_comparison(TestStats& stats) {
+void test_indexed_value_cross_type_comparison(TestStats& stats) {
     test_header("Cross-type comparison");
     
     IndexedValue iv_int(Value(42));
@@ -150,7 +150,7 @@ void test_cross_type_comparison(TestStats& stats) {
     check(stats, !(iv_null == iv_str), "null != string");
 }
 
-void test_null_comparison(TestStats& stats) {
+void test_indexed_value_null_comparison(TestStats& stats) {
     test_header("Null comparison");
     
     IndexedValue null1;
@@ -160,7 +160,7 @@ void test_null_comparison(TestStats& stats) {
     check(stats, !(null1 == null2), "null != null (both null)");
 }
 
-void test_transitivity(TestStats& stats) {
+void test_indexed_value_transitivity(TestStats& stats) {
     test_header("Transitivity of comparison");
     
     IndexedValue a(Value(1));
@@ -178,7 +178,7 @@ void test_transitivity(TestStats& stats) {
     }
 }
 
-void test_get_value_returns_reference(TestStats& stats) {
+void test_indexed_value_get_value_returns_reference(TestStats& stats) {
     test_header("getValue returns correct reference");
     
     Value v(42);
@@ -198,7 +198,7 @@ void test_get_value_returns_reference(TestStats& stats) {
     check(stats, ref_str.asString() == "test", "String reference value");
 }
 
-void test_negative_numbers_comparison(TestStats& stats) {
+void test_indexed_value_negative_numbers_comparison(TestStats& stats) {
     test_header("Negative numbers comparison");
     
     IndexedValue neg100(Value(-100));
@@ -218,7 +218,7 @@ void test_negative_numbers_comparison(TestStats& stats) {
     check(stats, neg50 == IndexedValue(Value(-50)), "-50 == -50");
 }
 
-void test_large_comparisons(TestStats& stats) {
+void test_indexed_value_large_comparisons(TestStats& stats) {
     test_header("Large value comparisons");
     
     IndexedValue large1(Value(1000000));
@@ -235,20 +235,20 @@ int main() {
     TestStats stats;
     std::cout << "Running IndexedValue tests..." << std::endl;
     
-    test_default_constructor(stats);
-    test_value_constructor(stats);
-    test_int_comparison_less(stats);
-    test_int_comparison_greater(stats);
-    test_int_comparison_equal(stats);
-    test_string_comparison_less(stats);
-    test_string_comparison_greater(stats);
-    test_string_comparison_equal(stats);
-    test_cross_type_comparison(stats);
-    test_null_comparison(stats);
-    test_transitivity(stats);
-    test_get_value_returns_reference(stats);
-    test_negative_numbers_comparison(stats);
-    test_large_comparisons(stats);
+    test_indexed_value_default_constructor(stats);
+    test_indexed_value_value_constructor(stats);
+    test_indexed_value_int_comparison_less(stats);
+    test_indexed_value_int_comparison_greater(stats);
+    test_indexed_value_int_comparison_equal(stats);
+    test_indexed_value_string_comparison_less(stats);
+    test_indexed_value_string_comparison_greater(stats);
+    test_indexed_value_string_comparison_equal(stats);
+    test_indexed_value_cross_type_comparison(stats);
+    test_indexed_value_null_comparison(stats);
+    test_indexed_value_transitivity(stats);
+    test_indexed_value_get_value_returns_reference(stats);
+    test_indexed_value_negative_numbers_comparison(stats);
+    test_indexed_value_large_comparisons(stats);
     
     print_test_results(stats);
     if (stats.tests_failed > 0) {

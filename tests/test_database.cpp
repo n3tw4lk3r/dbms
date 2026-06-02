@@ -3,10 +3,10 @@
 #include <vector>
 #include <filesystem>
 
-#include "test_utils.hpp"
 #include "catalog/database.hpp"
 #include "catalog/table.hpp"
 #include "common/types.hpp"
+#include "utils.hpp"
 
 using namespace dbms;
 namespace fs = std::filesystem;
@@ -44,7 +44,7 @@ void test_database_get_name(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_create_table(TestStats& stats) {
+void test_database_create_table(TestStats& stats) {
     test_header("Create table");
     
     fs::path test_path = "test_data/test_db_create_table";
@@ -85,7 +85,7 @@ void test_create_table(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_create_duplicate_table(TestStats& stats) {
+void test_database_create_duplicate_table(TestStats& stats) {
     test_header("Create duplicate table");
     
     fs::path test_path = "test_data/test_db_dup_table";
@@ -107,7 +107,7 @@ void test_create_duplicate_table(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_create_multiple_tables(TestStats& stats) {
+void test_database_create_multiple_tables(TestStats& stats) {
     test_header("Create multiple tables");
     
     fs::path test_path = "test_data/test_db_multi_tables";
@@ -132,7 +132,7 @@ void test_create_multiple_tables(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_get_table_nonexistent(TestStats& stats) {
+void test_database_get_table_nonexistent(TestStats& stats) {
     test_header("Get nonexistent table");
     
     fs::path test_path = "test_data/test_db_nonexist";
@@ -150,7 +150,7 @@ void test_get_table_nonexistent(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_drop_table(TestStats& stats) {
+void test_database_drop_table(TestStats& stats) {
     test_header("Drop table");
     
     fs::path test_path = "test_data/test_db_drop";
@@ -172,7 +172,7 @@ void test_drop_table(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_drop_nonexistent_table(TestStats& stats) {
+void test_database_drop_nonexistent_table(TestStats& stats) {
     test_header("Drop nonexistent table");
     
     fs::path test_path = "test_data/test_db_drop_nonexist";
@@ -186,7 +186,7 @@ void test_drop_nonexistent_table(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_create_and_drop_repeatedly(TestStats& stats) {
+void test_database_create_and_drop_repeatedly(TestStats& stats) {
     test_header("Create and drop repeatedly");
     
     fs::path test_path = "test_data/test_db_repeated";
@@ -213,7 +213,7 @@ void test_create_and_drop_repeatedly(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_table_with_complex_schema(TestStats& stats) {
+void test_database_table_with_complex_schema(TestStats& stats) {
     test_header("Table with complex schema");
     
     fs::path test_path = "test_data/test_db_complex";
@@ -256,14 +256,14 @@ int main() {
     
     test_database_creation(stats);
     test_database_get_name(stats);
-    test_create_table(stats);
-    test_create_duplicate_table(stats);
-    test_create_multiple_tables(stats);
-    test_get_table_nonexistent(stats);
-    test_drop_table(stats);
-    test_drop_nonexistent_table(stats);
-    test_create_and_drop_repeatedly(stats);
-    test_table_with_complex_schema(stats);
+    test_database_create_table(stats);
+    test_database_create_duplicate_table(stats);
+    test_database_create_multiple_tables(stats);
+    test_database_get_table_nonexistent(stats);
+    test_database_drop_table(stats);
+    test_database_drop_nonexistent_table(stats);
+    test_database_create_and_drop_repeatedly(stats);
+    test_database_table_with_complex_schema(stats);
     
     print_test_results(stats);
     if (stats.tests_failed > 0) {

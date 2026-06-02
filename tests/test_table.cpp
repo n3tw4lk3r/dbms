@@ -3,10 +3,10 @@
 #include <vector>
 #include <filesystem>
 
-#include "test_utils.hpp"
 #include "catalog/table.hpp"
 #include "common/types.hpp"
 #include "common/value.hpp"
+#include "utils.hpp"
 
 using namespace dbms;
 namespace fs = std::filesystem;
@@ -50,7 +50,7 @@ void test_table_get_name(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_insert_row(TestStats& stats) {
+void test_table_insert_row(TestStats& stats) {
     test_header("Insert row");
     
     fs::path test_path = "test_table_data/test_insert";
@@ -71,12 +71,16 @@ void test_insert_row(TestStats& stats) {
     check(stats, rows.size() == 1, "One row in table");
     check(stats, !rows[0]->deleted, "Row is not deleted");
     check(stats, rows[0]->values[0].asInt() == 1, "First value correct");
-    check(stats, rows[0]->values[1].asString() == "john", "Second value correct");
+    check(
+        stats,
+        rows[0]->values[1].asString() == "john",
+        "Second value correct"
+    );
     
     fs::remove_all(test_path);
 }
 
-void test_insert_multiple_rows(TestStats& stats) {
+void test_table_insert_multiple_rows(TestStats& stats) {
     test_header("Insert multiple rows");
     
     fs::path test_path = "test_table_data/test_insert_multi";
@@ -102,7 +106,7 @@ void test_insert_multiple_rows(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_insert_null_values(TestStats& stats) {
+void test_table_insert_null_values(TestStats& stats) {
     test_header("Insert NULL values");
     
     fs::path test_path = "test_table_data/test_insert_null";
@@ -125,7 +129,7 @@ void test_insert_null_values(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_insert_wrong_column_count(TestStats& stats) {
+void test_table_insert_wrong_column_count(TestStats& stats) {
     test_header("Insert wrong column count");
     
     fs::path test_path = "test_table_data/test_insert_wrong_count";
@@ -158,7 +162,7 @@ void test_insert_wrong_column_count(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_insert_wrong_type(TestStats& stats) {
+void test_table_insert_wrong_type(TestStats& stats) {
     test_header("Insert wrong type");
     
     fs::path test_path = "test_table_data/test_insert_wrong_type";
@@ -191,7 +195,7 @@ void test_insert_wrong_type(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_insert_not_null_violation(TestStats& stats) {
+void test_table_insert_not_null_violation(TestStats& stats) {
     test_header("Insert NOT_NULL violation");
     
     fs::path test_path = "test_table_data/test_insert_not_null";
@@ -216,7 +220,7 @@ void test_insert_not_null_violation(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_unique_constraint(TestStats& stats) {
+void test_table_unique_constraint(TestStats& stats) {
     test_header("Unique constraint on indexed column");
     
     fs::path test_path = "test_table_data/test_unique";
@@ -243,7 +247,7 @@ void test_unique_constraint(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_find_row_by_id(TestStats& stats) {
+void test_table_find_row_by_id(TestStats& stats) {
     test_header("Find row by ID");
     
     fs::path test_path = "test_table_data/test_find_by_id";
@@ -277,7 +281,7 @@ void test_find_row_by_id(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_find_by_indexed_value(TestStats& stats) {
+void test_table_find_by_indexed_value(TestStats& stats) {
     test_header("Find by indexed value");
     
     fs::path test_path = "test_table_data/test_find_indexed";
@@ -311,7 +315,7 @@ void test_find_by_indexed_value(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_contains_indexed_value(TestStats& stats) {
+void test_table_contains_indexed_value(TestStats& stats) {
     test_header("Contains indexed value");
     
     fs::path test_path = "test_table_data/test_contains_indexed";
@@ -344,7 +348,7 @@ void test_contains_indexed_value(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_has_indexed_column(TestStats& stats) {
+void test_table_has_indexed_column(TestStats& stats) {
     test_header("Has indexed column");
     
     fs::path test_path = "test_table_data/test_has_indexed";
@@ -371,7 +375,7 @@ void test_has_indexed_column(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_update_row(TestStats& stats) {
+void test_table_update_row(TestStats& stats) {
     test_header("Update row");
     
     fs::path test_path = "test_table_data/test_update";
@@ -404,7 +408,7 @@ void test_update_row(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_update_row_with_indexed_column(TestStats& stats) {
+void test_table_update_row_with_indexed_column(TestStats& stats) {
     test_header("Update row with indexed column change");
     
     fs::path test_path = "test_table_data/test_update_indexed";
@@ -449,7 +453,7 @@ void test_update_row_with_indexed_column(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_update_unique_constraint_violation(TestStats& stats) {
+void test_table_update_unique_constraint_violation(TestStats& stats) {
     test_header("Update unique constraint violation");
     
     fs::path test_path = "test_table_data/test_update_unique";
@@ -491,7 +495,7 @@ void test_update_unique_constraint_violation(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_delete_row(TestStats& stats) {
+void test_table_delete_row(TestStats& stats) {
     test_header("Delete row");
     
     fs::path test_path = "test_table_data/test_delete";
@@ -544,7 +548,7 @@ void test_delete_row(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_delete_nonexistent_row(TestStats& stats) {
+void test_table_delete_nonexistent_row(TestStats& stats) {
     test_header("Delete nonexistent row");
     
     fs::path test_path = "test_table_data/test_delete_nonexist";
@@ -560,7 +564,7 @@ void test_delete_nonexistent_row(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_get_schema(TestStats& stats) {
+void test_table_get_schema(TestStats& stats) {
     test_header("Get schema");
     
     fs::path test_path = "test_table_data/test_schema";
@@ -589,7 +593,7 @@ void test_get_schema(TestStats& stats) {
     fs::remove_all(test_path);
 }
 
-void test_get_rows_mutable(TestStats& stats) {
+void test_table_get_rows_mutable(TestStats& stats) {
     test_header("Get rows mutable");
     
     fs::path test_path = "test_table_data/test_rows_mutable";
@@ -614,24 +618,24 @@ int main() {
     
     test_table_creation(stats);
     test_table_get_name(stats);
-    test_insert_row(stats);
-    test_insert_multiple_rows(stats);
-    test_insert_null_values(stats);
-    test_insert_wrong_column_count(stats);
-    test_insert_wrong_type(stats);
-    test_insert_not_null_violation(stats);
-    test_unique_constraint(stats);
-    test_find_row_by_id(stats);
-    test_find_by_indexed_value(stats);
-    test_contains_indexed_value(stats);
-    test_has_indexed_column(stats);
-    test_update_row(stats);
-    test_update_row_with_indexed_column(stats);
-    test_update_unique_constraint_violation(stats);
-    test_delete_row(stats);
-    test_delete_nonexistent_row(stats);
-    test_get_schema(stats);
-    test_get_rows_mutable(stats);
+    test_table_insert_row(stats);
+    test_table_insert_multiple_rows(stats);
+    test_table_insert_null_values(stats);
+    test_table_insert_wrong_column_count(stats);
+    test_table_insert_wrong_type(stats);
+    test_table_insert_not_null_violation(stats);
+    test_table_unique_constraint(stats);
+    test_table_find_row_by_id(stats);
+    test_table_find_by_indexed_value(stats);
+    test_table_contains_indexed_value(stats);
+    test_table_has_indexed_column(stats);
+    test_table_update_row(stats);
+    test_table_update_row_with_indexed_column(stats);
+    test_table_update_unique_constraint_violation(stats);
+    test_table_delete_row(stats);
+    test_table_delete_nonexistent_row(stats);
+    test_table_get_schema(stats);
+    test_table_get_rows_mutable(stats);
     
     print_test_results(stats);
     if (stats.tests_failed > 0) {

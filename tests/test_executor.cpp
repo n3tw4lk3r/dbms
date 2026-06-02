@@ -3,11 +3,11 @@
 #include <vector>
 #include <sstream>
 
-#include "test_utils.hpp"
 #include "catalog/system.hpp"
 #include "execution/executor.hpp"
 #include "sqlparser/parser.hpp"
 #include "sqlparser/command.hpp"
+#include "utils.hpp"
 
 using namespace dbms;
 
@@ -48,7 +48,7 @@ struct TestExecutorContext {
     }
 };
 
-void test_execute_create_database(TestStats& stats) {
+void test_executor_execute_create_database(TestStats& stats) {
     test_header("Execute CREATE DATABASE");
     
     TestExecutorContext ctx;
@@ -66,7 +66,7 @@ void test_execute_create_database(TestStats& stats) {
     );
 }
 
-void test_execute_drop_database(TestStats& stats) {
+void test_executor_execute_drop_database(TestStats& stats) {
     test_header("Execute DROP DATABASE");
     
     TestExecutorContext ctx;
@@ -88,7 +88,7 @@ void test_execute_drop_database(TestStats& stats) {
     );
 }
 
-void test_execute_drop_nonexistent_database(TestStats& stats) {
+void test_executor_execute_drop_nonexistent_database(TestStats& stats) {
     test_header("Execute DROP DATABASE nonexistent");
     
     TestExecutorContext ctx;
@@ -102,7 +102,7 @@ void test_execute_drop_nonexistent_database(TestStats& stats) {
     check(stats, caught, "Dropping nonexistent database throws error");
 }
 
-void test_execute_use_database(TestStats& stats) {
+void test_executor_execute_use_database(TestStats& stats) {
     test_header("Execute USE DATABASE");
     
     TestExecutorContext ctx;
@@ -129,7 +129,7 @@ void test_execute_use_database(TestStats& stats) {
     );
 }
 
-void test_execute_create_table(TestStats& stats) {
+void test_executor_execute_create_table(TestStats& stats) {
     test_header("Execute CREATE TABLE");
     
     TestExecutorContext ctx;
@@ -155,7 +155,7 @@ void test_execute_create_table(TestStats& stats) {
     );
 }
 
-void test_execute_create_table_no_database(TestStats& stats) {
+void test_executor_execute_create_table_no_database(TestStats& stats) {
     test_header("Execute CREATE TABLE without database");
     
     TestExecutorContext ctx;
@@ -173,7 +173,7 @@ void test_execute_create_table_no_database(TestStats& stats) {
     );
 }
 
-void test_execute_drop_table(TestStats& stats) {
+void test_executor_execute_drop_table(TestStats& stats) {
     test_header("Execute DROP TABLE");
     
     TestExecutorContext ctx;
@@ -195,7 +195,7 @@ void test_execute_drop_table(TestStats& stats) {
     );
 }
 
-void test_execute_insert(TestStats& stats) {
+void test_executor_execute_insert(TestStats& stats) {
     test_header("Execute INSERT");
     
     TestExecutorContext ctx;
@@ -221,7 +221,7 @@ void test_execute_insert(TestStats& stats) {
     );
 }
 
-void test_execute_insert_multiple_rows(TestStats& stats) {
+void test_executor_execute_insert_multiple_rows(TestStats& stats) {
     test_header("Execute INSERT multiple rows");
     
     TestExecutorContext ctx;
@@ -246,7 +246,7 @@ void test_execute_insert_multiple_rows(TestStats& stats) {
     );
 }
 
-void test_execute_insert_no_table(TestStats& stats) {
+void test_executor_execute_insert_no_table(TestStats& stats) {
     test_header("Execute INSERT no table");
     
     TestExecutorContext ctx;
@@ -262,7 +262,7 @@ void test_execute_insert_no_table(TestStats& stats) {
     check(stats, caught, "Insert into nonexistent table throws error");
 }
 
-void test_execute_select(TestStats& stats) {
+void test_executor_execute_select(TestStats& stats) {
     test_header("Execute SELECT");
     
     TestExecutorContext ctx;
@@ -312,7 +312,7 @@ void test_execute_select(TestStats& stats) {
     check(stats, out.find("]") != std::string::npos, "Output is JSON array");
 }
 
-void test_execute_select_all(TestStats& stats) {
+void test_executor_execute_select_all(TestStats& stats) {
     test_header("Execute SELECT *");
     
     TestExecutorContext ctx;
@@ -333,7 +333,7 @@ void test_execute_select_all(TestStats& stats) {
     );
 }
 
-void test_execute_select_with_where(TestStats& stats) {
+void test_executor_execute_select_with_where(TestStats& stats) {
     test_header("Execute SELECT with WHERE");
     
     TestExecutorContext ctx;
@@ -359,7 +359,7 @@ void test_execute_select_with_where(TestStats& stats) {
     );
 }
 
-void test_execute_select_with_alias(TestStats& stats) {
+void test_executor_execute_select_with_alias(TestStats& stats) {
     test_header("Execute SELECT with alias");
     
     TestExecutorContext ctx;
@@ -389,7 +389,7 @@ void test_execute_select_with_alias(TestStats& stats) {
     );
 }
 
-void test_execute_select_no_table(TestStats& stats) {
+void test_executor_execute_select_no_table(TestStats& stats) {
     test_header("Execute SELECT no table");
     
     TestExecutorContext ctx;
@@ -405,7 +405,7 @@ void test_execute_select_no_table(TestStats& stats) {
     check(stats, caught, "Select from nonexistent table throws error");
 }
 
-void test_execute_update(TestStats& stats) {
+void test_executor_execute_update(TestStats& stats) {
     test_header("Execute UPDATE");
     
     TestExecutorContext ctx;
@@ -438,7 +438,7 @@ void test_execute_update(TestStats& stats) {
     );
 }
 
-void test_execute_update_multiple_rows(TestStats& stats) {
+void test_executor_execute_update_multiple_rows(TestStats& stats) {
     test_header("Execute UPDATE multiple rows");
     
     TestExecutorContext ctx;
@@ -478,7 +478,7 @@ void test_execute_update_multiple_rows(TestStats& stats) {
     );
 }
 
-void test_execute_delete(TestStats& stats) {
+void test_executor_execute_delete(TestStats& stats) {
     test_header("Execute DELETE");
     
     TestExecutorContext ctx;
@@ -507,7 +507,7 @@ void test_execute_delete(TestStats& stats) {
     );
 }
 
-void test_execute_delete_all(TestStats& stats) {
+void test_executor_execute_delete_all(TestStats& stats) {
     test_header("Execute DELETE all");
     
     TestExecutorContext ctx;
@@ -534,7 +534,7 @@ void test_execute_delete_all(TestStats& stats) {
     );
 }
 
-void test_execute_select_with_indexed_lookup(TestStats& stats) {
+void test_executor_execute_select_with_indexed_lookup(TestStats& stats) {
     test_header("Execute SELECT with indexed lookup");
     
     TestExecutorContext ctx;
@@ -556,7 +556,7 @@ void test_execute_select_with_indexed_lookup(TestStats& stats) {
     );
 }
 
-void test_execute_between_condition(TestStats& stats) {
+void test_executor_execute_between_condition(TestStats& stats) {
     test_header("Execute SELECT with BETWEEN");
     
     TestExecutorContext ctx;
@@ -582,7 +582,7 @@ void test_execute_between_condition(TestStats& stats) {
     check(stats, out.find("\"id\": 1") == std::string::npos, "Age 20 excluded");
 }
 
-void test_execute_select_deleted_rows_excluded(TestStats& stats) {
+void test_executor_execute_select_deleted_rows_excluded(TestStats& stats) {
     test_header("Execute SELECT excludes deleted rows");
     
     TestExecutorContext ctx;
@@ -609,7 +609,7 @@ void test_execute_select_deleted_rows_excluded(TestStats& stats) {
     );
 }
 
-void test_execute_update_deleted_rows_excluded(TestStats& stats) {
+void test_executor_execute_update_deleted_rows_excluded(TestStats& stats) {
     test_header("Execute UPDATE excludes deleted rows");
     
     TestExecutorContext ctx;
@@ -637,7 +637,7 @@ void test_execute_update_deleted_rows_excluded(TestStats& stats) {
     );
 }
 
-void test_execute_unknown_command(TestStats& stats) {
+void test_executor_execute_unknown_command(TestStats& stats) {
     test_header("Execute unknown command");
     
     ScopedDataDirectory guard;
@@ -659,30 +659,30 @@ int main() {
     TestStats stats;
     std::cout << "Running Executor tests..." << std::endl;
     
-    test_execute_create_database(stats);
-    test_execute_drop_database(stats);
-    test_execute_drop_nonexistent_database(stats);
-    test_execute_use_database(stats);
-    test_execute_create_table(stats);
-    test_execute_create_table_no_database(stats);
-    test_execute_drop_table(stats);
-    test_execute_insert(stats);
-    test_execute_insert_multiple_rows(stats);
-    test_execute_insert_no_table(stats);
-    test_execute_select(stats);
-    test_execute_select_all(stats);
-    test_execute_select_with_where(stats);
-    test_execute_select_with_alias(stats);
-    test_execute_select_no_table(stats);
-    test_execute_update(stats);
-    test_execute_update_multiple_rows(stats);
-    test_execute_delete(stats);
-    test_execute_delete_all(stats);
-    test_execute_select_with_indexed_lookup(stats);
-    test_execute_between_condition(stats);
-    test_execute_select_deleted_rows_excluded(stats);
-    test_execute_update_deleted_rows_excluded(stats);
-    test_execute_unknown_command(stats);
+    test_executor_execute_create_database(stats);
+    test_executor_execute_drop_database(stats);
+    test_executor_execute_drop_nonexistent_database(stats);
+    test_executor_execute_use_database(stats);
+    test_executor_execute_create_table(stats);
+    test_executor_execute_create_table_no_database(stats);
+    test_executor_execute_drop_table(stats);
+    test_executor_execute_insert(stats);
+    test_executor_execute_insert_multiple_rows(stats);
+    test_executor_execute_insert_no_table(stats);
+    test_executor_execute_select(stats);
+    test_executor_execute_select_all(stats);
+    test_executor_execute_select_with_where(stats);
+    test_executor_execute_select_with_alias(stats);
+    test_executor_execute_select_no_table(stats);
+    test_executor_execute_update(stats);
+    test_executor_execute_update_multiple_rows(stats);
+    test_executor_execute_delete(stats);
+    test_executor_execute_delete_all(stats);
+    test_executor_execute_select_with_indexed_lookup(stats);
+    test_executor_execute_between_condition(stats);
+    test_executor_execute_select_deleted_rows_excluded(stats);
+    test_executor_execute_update_deleted_rows_excluded(stats);
+    test_executor_execute_unknown_command(stats);
     
     print_test_results(stats);
     if (stats.tests_failed > 0) {

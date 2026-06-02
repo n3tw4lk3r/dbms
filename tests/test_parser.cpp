@@ -2,13 +2,13 @@
 #include <string>
 #include <vector>
 
-#include "test_utils.hpp"
 #include "sqlparser/parser.hpp"
 #include "sqlparser/command.hpp"
+#include "utils.hpp"
 
 using namespace dbms;
 
-void test_parse_empty(TestStats& stats) {
+void test_parser_parse_empty(TestStats& stats) {
     test_header("Parse empty query");
     
     Parser parser;
@@ -20,7 +20,7 @@ void test_parse_empty(TestStats& stats) {
     );
 }
 
-void test_parse_create_database(TestStats& stats) {
+void test_parser_parse_create_database(TestStats& stats) {
     test_header("Parse CREATE DATABASE");
     
     Parser parser;
@@ -34,7 +34,7 @@ void test_parse_create_database(TestStats& stats) {
     check(stats, cmd.database_name == "mydb", "Database name is mydb");
 }
 
-void test_parse_drop_database(TestStats& stats) {
+void test_parser_parse_drop_database(TestStats& stats) {
     test_header("Parse DROP DATABASE");
     
     Parser parser;
@@ -48,7 +48,7 @@ void test_parse_drop_database(TestStats& stats) {
     check(stats, cmd.database_name == "mydb", "Database name is mydb");
 }
 
-void test_parse_use_database(TestStats& stats) {
+void test_parser_parse_use_database(TestStats& stats) {
     test_header("Parse USE DATABASE");
     
     Parser parser;
@@ -62,7 +62,7 @@ void test_parse_use_database(TestStats& stats) {
     check(stats, cmd.database_name == "mydb", "Database name is mydb");
 }
 
-void test_parse_create_table(TestStats& stats) {
+void test_parser_parse_create_table(TestStats& stats) {
     test_header("Parse CREATE TABLE");
     
     Parser parser;
@@ -100,7 +100,7 @@ void test_parse_create_table(TestStats& stats) {
     check(stats, !cmd.columns[1].indexed, "Second column is not indexed");
 }
 
-void test_parse_create_table_without_db(TestStats& stats) {
+void test_parser_parse_create_table_without_db(TestStats& stats) {
     test_header("Parse CREATE TABLE without database");
     
     Parser parser;
@@ -116,7 +116,7 @@ void test_parse_create_table_without_db(TestStats& stats) {
     check(stats, cmd.columns.size() == 1, "One column");
 }
 
-void test_parse_drop_table(TestStats& stats) {
+void test_parser_parse_drop_table(TestStats& stats) {
     test_header("Parse DROP TABLE");
     
     Parser parser;
@@ -131,7 +131,7 @@ void test_parse_drop_table(TestStats& stats) {
     check(stats, cmd.table_name == "users", "Table name is users");
 }
 
-void test_parse_insert(TestStats& stats) {
+void test_parser_parse_insert(TestStats& stats) {
     test_header("Parse INSERT");
     
     Parser parser;
@@ -160,7 +160,7 @@ void test_parse_insert(TestStats& stats) {
     check(stats, cmd.values[0][1].asString() == "john", "Second value is john");
 }
 
-void test_parse_insert_multiple_rows(TestStats& stats) {
+void test_parser_parse_insert_multiple_rows(TestStats& stats) {
     test_header("Parse INSERT multiple rows");
     
     Parser parser;
@@ -178,7 +178,7 @@ void test_parse_insert_multiple_rows(TestStats& stats) {
     check(stats, cmd.values[2][1].asInt() == 6, "Third row second value");
 }
 
-void test_parse_insert_null(TestStats& stats) {
+void test_parser_parse_insert_null(TestStats& stats) {
     test_header("Parse INSERT with NULL");
     
     Parser parser;
@@ -189,7 +189,7 @@ void test_parse_insert_null(TestStats& stats) {
     check(stats, cmd.values[0][0].isNull(), "Value is null");
 }
 
-void test_parse_select_all(TestStats& stats) {
+void test_parser_parse_select_all(TestStats& stats) {
     test_header("Parse SELECT *");
     
     Parser parser;
@@ -202,7 +202,7 @@ void test_parse_select_all(TestStats& stats) {
     check(stats, cmd.select_columns[0].name == "*", "Select column is *");
 }
 
-void test_parse_select_columns(TestStats& stats) {
+void test_parser_parse_select_columns(TestStats& stats) {
     test_header("Parse SELECT specific columns");
     
     Parser parser;
@@ -214,7 +214,7 @@ void test_parse_select_columns(TestStats& stats) {
     check(stats, cmd.select_columns[1].name == "name", "Second column is name");
 }
 
-void test_parse_select_with_alias(TestStats& stats) {
+void test_parser_parse_select_with_alias(TestStats& stats) {
     test_header("Parse SELECT with alias");
     
     Parser parser;
@@ -233,7 +233,7 @@ void test_parse_select_with_alias(TestStats& stats) {
     );
 }
 
-void test_parse_select_with_where(TestStats& stats) {
+void test_parser_parse_select_with_where(TestStats& stats) {
     test_header("Parse SELECT with WHERE");
     
     Parser parser;
@@ -247,7 +247,7 @@ void test_parse_select_with_where(TestStats& stats) {
     check(stats, cmd.conditions[0].rhs.value.asInt() == 1, "RHS value is 1");
 }
 
-void test_parse_select_with_multiple_conditions(TestStats& stats) {
+void test_parser_parse_select_with_multiple_conditions(TestStats& stats) {
     test_header("Parse SELECT with multiple conditions");
     
     Parser parser;
@@ -268,7 +268,7 @@ void test_parse_select_with_multiple_conditions(TestStats& stats) {
     );
 }
 
-void test_parse_select_with_between(TestStats& stats) {
+void test_parser_parse_select_with_between(TestStats& stats) {
     test_header("Parse SELECT with BETWEEN");
     
     Parser parser;
@@ -288,7 +288,7 @@ void test_parse_select_with_between(TestStats& stats) {
     );
 }
 
-void test_parse_update(TestStats& stats) {
+void test_parser_parse_update(TestStats& stats) {
     test_header("Parse UPDATE");
     
     Parser parser;
@@ -310,7 +310,7 @@ void test_parse_update(TestStats& stats) {
     check(stats, cmd.conditions.size() == 1, "One condition");
 }
 
-void test_parse_update_multiple_assignments(TestStats& stats) {
+void test_parser_parse_update_multiple_assignments(TestStats& stats) {
     test_header("Parse UPDATE multiple assignments");
     
     Parser parser;
@@ -333,7 +333,7 @@ void test_parse_update_multiple_assignments(TestStats& stats) {
     );
 }
 
-void test_parse_delete(TestStats& stats) {
+void test_parser_parse_delete(TestStats& stats) {
     test_header("Parse DELETE");
     
     Parser parser;
@@ -344,7 +344,7 @@ void test_parse_delete(TestStats& stats) {
     check(stats, cmd.conditions.size() == 1, "One condition");
 }
 
-void test_parse_delete_no_where(TestStats& stats) {
+void test_parser_parse_delete_no_where(TestStats& stats) {
     test_header("Parse DELETE without WHERE");
     
     Parser parser;
@@ -355,7 +355,7 @@ void test_parse_delete_no_where(TestStats& stats) {
     check(stats, cmd.conditions.empty(), "No conditions");
 }
 
-void test_parse_value_int(TestStats& stats) {
+void test_parser_parse_value_int(TestStats& stats) {
     test_header("Parse value int");
     
     Parser parser;
@@ -365,7 +365,7 @@ void test_parse_value_int(TestStats& stats) {
     check(stats, cmd.values[0][0].asInt() == 42, "Value is 42");
 }
 
-void test_parse_value_negative_int(TestStats& stats) {
+void test_parser_parse_value_negative_int(TestStats& stats) {
     test_header("Parse value negative int");
     
     Parser parser;
@@ -375,7 +375,7 @@ void test_parse_value_negative_int(TestStats& stats) {
     check(stats, cmd.values[0][0].asInt() == -10, "Value is -10");
 }
 
-void test_parse_value_string(TestStats& stats) {
+void test_parser_parse_value_string(TestStats& stats) {
     test_header("Parse value string");
     
     Parser parser;
@@ -393,7 +393,7 @@ void test_parse_value_string(TestStats& stats) {
     );
 }
 
-void test_parse_value_null(TestStats& stats) {
+void test_parser_parse_value_null(TestStats& stats) {
     test_header("Parse value NULL");
     
     Parser parser;
@@ -402,7 +402,7 @@ void test_parse_value_null(TestStats& stats) {
     check(stats, cmd.values[0][0].isNull(), "Value is null");
 }
 
-void test_parse_condition_operators(TestStats& stats) {
+void test_parser_parse_condition_operators(TestStats& stats) {
     test_header("Parse condition operators");
     
     Parser parser;
@@ -426,7 +426,7 @@ void test_parse_condition_operators(TestStats& stats) {
     check(stats, cmd6.conditions[0].operator_type == ">=", "Operator >=");
 }
 
-void test_parse_keywords_case_insensitive(TestStats& stats) {
+void test_parser_parse_keywords_case_insensitive(TestStats& stats) {
     test_header("Parse case insensitive keywords");
     
     Parser parser;
@@ -452,7 +452,7 @@ void test_parse_keywords_case_insensitive(TestStats& stats) {
     check(stats, cmd4.type == CommandType::kSelect, "Uppercase SELECT works");
 }
 
-void test_parse_invalid_identifier(TestStats& stats) {
+void test_parser_parse_invalid_identifier(TestStats& stats) {
     test_header("Parse invalid identifier");
     
     Parser parser;
@@ -465,7 +465,7 @@ void test_parse_invalid_identifier(TestStats& stats) {
     check(stats, caught, "Invalid identifier starting with digit throws error");
 }
 
-void test_parse_table_with_db_prefix(TestStats& stats) {
+void test_parser_parse_table_with_db_prefix(TestStats& stats) {
     test_header("Parse table with database prefix");
     
     Parser parser;
@@ -475,7 +475,7 @@ void test_parse_table_with_db_prefix(TestStats& stats) {
     check(stats, cmd.table_name == "users", "Table name extracted");
 }
 
-void test_parse_insert_without_columns(TestStats& stats) {
+void test_parser_parse_insert_without_columns(TestStats& stats) {
     test_header("Parse INSERT without column names");
     
     Parser parser;
@@ -491,35 +491,35 @@ int main() {
     TestStats stats;
     std::cout << "Running Parser tests..." << std::endl;
     
-    test_parse_empty(stats);
-    test_parse_create_database(stats);
-    test_parse_drop_database(stats);
-    test_parse_use_database(stats);
-    test_parse_create_table(stats);
-    test_parse_create_table_without_db(stats);
-    test_parse_drop_table(stats);
-    test_parse_insert(stats);
-    test_parse_insert_multiple_rows(stats);
-    test_parse_insert_null(stats);
-    test_parse_select_all(stats);
-    test_parse_select_columns(stats);
-    test_parse_select_with_alias(stats);
-    test_parse_select_with_where(stats);
-    test_parse_select_with_multiple_conditions(stats);
-    test_parse_select_with_between(stats);
-    test_parse_update(stats);
-    test_parse_update_multiple_assignments(stats);
-    test_parse_delete(stats);
-    test_parse_delete_no_where(stats);
-    test_parse_value_int(stats);
-    test_parse_value_negative_int(stats);
-    test_parse_value_string(stats);
-    test_parse_value_null(stats);
-    test_parse_condition_operators(stats);
-    test_parse_keywords_case_insensitive(stats);
-    test_parse_invalid_identifier(stats);
-    test_parse_table_with_db_prefix(stats);
-    test_parse_insert_without_columns(stats);
+    test_parser_parse_empty(stats);
+    test_parser_parse_create_database(stats);
+    test_parser_parse_drop_database(stats);
+    test_parser_parse_use_database(stats);
+    test_parser_parse_create_table(stats);
+    test_parser_parse_create_table_without_db(stats);
+    test_parser_parse_drop_table(stats);
+    test_parser_parse_insert(stats);
+    test_parser_parse_insert_multiple_rows(stats);
+    test_parser_parse_insert_null(stats);
+    test_parser_parse_select_all(stats);
+    test_parser_parse_select_columns(stats);
+    test_parser_parse_select_with_alias(stats);
+    test_parser_parse_select_with_where(stats);
+    test_parser_parse_select_with_multiple_conditions(stats);
+    test_parser_parse_select_with_between(stats);
+    test_parser_parse_update(stats);
+    test_parser_parse_update_multiple_assignments(stats);
+    test_parser_parse_delete(stats);
+    test_parser_parse_delete_no_where(stats);
+    test_parser_parse_value_int(stats);
+    test_parser_parse_value_negative_int(stats);
+    test_parser_parse_value_string(stats);
+    test_parser_parse_value_null(stats);
+    test_parser_parse_condition_operators(stats);
+    test_parser_parse_keywords_case_insensitive(stats);
+    test_parser_parse_invalid_identifier(stats);
+    test_parser_parse_table_with_db_prefix(stats);
+    test_parser_parse_insert_without_columns(stats);
     
     print_test_results(stats);
     if (stats.tests_failed > 0) {

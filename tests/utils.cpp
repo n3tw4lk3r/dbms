@@ -1,23 +1,18 @@
-#include "test_utils.hpp"
+#include "utils.hpp"
 
 #include <filesystem>
 #include <iostream>
 
 ScopedDataDirectory::ScopedDataDirectory() {
     const std::filesystem::path data_path = "data";
-    const std::filesystem::path backup_path =
-        "data_backup_test";
+    const std::filesystem::path backup_path = "data_backup_test";
 
     if (std::filesystem::exists(backup_path)) {
         std::filesystem::remove_all(backup_path);
     }
 
     if (std::filesystem::exists(data_path)) {
-        std::filesystem::rename(
-            data_path,
-            backup_path
-        );
-
+        std::filesystem::rename(data_path, backup_path);
         backup_created = true;
     }
 }
@@ -34,10 +29,7 @@ ScopedDataDirectory::~ScopedDataDirectory() {
         backup_created &&
         std::filesystem::exists(backup_path)
     ) {
-        std::filesystem::rename(
-            backup_path,
-            data_path
-        );
+        std::filesystem::rename(backup_path, data_path);
     }
 }
 
@@ -62,4 +54,3 @@ void print_test_results(const TestStats& stats) {
     std::cout << "Passed: " << stats.tests_passed << std::endl;
     std::cout << "Failed: " << stats.tests_failed << std::endl;
 }
-
