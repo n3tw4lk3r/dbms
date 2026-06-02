@@ -69,6 +69,7 @@ target_compile_options(test_utils
 target_compile_features(test_utils PUBLIC cxx_std_20)
 
 file(GLOB TEST_SOURCES
+    tests/test_batch_mode.cpp
     tests/test_btree.cpp
     tests/test_btree_node.cpp
     tests/test_database.cpp
