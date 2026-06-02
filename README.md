@@ -66,6 +66,8 @@ Project structure:
   - Custom exceptions
 - `execution/`
   - Query execution engine
+- `io/`
+  - Input-output system
 - `sqlparser/`
   - Query tokenizer and parser
 - `storage/`

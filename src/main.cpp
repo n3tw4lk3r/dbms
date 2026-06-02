@@ -1,53 +1,13 @@
-#include <exception>
 #include <fstream>
 #include <iostream>
-#include <string>
 
-#include "catalog/system.hpp"
-#include "execution/executor.hpp"
-#include "sqlparser/parser.hpp"
-#include "sqlparser/query_buffer.hpp"
-
-namespace dbms {
-
-void executeQueries(
-    std::istream& input,
-    Parser& parser,
-    Executor& executor
-) {
-    QueryBuffer buffer;
-    std::string line;
-
-    while (std::getline(input, line)) {
-        if (line == "exit") {
-            break;
-        }
-
-        auto queries = buffer.append(line);
-        for (const auto& query : queries) {
-            try {
-                auto cmd = parser.parse(query);
-                executor.execute(cmd);
-
-            } catch (const std::exception& error) {
-                std::cerr << error.what() << std::endl;
-            }
-        }
-    }
-}
-
-} // namespace dbms
+#include "io/repl.hpp"
 
 int main(int argc, char** argv) {
     using namespace dbms;
 
-    System system;
-    Parser parser;
-    Executor executor(system);
-
     if (argc == 1) {
-        std::cout << "Enter 'exit' to exit." << std::endl;
-        executeQueries(std::cin, parser, executor);
+        run_interactive_mode();
         return EXIT_SUCCESS;
     }
 
@@ -59,7 +19,7 @@ int main(int argc, char** argv) {
             return EXIT_FAILURE;
         }
 
-        executeQueries(file, parser, executor);
+        run_batch_mode(file);
         return EXIT_SUCCESS;
     }
 
