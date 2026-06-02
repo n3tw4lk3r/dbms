@@ -79,7 +79,10 @@ void run_batch_mode(std::istream& input) {
     bool should_exit = false;
     while (!should_exit) {
         std::string line;
-        std::getline(input, line);
+        if (!std::getline(input, line)) {
+            should_exit = true;
+            break;
+        }
 
         if (!process_line(line, buffer, parser, executor)) {
             should_exit = true;
