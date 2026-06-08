@@ -43,25 +43,23 @@ void run_interactive_mode() {
     QueryBuffer buffer;
 
     bool should_exit = false;
-    bool expecting_command_end = false;
     while (!should_exit) {
-        if (!expecting_command_end) {
+        if (buffer.empty()) {
             std::cout << "> ";
+        } else {
+            std::cout << "... ";
         }
         
         std::string line;
-        std::getline(std::cin, line); 
+        if (!std::getline(std::cin, line)) {
+            should_exit = true;
+            break;
+        }
         
         if (line.empty()) {
             continue;
         }
 
-        if (line.substr(line.size() - 1) != ";") {
-            expecting_command_end = true;
-        } else {
-            expecting_command_end = false;
-        }
-        
         if (!process_line(line, buffer, parser, executor)) {
             should_exit = true;
             break;

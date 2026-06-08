@@ -9,13 +9,9 @@ std::vector<std::string> QueryBuffer::append(
     buffer += '\n';
 
     std::vector<std::string> queries;
+    std::size_t query_start = 0;
 
-    size_t start = 0;
-
-    bool in_string = false;
-    bool escaped = false;
-
-    for (size_t i = 0; i < buffer.size(); ++i) {
+    for (std::size_t i = 0; i < buffer.size(); ++i) {
         char ch = buffer[i];
 
         if (escaped) {
@@ -34,17 +30,24 @@ std::vector<std::string> QueryBuffer::append(
         }
 
         if (ch == ';' && !in_string) {
-            queries.push_back(
-                buffer.substr(start, i - start)
+            queries.emplace_back(
+                buffer.substr(query_start, i - query_start)
             );
 
-            start = i + 1;
+            query_start = i + 1;
         }
     }
 
-    buffer = buffer.substr(start);
-
+    buffer.erase(0, query_start);
+    if (buffer.find_first_not_of(" \t\r\n") == std::string::npos) {
+        buffer.clear();
+    }
     return queries;
 }
 
+bool QueryBuffer::empty() const {
+    return buffer.empty();
+}
+
 } // namespace dbms
+
