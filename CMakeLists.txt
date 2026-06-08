@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(DBMS LANGUAGES CXX)
+project(dbms LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
