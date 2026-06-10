@@ -164,7 +164,7 @@ void test_btree_node_null_keys(TestStats& stats) {
     node.entries.push_back(entry);
     
     check(stats, node.entries.size() == 1, "Null key entry added");
-    check(stats, node.entries[0].key.getValue().isNull(), "Key is null");
+    check(stats, node.entries[0].key.GetValue().IsNull(), "Key is null");
     check(stats, node.entries[0].row_id == 1, "Row ID preserved with null key");
 }
 

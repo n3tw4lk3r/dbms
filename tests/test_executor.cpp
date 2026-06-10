@@ -34,8 +34,8 @@ struct TestExecutorContext {
     }
     
     void execute(const std::string& query) {
-        Command cmd = parser.parse(query);
-        executor.execute(cmd);
+        Command cmd = parser.Parse(query);
+        executor.Execute(cmd);
     }
     
     std::string getOutput() {
@@ -54,9 +54,9 @@ void test_executor_execute_create_database(TestStats& stats) {
     TestExecutorContext ctx;
     ctx.execute("CREATE DATABASE testdb");
     
-    Database* db = ctx.system.getDatabase("testdb");
+    Database* db = ctx.system.GetDatabase("testdb");
     check(stats, db != nullptr, "Database created");
-    check(stats, db->getName() == "testdb", "Database name correct");
+    check(stats, db->GetName() == "testdb", "Database name correct");
     
     std::string out = ctx.getOutput();
     check(
@@ -76,7 +76,7 @@ void test_executor_execute_drop_database(TestStats& stats) {
     ctx.execute("DROP DATABASE testdb");
     check(
         stats,
-        ctx.system.getDatabase("testdb") == nullptr,
+        ctx.system.GetDatabase("testdb") == nullptr,
         "Database dropped"
     );
     
@@ -112,12 +112,12 @@ void test_executor_execute_use_database(TestStats& stats) {
     ctx.execute("USE testdb");
     check(
         stats,
-        ctx.system.getCurrentDatabase() != nullptr,
+        ctx.system.GetCurrentDatabase() != nullptr,
         "Current database set"
     );
     check(
         stats,
-        ctx.system.getCurrentDatabase()->getName() == "testdb", 
+        ctx.system.GetCurrentDatabase()->GetName() == "testdb", 
         "Current database name correct"
     );
     
@@ -141,11 +141,11 @@ void test_executor_execute_create_table(TestStats& stats) {
         "CREATE TABLE testdb.users (id INT INDEXED, name STRING NOT_NULL)"
     );
     
-    Database* db = ctx.system.getCurrentDatabase();
-    Table* table = db->getTable("users");
+    Database* db = ctx.system.GetCurrentDatabase();
+    Table* table = db->GetTable("users");
     check(stats, table != nullptr, "Table created");
-    check(stats, table->getName() == "users", "Table name correct");
-    check(stats, table->getSchema().size() == 2, "Schema has 2 columns");
+    check(stats, table->GetName() == "users", "Table name correct");
+    check(stats, table->GetSchema().size() == 2, "Schema has 2 columns");
     
     std::string out = ctx.getOutput();
     check(
@@ -184,8 +184,8 @@ void test_executor_execute_drop_table(TestStats& stats) {
     
     ctx.execute("DROP TABLE testdb.users");
     
-    Database* db = ctx.system.getCurrentDatabase();
-    check(stats, db->getTable("users") == nullptr, "Table dropped");
+    Database* db = ctx.system.GetCurrentDatabase();
+    check(stats, db->GetTable("users") == nullptr, "Table dropped");
     
     std::string out = ctx.getOutput();
     check(
@@ -206,12 +206,12 @@ void test_executor_execute_insert(TestStats& stats) {
     
     ctx.execute("INSERT INTO users (id, name) VALUE (1, \"alice\")");
     
-    Database* db = ctx.system.getCurrentDatabase();
-    Table* table = db->getTable("users");
-    const auto& rows = table->getRows();
+    Database* db = ctx.system.GetCurrentDatabase();
+    Table* table = db->GetTable("users");
+    const auto& rows = table->GetRows();
     check(stats, rows.size() == 1, "One row inserted");
-    check(stats, rows[0]->values[0].asInt() == 1, "ID value correct");
-    check(stats, rows[0]->values[1].asString() == "alice", "Name value correct");
+    check(stats, rows[0]->values[0].AsInt() == 1, "ID value correct");
+    check(stats, rows[0]->values[1].AsString() == "alice", "Name value correct");
     
     std::string out = ctx.getOutput();
     check(
@@ -234,9 +234,9 @@ void test_executor_execute_insert_multiple_rows(TestStats& stats) {
     data += "(2, \"bob\"), (3, \"charlie\")";
     ctx.execute(data);
     
-    Database* db = ctx.system.getCurrentDatabase();
-    Table* table = db->getTable("users");
-    check(stats, table->getRows().size() == 3, "Three rows inserted");
+    Database* db = ctx.system.GetCurrentDatabase();
+    Table* table = db->GetTable("users");
+    check(stats, table->GetRows().size() == 3, "Three rows inserted");
     
     std::string out = ctx.getOutput();
     check(
@@ -420,15 +420,15 @@ void test_executor_execute_update(TestStats& stats) {
     
     ctx.execute("UPDATE users SET name = \"alice_new\", age = 26 WHERE id == 1");
     
-    Database* db = ctx.system.getCurrentDatabase();
-    Table* table = db->getTable("users");
-    Row* row = table->findRowById(1);
-    check(stats, row->values[1].asString() == "alice_new", "Name updated");
-    check(stats, row->values[2].asInt() == 26, "Age updated");
+    Database* db = ctx.system.GetCurrentDatabase();
+    Table* table = db->GetTable("users");
+    Row* row = table->FindRowById(1);
+    check(stats, row->values[1].AsString() == "alice_new", "Name updated");
+    check(stats, row->values[2].AsInt() == 26, "Age updated");
     
-    row = table->findRowById(2);
-    check(stats, row->values[1].asString() == "bob", "Other row unchanged");
-    check(stats, row->values[2].asInt() == 30, "Other row age unchanged");
+    row = table->FindRowById(2);
+    check(stats, row->values[1].AsString() == "bob", "Other row unchanged");
+    check(stats, row->values[2].AsInt() == 30, "Other row age unchanged");
     
     std::string out = ctx.getOutput();
     check(
@@ -452,21 +452,21 @@ void test_executor_execute_update_multiple_rows(TestStats& stats) {
     
     ctx.execute("UPDATE users SET name = \"updated\" WHERE id >= 2");
     
-    Database* db = ctx.system.getCurrentDatabase();
-    Table* table = db->getTable("users");
+    Database* db = ctx.system.GetCurrentDatabase();
+    Table* table = db->GetTable("users");
     check(
         stats,
-        table->findRowById(1)->values[1].asString() == "alice",
+        table->FindRowById(1)->values[1].AsString() == "alice",
         "Row 1 unchanged"
     );
     check(
         stats,
-        table->findRowById(2)->values[1].asString() == "updated",
+        table->FindRowById(2)->values[1].AsString() == "updated",
         "Row 2 updated"
     );
     check(
         stats,
-        table->findRowById(3)->values[1].asString() == "updated",
+        table->FindRowById(3)->values[1].AsString() == "updated",
         "Row 3 updated"
     );
     
@@ -492,12 +492,12 @@ void test_executor_execute_delete(TestStats& stats) {
     
     ctx.execute("DELETE FROM users WHERE id == 2");
     
-    Database* db = ctx.system.getCurrentDatabase();
-    Table* table = db->getTable("users");
+    Database* db = ctx.system.GetCurrentDatabase();
+    Table* table = db->GetTable("users");
     
-    check(stats, !table->findRowById(1)->deleted, "Row 1 not deleted");
-    check(stats, table->findRowById(2)->deleted, "Row 2 deleted");
-    check(stats, !table->findRowById(3)->deleted, "Row 3 not deleted");
+    check(stats, !table->FindRowById(1)->deleted, "Row 1 not deleted");
+    check(stats, table->FindRowById(2)->deleted, "Row 2 deleted");
+    check(stats, !table->FindRowById(3)->deleted, "Row 3 not deleted");
     
     std::string out = ctx.getOutput();
     check(
@@ -520,11 +520,11 @@ void test_executor_execute_delete_all(TestStats& stats) {
     
     ctx.execute("DELETE FROM users");
     
-    Database* db = ctx.system.getCurrentDatabase();
-    Table* table = db->getTable("users");
+    Database* db = ctx.system.GetCurrentDatabase();
+    Table* table = db->GetTable("users");
     
-    check(stats, table->findRowById(1)->deleted, "Row 1 deleted");
-    check(stats, table->findRowById(2)->deleted, "Row 2 deleted");
+    check(stats, table->FindRowById(1)->deleted, "Row 1 deleted");
+    check(stats, table->FindRowById(2)->deleted, "Row 2 deleted");
     
     std::string out = ctx.getOutput();
     check(
@@ -623,16 +623,16 @@ void test_executor_execute_update_deleted_rows_excluded(TestStats& stats) {
     
     ctx.execute("UPDATE users SET name = \"changed\"");
     
-    Database* db = ctx.system.getCurrentDatabase();
-    Table* table = db->getTable("users");
+    Database* db = ctx.system.GetCurrentDatabase();
+    Table* table = db->GetTable("users");
     check(
         stats,
-        table->findRowById(1)->values[1].asString() == "changed",
+        table->FindRowById(1)->values[1].AsString() == "changed",
         "Active row updated"
     );
     check(
         stats,
-        table->findRowById(2)->values[1].asString() == "bob",
+        table->FindRowById(2)->values[1].AsString() == "bob",
         "Deleted row unchanged"
     );
 }
@@ -648,7 +648,7 @@ void test_executor_execute_unknown_command(TestStats& stats) {
     try {
         Command cmd;
         cmd.type = CommandType::kUnknown;
-        executor.execute(cmd);
+        executor.Execute(cmd);
     } catch (...) {
         caught = true;
     }

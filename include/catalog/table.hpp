@@ -27,75 +27,69 @@ public:
         const std::filesystem::path& storage_path
     );
 
-    const std::string getName() const;
+    const std::string GetName() const;
 
-    RowId insertRow(const std::vector<Value>& values);
+    RowId InsertRow(const std::vector<Value>& values);
 
-    const std::vector<std::unique_ptr<Row>>& getRows() const;
-    std::vector<std::unique_ptr<Row>>& getRowsMutable();
+    const std::vector<std::unique_ptr<Row>>& GetRows() const;
+    std::vector<std::unique_ptr<Row>>& GetRowsMutable();
+    const std::vector<ColumnSchema>& GetSchema() const;
 
-    const std::vector<ColumnSchema>& getSchema() const;
+    bool HasIndexedColumn(const std::string& column_name) const;
 
-    bool hasIndexedColumn(const std::string& column_name) const;
-
-    bool containsIndexedValue(
+    bool ContainsIndexedValue(
         const std::string& column_name,
         const Value& value
     ) const;
 
-    Row* findByIndexedValue(
+    Row* FindByIndexedValue(
         const std::string& column_name,
         const Value& value
     );
+    Row* FindRowById(RowId row_id);
 
-    Row* findRowById(RowId row_id);
-
-    void updateRow(
+    void UpdateRow(
         Row& row,
         const std::vector<Assignment>& assignments
     );
 
-    void deleteRow(RowId row_id);
+    void DeleteRow(RowId row_id);
     
 
 private:
-    void save() const;
-    void load();
+    void Save() const;
+    void Load();
 
-    void compact();
-    void tryCompact();
+    void Compact();
+    void TryCompact();
 
-    void validateRow(const std::vector<Value>& values) const;
-
-    void validateColumnCount(
+    void ValidateRow(const std::vector<Value>& values) const;
+    void ValidateColumnCount(
         const std::vector<Value>& values
     ) const;
-
-    void validateColumnType(
+    void ValidateColumnType(
         const Value& value,
         const ColumnSchema& column
     ) const;
-
-    void validateNotNull(
+    void ValidateNotNull(
         const Value& value,
         const ColumnSchema& column
     ) const;
-
-    void validateUniqueConstraints(
+    void ValidateUniqueConstraints(
         const std::vector<Value>& values,
         RowId ignored_row_id = 0
     ) const;
 
-    int findColumnIndex(const std::string& column_name) const;
+    int FindColumnIndex(const std::string& column_name) const;
 
-    void insertIntoIndexes(const Row& row);
-    void eraseFromIndexes(const Row& row);
+    void InsertIntoIndexes(const Row& row);
+    void EraseFromIndexes(const Row& row);
     
-    void appendInsert(const Row& row);
-    void appendDelete(RowId row_id);
-    void appendUpdate(const Row& row);
+    void AppendInsert(const Row& row);
+    void AppendDelete(RowId row_id);
+    void AppendUpdate(const Row& row);
 
-    void saveSchema() const;
+    void SaveSchema() const;
 
 private:
     std::string name;

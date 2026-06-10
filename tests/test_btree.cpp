@@ -13,39 +13,39 @@ void test_btree_create_empty(TestStats& stats) {
     test_header("Create empty B-tree");
 
     BTree tree;
-    check(stats, tree.size() == 0, "New tree has size 0");
-    check(stats, tree.empty(), "New tree is empty");
-    check(stats, tree.verify(), "New tree passes verification");
+    check(stats, tree.Size() == 0, "New tree has size 0");
+    check(stats, tree.Empty(), "New tree is empty");
+    check(stats, tree.Verify(), "New tree passes verification");
 }
 
 void test_btree_create_with_degree(TestStats& stats) {
     test_header("Create B-tree with custom min degree");
 
     BTree tree(4);
-    check(stats, tree.size() == 0, "Tree with custom degree has size 0");
-    check(stats, tree.empty(), "Tree with custom degree is empty");
-    check(stats, tree.verify(), "Tree with custom degree passes verification");
+    check(stats, tree.Size() == 0, "Tree with custom degree has size 0");
+    check(stats, tree.Empty(), "Tree with custom degree is empty");
+    check(stats, tree.Verify(), "Tree with custom degree passes verification");
 }
 
 void test_btree_insert_single(TestStats& stats) {
     test_header("Insert single entry");
 
     BTree tree;
-    tree.insert(IndexedValue(Value(42)), 100);
+    tree.Insert(IndexedValue(Value(42)), 100);
 
-    check(stats, tree.size() == 1, "Tree size is 1 after insert");
-    check(stats, !tree.empty(), "Tree is not empty after insert");
+    check(stats, tree.Size() == 1, "Tree size is 1 after insert");
+    check(stats, !tree.Empty(), "Tree is not empty after insert");
     check(
         stats,
-        tree.contains(IndexedValue(Value(42))),
+        tree.Contains(IndexedValue(Value(42))),
         "Tree contains inserted key"
     );
     check(
         stats,
-        tree.find(IndexedValue(Value(42))) == 100,
+        tree.Find(IndexedValue(Value(42))) == 100,
         "Find returns correct row_id"
     );
-    check(stats, tree.verify(), "Tree passes verification after insert");
+    check(stats, tree.Verify(), "Tree passes verification after insert");
 }
 
 void test_btree_insert_multiple_ascending(TestStats& stats) {
@@ -53,24 +53,24 @@ void test_btree_insert_multiple_ascending(TestStats& stats) {
 
     BTree tree;
     for (int i = 1; i <= 20; ++i) {
-        tree.insert(IndexedValue(Value(i)), static_cast<RowId>(i * 10));
+        tree.Insert(IndexedValue(Value(i)), static_cast<RowId>(i * 10));
     }
 
-    check(stats, tree.size() == 20, "Tree size is 20");
+    check(stats, tree.Size() == 20, "Tree size is 20");
     for (int i = 1; i <= 20; ++i) {
-        check(stats, tree.contains(IndexedValue(Value(i))), "Tree contains key");
+        check(stats, tree.Contains(IndexedValue(Value(i))), "Tree contains key");
     }
     check(
         stats,
-        tree.find(IndexedValue(Value(5))) == 50,
+        tree.Find(IndexedValue(Value(5))) == 50,
         "Find returns correct row_id"
     );
     check(
         stats,
-        tree.find(IndexedValue(Value(20))) == 200,
+        tree.Find(IndexedValue(Value(20))) == 200,
         "Find returns correct row_id"
     );
-    check(stats, tree.verify(), "Tree passes verification");
+    check(stats, tree.Verify(), "Tree passes verification");
 }
 
 void test_btree_insert_multiple_descending(TestStats& stats) {
@@ -78,34 +78,34 @@ void test_btree_insert_multiple_descending(TestStats& stats) {
 
     BTree tree;
     for (int i = 20; i >= 1; --i) {
-        tree.insert(IndexedValue(Value(i)), static_cast<RowId>(i * 10));
+        tree.Insert(IndexedValue(Value(i)), static_cast<RowId>(i * 10));
     }
 
-    check(stats, tree.size() == 20, "Tree size is 20");
+    check(stats, tree.Size() == 20, "Tree size is 20");
     for (int i = 1; i <= 20; ++i) {
-        check(stats, tree.contains(IndexedValue(Value(i))), "Tree contains key");
+        check(stats, tree.Contains(IndexedValue(Value(i))), "Tree contains key");
     }
-    check(stats, tree.verify(), "Tree passes verification");
+    check(stats, tree.Verify(), "Tree passes verification");
 }
 
 void test_btree_insert_duplicate(TestStats& stats) {
     test_header("Insert duplicate key throws exception");
 
     BTree tree;
-    tree.insert(IndexedValue(Value(10)), 100);
+    tree.Insert(IndexedValue(Value(10)), 100);
 
     bool threw = false;
     try {
-        tree.insert(IndexedValue(Value(10)), 200);
+        tree.Insert(IndexedValue(Value(10)), 200);
     } catch (const DuplicateError&) {
         threw = true;
     }
 
     check(stats, threw, "DuplicateError thrown on duplicate insert");
-    check(stats, tree.size() == 1, "Tree size unchanged after duplicate attempt");
+    check(stats, tree.Size() == 1, "Tree size unchanged after duplicate attempt");
     check(
         stats,
-        tree.find(IndexedValue(Value(10))) == 100,
+        tree.Find(IndexedValue(Value(10))) == 100,
         "Original entry preserved"
     );
 }
@@ -114,16 +114,16 @@ void test_btree_find_non_existent(TestStats& stats) {
     test_header("Find non-existent key");
 
     BTree tree;
-    tree.insert(IndexedValue(Value(10)), 100);
+    tree.Insert(IndexedValue(Value(10)), 100);
 
     check(
         stats,
-        tree.find(IndexedValue(Value(99))) == 0,
+        tree.Find(IndexedValue(Value(99))) == 0,
         "Find returns 0 for non-existent key"
     );
     check(
         stats,
-        !tree.contains(IndexedValue(Value(99))),
+        !tree.Contains(IndexedValue(Value(99))),
         "Contains returns false for non-existent key"
     );
 }
@@ -132,22 +132,22 @@ void test_btree_insert_string_keys(TestStats& stats) {
     test_header("Insert string keys");
 
     BTree tree;
-    tree.insert(IndexedValue(Value("apple")), 1);
-    tree.insert(IndexedValue(Value("banana")), 2);
-    tree.insert(IndexedValue(Value("cherry")), 3);
-    tree.insert(IndexedValue(Value("date")), 4);
-    tree.insert(IndexedValue(Value("elderberry")), 5);
+    tree.Insert(IndexedValue(Value("apple")), 1);
+    tree.Insert(IndexedValue(Value("banana")), 2);
+    tree.Insert(IndexedValue(Value("cherry")), 3);
+    tree.Insert(IndexedValue(Value("date")), 4);
+    tree.Insert(IndexedValue(Value("elderberry")), 5);
 
-    check(stats, tree.size() == 5, "Tree size is 5 with string keys");
-    check(stats, tree.contains(IndexedValue(Value("apple"))), "Contains apple");
-    check(stats, tree.contains(IndexedValue(Value("banana"))), "Contains banana");
-    check(stats, tree.contains(IndexedValue(Value("cherry"))), "Contains cherry");
+    check(stats, tree.Size() == 5, "Tree size is 5 with string keys");
+    check(stats, tree.Contains(IndexedValue(Value("apple"))), "Contains apple");
+    check(stats, tree.Contains(IndexedValue(Value("banana"))), "Contains banana");
+    check(stats, tree.Contains(IndexedValue(Value("cherry"))), "Contains cherry");
     check(
         stats,
-        tree.find(IndexedValue(Value("date"))) == 4,
+        tree.Find(IndexedValue(Value("date"))) == 4,
         "Find returns correct row_id for date"
     );
-    check(stats, tree.verify(), "Tree passes verification with string keys");
+    check(stats, tree.Verify(), "Tree passes verification with string keys");
 }
 
 void test_btree_erase_leaf(TestStats& stats) {
@@ -155,45 +155,45 @@ void test_btree_erase_leaf(TestStats& stats) {
 
     BTree tree;
     for (int i = 1; i <= 10; ++i) {
-        tree.insert(IndexedValue(Value(i)), static_cast<RowId>(i * 10));
+        tree.Insert(IndexedValue(Value(i)), static_cast<RowId>(i * 10));
     }
 
     check(
         stats,
-        tree.erase(IndexedValue(Value(5))),
+        tree.Erase(IndexedValue(Value(5))),
         "Erase returns true for existing key"
     );
-    check(stats, tree.size() == 9, "Tree size decremented");
+    check(stats, tree.Size() == 9, "Tree size decremented");
     check(
         stats,
-        !tree.contains(IndexedValue(Value(5))),
+        !tree.Contains(IndexedValue(Value(5))),
         "Tree no longer contains erased key"
     );
     check(
         stats,
-        tree.contains(IndexedValue(Value(4))),
+        tree.Contains(IndexedValue(Value(4))),
         "Neighboring key still present"
     );
     check(
         stats,
-        tree.contains(IndexedValue(Value(6))),
+        tree.Contains(IndexedValue(Value(6))),
         "Neighboring key still present"
     );
-    check(stats, tree.verify(), "Tree passes verification after erase");
+    check(stats, tree.Verify(), "Tree passes verification after erase");
 }
 
 void test_btree_erase_non_existent(TestStats& stats) {
     test_header("Erase non-existent key");
 
     BTree tree;
-    tree.insert(IndexedValue(Value(10)), 100);
+    tree.Insert(IndexedValue(Value(10)), 100);
 
     check(
         stats,
-        !tree.erase(IndexedValue(Value(99))),
+        !tree.Erase(IndexedValue(Value(99))),
         "Erase returns false for non-existent key"
     );
-    check(stats, tree.size() == 1, "Tree size unchanged");
+    check(stats, tree.Size() == 1, "Tree size unchanged");
 }
 
 void test_btree_erase_all(TestStats& stats) {
@@ -201,16 +201,16 @@ void test_btree_erase_all(TestStats& stats) {
 
     BTree tree;
     for (int i = 1; i <= 5; ++i) {
-        tree.insert(IndexedValue(Value(i)), static_cast<RowId>(i * 10));
+        tree.Insert(IndexedValue(Value(i)), static_cast<RowId>(i * 10));
     }
 
     for (int i = 1; i <= 5; ++i) {
-        check(stats, tree.erase(IndexedValue(Value(i))), "Erase successful");
+        check(stats, tree.Erase(IndexedValue(Value(i))), "Erase successful");
     }
 
-    check(stats, tree.size() == 0, "Tree size is 0 after erasing all");
-    check(stats, tree.empty(), "Tree is empty after erasing all");
-    check(stats, tree.verify(), "Tree passes verification when empty");
+    check(stats, tree.Size() == 0, "Tree size is 0 after erasing all");
+    check(stats, tree.Empty(), "Tree is empty after erasing all");
+    check(stats, tree.Verify(), "Tree passes verification when empty");
 }
 
 void test_btree_large_insert(TestStats& stats) {
@@ -218,16 +218,16 @@ void test_btree_large_insert(TestStats& stats) {
 
     BTree tree(2);
     for (int i = 1; i <= 100; ++i) {
-        tree.insert(IndexedValue(Value(i)), static_cast<RowId>(i));
+        tree.Insert(IndexedValue(Value(i)), static_cast<RowId>(i));
     }
 
-    check(stats, tree.size() == 100, "Tree size is 100");
-    check(stats, tree.verify(), "Tree passes verification after many inserts");
+    check(stats, tree.Size() == 100, "Tree size is 100");
+    check(stats, tree.Verify(), "Tree passes verification after many inserts");
 
     for (int i = 1; i <= 100; ++i) {
         check(
             stats,
-            tree.contains(IndexedValue(Value(i))),
+            tree.Contains(IndexedValue(Value(i))),
             "Tree contains all keys"
         );
     }
@@ -238,20 +238,20 @@ void test_btree_large_erase(TestStats& stats) {
 
     BTree tree(2);
     for (int i = 1; i <= 50; ++i) {
-        tree.insert(IndexedValue(Value(i)), static_cast<RowId>(i));
+        tree.Insert(IndexedValue(Value(i)), static_cast<RowId>(i));
     }
 
     for (int i = 1; i <= 25; ++i) {
-        check(stats, tree.erase(IndexedValue(Value(i))), "Erase successful");
+        check(stats, tree.Erase(IndexedValue(Value(i))), "Erase successful");
     }
 
-    check(stats, tree.size() == 25, "Tree size is 25 after erasing half");
-    check(stats, tree.verify(), "Tree passes verification after many erases");
+    check(stats, tree.Size() == 25, "Tree size is 25 after erasing half");
+    check(stats, tree.Verify(), "Tree passes verification after many erases");
 
     for (int i = 26; i <= 50; ++i) {
         check(
             stats,
-            tree.contains(IndexedValue(Value(i))),
+            tree.Contains(IndexedValue(Value(i))),
             "Remaining keys present"
         );
     }
@@ -261,19 +261,19 @@ void test_btree_insert_erase_alternating(TestStats& stats) {
     test_header("Alternating insert and erase");
 
     BTree tree;
-    tree.insert(IndexedValue(Value(1)), 10);
-    tree.erase(IndexedValue(Value(1)));
-    check(stats, tree.empty(), "Tree empty after insert-erase cycle");
+    tree.Insert(IndexedValue(Value(1)), 10);
+    tree.Erase(IndexedValue(Value(1)));
+    check(stats, tree.Empty(), "Tree empty after insert-erase cycle");
 
-    tree.insert(IndexedValue(Value(2)), 20);
-    tree.insert(IndexedValue(Value(3)), 30);
-    tree.erase(IndexedValue(Value(2)));
-    check(stats, tree.size() == 1, "Tree size correct after partial erase");
-    check(stats, tree.contains(IndexedValue(Value(3))), "Remaining key present");
+    tree.Insert(IndexedValue(Value(2)), 20);
+    tree.Insert(IndexedValue(Value(3)), 30);
+    tree.Erase(IndexedValue(Value(2)));
+    check(stats, tree.Size() == 1, "Tree size correct after partial erase");
+    check(stats, tree.Contains(IndexedValue(Value(3))), "Remaining key present");
 
-    tree.insert(IndexedValue(Value(2)), 20);
-    check(stats, tree.size() == 2, "Tree size correct after re-insert");
-    check(stats, tree.verify(), "Tree passes verification");
+    tree.Insert(IndexedValue(Value(2)), 20);
+    check(stats, tree.Size() == 2, "Tree size correct after re-insert");
+    check(stats, tree.Verify(), "Tree passes verification");
 }
 
 void test_btree_empty_operations(TestStats& stats) {
@@ -282,17 +282,17 @@ void test_btree_empty_operations(TestStats& stats) {
     BTree tree;
     check(
         stats,
-        tree.find(IndexedValue(Value(1))) == 0,
+        tree.Find(IndexedValue(Value(1))) == 0,
         "Find returns 0 on empty tree"
     );
     check(
         stats,
-        !tree.contains(IndexedValue(Value(1))),
+        !tree.Contains(IndexedValue(Value(1))),
         "Contains returns false on empty tree"
     );
     check(
         stats,
-        !tree.erase(IndexedValue(Value(1))),
+        !tree.Erase(IndexedValue(Value(1))),
         "Erase returns false on empty tree"
     );
 }

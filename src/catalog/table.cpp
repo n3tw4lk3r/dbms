@@ -29,15 +29,15 @@ Table::Table(
 Table::Table(const std::filesystem::path& storage_path) :
     storage_path(storage_path)
 {
-    load();
+    Load();
 }
 
-const std::string Table::getName() const {
+const std::string Table::GetName() const {
     return name;
 }
 
-RowId Table::insertRow(const std::vector<Value>& values) {
-    validateRow(values);
+RowId Table::InsertRow(const std::vector<Value>& values) {
+    ValidateRow(values);
 
     auto row = std::make_unique<Row>();
 
@@ -51,32 +51,32 @@ RowId Table::insertRow(const std::vector<Value>& values) {
     rows.push_back(std::move(row));
     row_lookup[row_ptr->id] = row_ptr;
 
-    insertIntoIndexes(*row_ptr);
-    appendInsert(*row_ptr);
+    InsertIntoIndexes(*row_ptr);
+    AppendInsert(*row_ptr);
 
-    tryCompact();
+    TryCompact();
     return row_ptr->id;
 }
 
-const std::vector<std::unique_ptr<Row>>& Table::getRows() const {
+const std::vector<std::unique_ptr<Row>>& Table::GetRows() const {
     return rows;
 }
 
-std::vector<std::unique_ptr<Row>>& Table::getRowsMutable() {
+std::vector<std::unique_ptr<Row>>& Table::GetRowsMutable() {
     return rows;
 }
 
-const std::vector<ColumnSchema>& Table::getSchema() const {
+const std::vector<ColumnSchema>& Table::GetSchema() const {
     return schema;
 }
 
-bool Table::hasIndexedColumn(
+bool Table::HasIndexedColumn(
     const std::string& column_name
 ) const {
     return indexes.find(column_name) != indexes.end();
 }
 
-bool Table::containsIndexedValue(
+bool Table::ContainsIndexedValue(
     const std::string& column_name,
     const Value& value
 ) const {
@@ -86,12 +86,12 @@ bool Table::containsIndexedValue(
         return false;
     }
 
-    return it->second.contains(
+    return it->second.Contains(
         IndexedValue(value)
     );
 }
 
-Row* Table::findByIndexedValue(
+Row* Table::FindByIndexedValue(
     const std::string& column_name,
     const Value& value
 ) {
@@ -101,13 +101,13 @@ Row* Table::findByIndexedValue(
         return nullptr;
     }
 
-    RowId row_id = it->second.find(IndexedValue(value));
+    RowId row_id = it->second.Find(IndexedValue(value));
 
     if (row_id == 0) {
         return nullptr;
     }
 
-    Row* row = findRowById(row_id);
+    Row* row = FindRowById(row_id);
 
     if (!row || row->deleted) {
         return nullptr;
@@ -116,7 +116,7 @@ Row* Table::findByIndexedValue(
     return row;
 }
 
-Row* Table::findRowById(RowId row_id) {
+Row* Table::FindRowById(RowId row_id) {
     auto it = row_lookup.find(row_id);
 
     if (it == row_lookup.end()) {
@@ -126,14 +126,14 @@ Row* Table::findRowById(RowId row_id) {
     return it->second;
 }
 
-void Table::updateRow(
+void Table::UpdateRow(
     Row& row,
     const std::vector<Assignment>& assignments
 ) {
     std::vector<Value> updated_values = row.values;
 
     for (const auto& assignment : assignments) {
-        int column_index = findColumnIndex(assignment.column);
+        int column_index = FindColumnIndex(assignment.column);
 
         if (column_index < 0) {
             throw SchemaError(
@@ -145,57 +145,57 @@ void Table::updateRow(
         updated_values[column_index] = assignment.value;
     }
 
-    validateColumnCount(updated_values);
+    ValidateColumnCount(updated_values);
 
     for (size_t i = 0; i < schema.size(); ++i) {
-        validateColumnType(
+        ValidateColumnType(
             updated_values[i],
             schema[i]
         );
 
-        validateNotNull(
+        ValidateNotNull(
             updated_values[i],
             schema[i]
         );
     }
 
-    validateUniqueConstraints(
+    ValidateUniqueConstraints(
         updated_values,
         row.id
     );
 
     std::vector<Value> old_values = row.values;
 
-    eraseFromIndexes(row);
+    EraseFromIndexes(row);
 
     try {
         row.values = updated_values;
-        insertIntoIndexes(row);
-        appendUpdate(row);
-        tryCompact();
+        InsertIntoIndexes(row);
+        AppendUpdate(row);
+        TryCompact();
     } catch (...) {
         row.values = old_values;
-        insertIntoIndexes(row);
+        InsertIntoIndexes(row);
         throw;
     }
 }
 
-void Table::deleteRow(RowId row_id) {
+void Table::DeleteRow(RowId row_id) {
     for (auto it = rows.begin(); it != rows.end(); ++it) {
         if ((*it)->id != row_id) {
             continue;
         }
 
         (*it)->deleted = true;
-        eraseFromIndexes(*(*it));
-        appendDelete(row_id);
+        EraseFromIndexes(*(*it));
+        AppendDelete(row_id);
 
-        tryCompact();
+        TryCompact();
         return;
     }
 }
 
-void Table::save() const {
+void Table::Save() const {
     std::filesystem::path temp_path = storage_path;
     temp_path += ".tmp";
 
@@ -224,7 +224,7 @@ void Table::save() const {
         file << row.id << "\n";
         file << row.values.size() << "\n";
         for (const auto& value : row.values) {
-            file << Serializer::serializeValue(value) << "\n";
+            file << Serializer::SerializeValue(value) << "\n";
         }
     }
 
@@ -243,7 +243,7 @@ void Table::save() const {
     std::filesystem::rename(temp_path, storage_path);
 }
 
-void Table::load() {
+void Table::Load() {
     std::ifstream meta(metadata_path);
 
     if (!meta.is_open()) {
@@ -340,11 +340,11 @@ void Table::load() {
                 throw DataCorruptionError("Invalid row id in delete record");
             }
 
-            Row* row = findRowById(row_id);
+            Row* row = FindRowById(row_id);
 
             if (row) {
                 row->deleted = true;
-                eraseFromIndexes(*row);
+                EraseFromIndexes(*row);
             }
 
             continue;
@@ -363,7 +363,7 @@ void Table::load() {
         Row parsed;
 
         try {
-            parsed = Serializer::deserializeRow(serialized_row);
+            parsed = Serializer::DeserializeRow(serialized_row);
         } catch (const std::exception& error) {
             throw DataCorruptionError(
                 std::string("Failed to deserialize row: ") +
@@ -388,28 +388,28 @@ void Table::load() {
             rows.push_back(std::move(row));
             row_lookup[row_ptr->id] = row_ptr;
 
-            insertIntoIndexes(*row_ptr);
+            InsertIntoIndexes(*row_ptr);
 
             continue;
         }
 
-        Row* row = findRowById(parsed.id);
+        Row* row = FindRowById(parsed.id);
 
         if (!row) {
             throw NotFoundError("Update for unknown row");
         }
 
-        eraseFromIndexes(*row);
+        EraseFromIndexes(*row);
 
         row->values = parsed.values;
 
-        insertIntoIndexes(*row);
+        InsertIntoIndexes(*row);
     }
 
     next_row_id = max_row_id + 1;
 }
 
-void Table::compact() {
+void Table::Compact() {
     std::filesystem::path temp_path = data_path;
     temp_path += ".tmp";
 
@@ -426,7 +426,7 @@ void Table::compact() {
             continue;
         }
 
-        file << "I|" << Serializer::serializeRow(row) << "\n";
+        file << "I|" << Serializer::SerializeRow(row) << "\n";
     }
 
     file.close();
@@ -435,29 +435,29 @@ void Table::compact() {
     std::filesystem::rename(temp_path, data_path);
 }
 
-void Table::tryCompact() {
+void Table::TryCompact() {
     ++operation_count;
 
     static constexpr size_t kCompactThreshold = 100;
 
     if (operation_count >= kCompactThreshold) {
-        compact();
+        Compact();
         operation_count = 0;
     }
 }
 
-void Table::validateRow(const std::vector<Value>& values) const {
-    validateColumnCount(values);
+void Table::ValidateRow(const std::vector<Value>& values) const {
+    ValidateColumnCount(values);
 
     for (size_t i = 0; i < schema.size(); ++i) {
-        validateColumnType(values[i], schema[i]);
-        validateNotNull(values[i], schema[i]);
+        ValidateColumnType(values[i], schema[i]);
+        ValidateNotNull(values[i], schema[i]);
     }
 
-    validateUniqueConstraints(values);
+    ValidateUniqueConstraints(values);
 }
 
-void Table::validateColumnCount(
+void Table::ValidateColumnCount(
     const std::vector<Value>& values
 ) const {
     if (values.size() != schema.size()) {
@@ -465,17 +465,17 @@ void Table::validateColumnCount(
     }
 }
 
-void Table::validateColumnType(
+void Table::ValidateColumnType(
     const Value& value,
     const ColumnSchema& column
 ) const {
-    if (value.isNull()) {
+    if (value.IsNull()) {
         return;
     }
 
     if (
         column.type == ColumnType::kInt &&
-        value.getType() != Value::Type::kInt
+        value.GetType() != Value::Type::kInt
     ) {
         throw TypeError(
             "Expected INT value for column '" +
@@ -486,7 +486,7 @@ void Table::validateColumnType(
 
     if (
         column.type == ColumnType::kString &&
-        value.getType() != Value::Type::kString
+        value.GetType() != Value::Type::kString
     ) {
         throw TypeError(
             "Expected STRING value for column '" +
@@ -496,11 +496,11 @@ void Table::validateColumnType(
     }
 }
 
-void Table::validateNotNull(
+void Table::ValidateNotNull(
     const Value& value,
     const ColumnSchema& column
 ) const {
-    if ((column.not_null || column.indexed) && value.isNull()) {
+    if ((column.not_null || column.indexed) && value.IsNull()) {
         throw ConstraintViolationError(
             "Column '" +
             column.name +
@@ -509,7 +509,7 @@ void Table::validateNotNull(
     }
 }
 
-void Table::validateUniqueConstraints(
+void Table::ValidateUniqueConstraints(
     const std::vector<Value>& values,
     RowId ignored_row_id
 ) const {
@@ -525,7 +525,7 @@ void Table::validateUniqueConstraints(
             continue;
         }
 
-        RowId existing_row_id = index_it->second.find(
+        RowId existing_row_id = index_it->second.Find(
             IndexedValue(values[i])
         );
 
@@ -545,7 +545,7 @@ void Table::validateUniqueConstraints(
     }
 }
 
-int Table::findColumnIndex(
+int Table::FindColumnIndex(
     const std::string& column_name
 ) const {
     for (size_t i = 0; i < schema.size(); ++i) {
@@ -557,7 +557,7 @@ int Table::findColumnIndex(
     return -1;
 }
 
-void Table::insertIntoIndexes(const Row& row) {
+void Table::InsertIntoIndexes(const Row& row) {
     for (size_t i = 0; i < schema.size(); ++i) {
         const auto& column = schema[i];
 
@@ -565,14 +565,14 @@ void Table::insertIntoIndexes(const Row& row) {
             continue;
         }
 
-        indexes[column.name].insert(
+        indexes[column.name].Insert(
             IndexedValue(row.values[i]),
             row.id
         );
     }
 }
 
-void Table::eraseFromIndexes(const Row& row) {
+void Table::EraseFromIndexes(const Row& row) {
     for (size_t i = 0; i < schema.size(); ++i) {
         const auto& column = schema[i];
 
@@ -580,22 +580,22 @@ void Table::eraseFromIndexes(const Row& row) {
             continue;
         }
 
-        indexes[column.name].erase(IndexedValue(row.values[i]));
+        indexes[column.name].Erase(IndexedValue(row.values[i]));
     }
 }
 
 
-void Table::appendInsert(const Row& row) {
+void Table::AppendInsert(const Row& row) {
     std::ofstream file(data_path, std::ios::app);
 
     if (!file.is_open()) {
         throw StorageError("Failed to open table file");
     }
 
-    file << "I|" << Serializer::serializeRow(row) << "\n";
+    file << "I|" << Serializer::SerializeRow(row) << "\n";
 }
 
-void Table::appendDelete(RowId row_id) {
+void Table::AppendDelete(RowId row_id) {
     std::ofstream file(data_path, std::ios::app);
 
     if (!file.is_open()) {
@@ -605,18 +605,18 @@ void Table::appendDelete(RowId row_id) {
     file << "D|" << row_id << "\n";
 }
 
-void Table::appendUpdate(const Row& row) {
+void Table::AppendUpdate(const Row& row) {
     std::ofstream file(data_path, std::ios::app);
 
     if (!file.is_open()) {
         throw StorageError("Failed to open table file");
     }
 
-    file << "U|" << Serializer::serializeRow(row) << "\n";
+    file << "U|" << Serializer::SerializeRow(row) << "\n";
 }
 
 
-void Table::saveSchema() const {
+void Table::SaveSchema() const {
     std::filesystem::path temp_path = metadata_path;
     temp_path += ".tmp";
 

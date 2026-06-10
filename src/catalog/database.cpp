@@ -34,11 +34,11 @@ Database::Database(
     }
 }
 
-const std::string Database::getName() const {
+const std::string Database::GetName() const {
     return name;
 }
 
-void Database::createTable(
+void Database::CreateTable(
     const std::string& table_name,
     const std::vector<ColumnSchema>& schema
 ) {
@@ -67,10 +67,10 @@ void Database::createTable(
         table_path
     );
 
-    tables[table_name]->saveSchema();
+    tables[table_name]->SaveSchema();
 }
 
-Table* Database::getTable(const std::string& table_name) {
+Table* Database::GetTable(const std::string& table_name) {
     auto it = tables.find(table_name);
 
     if (it == tables.end()) {
@@ -79,7 +79,7 @@ Table* Database::getTable(const std::string& table_name) {
 
     return it->second.get();
 }
-void Database::dropTable(const std::string& table_name) {
+void Database::DropTable(const std::string& table_name) {
     auto it = tables.find(table_name);
 
     if (it == tables.end()) {

@@ -8,13 +8,13 @@ namespace dbms {
 
 class ValueComparator {
 public:
-    static bool compare(
+    static bool Compare(
         const Value& lhs,
         const Value& rhs,
         const std::string& operator_str
     );
 
-    static bool between(
+    static bool Between(
         const Value& value,
         const Value& lhs,
         const Value& rhs

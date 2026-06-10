@@ -4,17 +4,17 @@
 
 namespace dbms {
 
-std::string Serializer::serializeValue(const Value& value) {
-    switch (value.getType()) {
+std::string Serializer::SerializeValue(const Value& value) {
+    switch (value.GetType()) {
 
     case Value::Type::kNull:
         return "NULL";
 
     case Value::Type::kInt:
-        return "INT:" + std::to_string(value.asInt());
+        return "INT:" + std::to_string(value.AsInt());
 
     case Value::Type::kString: {
-        const std::string& str = value.asString();
+        const std::string& str = value.AsString();
         return "STRING:" + std::to_string(str.size()) + ":" + str;
     }
 
@@ -23,7 +23,7 @@ std::string Serializer::serializeValue(const Value& value) {
     throw TypeError("Unknown value type");
 }
 
-Value Serializer::deserializeValue(const std::string& token) {
+Value Serializer::DeserializeValue(const std::string& token) {
     if (token == "NULL") {
         return Value();
     }
@@ -51,24 +51,24 @@ Value Serializer::deserializeValue(const std::string& token) {
     return Value(value);
 }
 
-std::string Serializer::serializeRowBody(const Row& row) {
+std::string Serializer::SerializeRowBody(const Row& row) {
     std::string out;
 
     for (size_t i = 0; i < row.values.size(); ++i) {
         if (i > 0) {
             out += "|";
         }
-        out += serializeValue(row.values[i]);
+        out += SerializeValue(row.values[i]);
     }
 
     return out;
 }
 
-std::string Serializer::serializeRow(const Row& row) {
-    return std::to_string(row.id) + "|" + serializeRowBody(row);
+std::string Serializer::SerializeRow(const Row& row) {
+    return std::to_string(row.id) + "|" + SerializeRowBody(row);
 }
 
-Row Serializer::deserializeRow(const std::string& line) {
+Row Serializer::DeserializeRow(const std::string& line) {
     Row row;
 
     size_t pos = line.find('|');
@@ -94,7 +94,7 @@ Row Serializer::deserializeRow(const std::string& line) {
                 current = next + 1;
             }
 
-            row.values.push_back(deserializeValue(token));
+            row.values.push_back(DeserializeValue(token));
             continue;
         }
 

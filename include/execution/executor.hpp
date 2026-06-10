@@ -14,96 +14,89 @@ class Executor {
 public:
     explicit Executor(System& system);
 
-    void execute(const Command& cmd);
+    void Execute(const Command& cmd);
 
 private:
-    void executeCreateDatabase(const Command& cmd);
-    void executeDropDatabase(const Command& cmd);
-    void executeUseDatabase(const Command& cmd);
+    void ExecuteCreateDatabase(const Command& cmd);
+    void ExecuteDropDatabase(const Command& cmd);
+    void ExecuteUseDatabase(const Command& cmd);
+    void ExecuteCreateTable(const Command& cmd);
+    void ExecuteDropTable(const Command& cmd);
+    void ExecuteInsert(const Command& cmd);
+    void ExecuteSelect(const Command& cmd);
+    void ExecuteUpdate(const Command& cmd);
+    void ExecuteDelete(const Command& cmd);
 
-    void executeCreateTable(const Command& cmd);
-    void executeDropTable(const Command& cmd);
+    Database* ResolveDatabase(const Command& cmd);
 
-    void executeInsert(const Command& cmd);
-    void executeSelect(const Command& cmd);
-    void executeUpdate(const Command& cmd);
-    void executeDelete(const Command& cmd);
-
-    Database* resolveDatabase(const Command& cmd);
-
-    void printJsonRows(
+    void PrintJsonRows(
         const std::vector<const Row*>& rows,
         const Command& cmd,
         const std::vector<ColumnSchema>& schema
     );
-
-    void printJsonRow(
+    void PrintJsonRow(
         const Row& row,
         const Command& cmd,
         const std::vector<ColumnSchema>& schema
     );
+    void PrintJsonValue(const Value& value);
 
-    void printJsonValue(const Value& value);
-
-    bool matchConditions(
+    bool MatchConditions(
         const std::vector<Condition>& conditions,
         const Row& row,
         const std::vector<ColumnSchema>& schema
     );
 
-    int findColumnIndex(
+    int FindColumnIndex(
         const std::vector<ColumnSchema>& schema,
         const std::string& name
     );
 
-    void validateColumnExists(
+    void ValidateColumnExists(
         const std::vector<ColumnSchema>& schema,
         const std::string& column_name
     );
-
-    void validateSelectColumns(
+    void ValidateSelectColumns(
         const Command& cmd,
         const std::vector<ColumnSchema>& schema
     );
-
-    void validateAssignments(
+    void ValidateAssignments(
         const Command& cmd,
         const std::vector<ColumnSchema>& schema
     );
-
-    void validateConditions(
+    void ValidateConditions(
         const std::vector<Condition>& conditions,
         const std::vector<ColumnSchema>& schema
     );
     
-    Value resolveOperand(
+    Value ResolveOperand(
         const Operand& operand,
         const Row& row,
         const std::vector<ColumnSchema>& schema
     );
 
-    bool likeValues(
+    bool LikeValues(
         const Value& value,
         const Value& pattern
     );
 
-    bool canUseIndexLookup(
+    bool CanUseIndexLookup(
         const Table& table,
         const std::vector<Condition>& conditions
     );
 
-    Row* tryFindIndexedRow(
+    Row* TryFindIndexedRow(
         Table& table,
         const std::vector<Condition>& conditions
     );
 
-    void printSelectedRow(
+    void PrintSelectedRow(
         const Row& row,
         const Command& cmd,
         const std::vector<ColumnSchema>& schema
     );
     
-    std::vector<Value> buildInsertRow(
+    std::vector<Value> BuildInsertRow(
         const Table& table,
         const Command& cmd,
         const std::vector<Value>& values

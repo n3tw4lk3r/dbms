@@ -15,7 +15,7 @@ void test_system_initialization(TestStats& stats) {
     
     check(
         stats,
-        system.getCurrentDatabase() == nullptr, 
+        system.GetCurrentDatabase() == nullptr, 
         "No current database on init"
     );
 }
@@ -26,11 +26,11 @@ void test_system_create_database(TestStats& stats) {
     ScopedDataDirectory guard;
     System system;
     
-    system.createDatabase("mydb");
+    system.CreateDatabase("mydb");
     
-    Database* db = system.getDatabase("mydb");
+    Database* db = system.GetDatabase("mydb");
     check(stats, db != nullptr, "Database can be retrieved after creation");
-    check(stats, db->getName() == "mydb", "Database name is correct");
+    check(stats, db->GetName() == "mydb", "Database name is correct");
     check(
         stats,
         std::filesystem::exists("data/mydb"),
@@ -44,26 +44,26 @@ void test_system_create_multiple_databases(TestStats& stats) {
     ScopedDataDirectory guard;
     System system;
 
-    system.createDatabase("db1");
-    system.createDatabase("db2");
-    system.createDatabase("db3");
+    system.CreateDatabase("db1");
+    system.CreateDatabase("db2");
+    system.CreateDatabase("db3");
     
-    check(stats, system.getDatabase("db1") != nullptr, "db1 exists");
-    check(stats, system.getDatabase("db2") != nullptr, "db2 exists");
-    check(stats, system.getDatabase("db3") != nullptr, "db3 exists");
+    check(stats, system.GetDatabase("db1") != nullptr, "db1 exists");
+    check(stats, system.GetDatabase("db2") != nullptr, "db2 exists");
+    check(stats, system.GetDatabase("db3") != nullptr, "db3 exists");
     check(
         stats,
-        system.getDatabase("db1")->getName() == "db1",
+        system.GetDatabase("db1")->GetName() == "db1",
         "db1 name correct"
     );
     check(
         stats,
-        system.getDatabase("db2")->getName() == "db2",
+        system.GetDatabase("db2")->GetName() == "db2",
         "db2 name correct"
     );
     check(
         stats,
-        system.getDatabase("db3")->getName() == "db3",
+        system.GetDatabase("db3")->GetName() == "db3",
         "db3 name correct"
     );
 }
@@ -76,12 +76,12 @@ void test_system_get_nonexistent_database(TestStats& stats) {
     
     check(
         stats,
-        system.getDatabase("nonexistent") == nullptr, 
+        system.GetDatabase("nonexistent") == nullptr, 
         "Nonexistent database returns nullptr"
     );
     check(
         stats,
-        system.getDatabase("") == nullptr, 
+        system.GetDatabase("") == nullptr, 
         "Empty name returns nullptr"
     );
 }
@@ -92,14 +92,14 @@ void test_system_use_database(TestStats& stats) {
     ScopedDataDirectory guard;
     System system;
 
-    system.createDatabase("mydb");
-    system.useDatabase("mydb");
+    system.CreateDatabase("mydb");
+    system.UseDatabase("mydb");
     
-    Database* current = system.getCurrentDatabase();
+    Database* current = system.GetCurrentDatabase();
     check(stats, current != nullptr, "Current database is not null after use");
     check(
         stats,
-        current->getName() == "mydb",
+        current->GetName() == "mydb",
         "Current database name is correct"
     );
 }
@@ -113,14 +113,14 @@ void test_system_use_nonexistent_database(TestStats& stats) {
     
     bool caught = false;
     try {
-        system.useDatabase("nonexistent");
+        system.UseDatabase("nonexistent");
     } catch (...) {
         caught = true;
     }
     check(stats, caught, "Using nonexistent database throws error");
     check(
         stats,
-        system.getCurrentDatabase() == nullptr, 
+        system.GetCurrentDatabase() == nullptr, 
         "Current database is still null after failed use"
     );
 }
@@ -131,20 +131,20 @@ void test_system_switch_database(TestStats& stats) {
     ScopedDataDirectory guard;
     System system;
 
-    system.createDatabase("first_db");
-    system.createDatabase("second_db");
+    system.CreateDatabase("first_db");
+    system.CreateDatabase("second_db");
     
-    system.useDatabase("first_db");
+    system.UseDatabase("first_db");
     check(
         stats,
-        system.getCurrentDatabase()->getName() == "first_db", 
+        system.GetCurrentDatabase()->GetName() == "first_db", 
         "Current is first_db"
     );
     
-    system.useDatabase("second_db");
+    system.UseDatabase("second_db");
     check(
         stats,
-        system.getCurrentDatabase()->getName() == "second_db", 
+        system.GetCurrentDatabase()->GetName() == "second_db", 
         "Current switched to second_db"
     );
 }
@@ -155,17 +155,17 @@ void test_system_drop_database(TestStats& stats) {
     ScopedDataDirectory guard;
     System system;
 
-    system.createDatabase("mydb");
+    system.CreateDatabase("mydb");
     check(
         stats,
-        system.getDatabase("mydb") != nullptr,
+        system.GetDatabase("mydb") != nullptr,
         "Database exists before drop"
     );
     
-    system.dropDatabase("mydb");
+    system.DropDatabase("mydb");
     check(
         stats,
-        system.getDatabase("mydb") == nullptr,
+        system.GetDatabase("mydb") == nullptr,
         "Database does not exist after drop"
     );
     check(
@@ -181,19 +181,19 @@ void test_system_drop_current_database(TestStats& stats) {
     ScopedDataDirectory guard;
     System system;
 
-    system.createDatabase("mydb");
-    system.useDatabase("mydb");
-    check(stats, system.getCurrentDatabase() != nullptr, "Current database set");
+    system.CreateDatabase("mydb");
+    system.UseDatabase("mydb");
+    check(stats, system.GetCurrentDatabase() != nullptr, "Current database set");
     
-    system.dropDatabase("mydb");
+    system.DropDatabase("mydb");
     check(
         stats,
-        system.getCurrentDatabase() == nullptr, 
+        system.GetCurrentDatabase() == nullptr, 
         "Current database is null after dropping it"
     );
     check(
         stats,
-        system.getDatabase("mydb") == nullptr, 
+        system.GetDatabase("mydb") == nullptr, 
         "Database removed"
     );
 }
@@ -204,7 +204,7 @@ void test_system_drop_nonexistent_database(TestStats& stats) {
     ScopedDataDirectory guard;
     System system;
 
-    system.dropDatabase("nonexistent");
+    system.DropDatabase("nonexistent");
     check(stats, true, "Dropping nonexistent database does not throw");
 }
 
@@ -214,18 +214,18 @@ void test_system_create_database_with_tables(TestStats& stats) {
     ScopedDataDirectory guard;
     System system;
 
-    system.createDatabase("appdb");
-    system.useDatabase("appdb");
+    system.CreateDatabase("appdb");
+    system.UseDatabase("appdb");
     
-    Database* db = system.getCurrentDatabase();
+    Database* db = system.GetCurrentDatabase();
     check(stats, db != nullptr, "Current database available");
     
     std::vector<ColumnSchema> schema = {{"id", ColumnType::kInt, true, true}};
-    db->createTable("users", schema);
-    db->createTable("products", schema);
+    db->CreateTable("users", schema);
+    db->CreateTable("products", schema);
     
-    check(stats, db->getTable("users") != nullptr, "Users table exists");
-    check(stats, db->getTable("products") != nullptr, "Products table exists");
+    check(stats, db->GetTable("users") != nullptr, "Users table exists");
+    check(stats, db->GetTable("products") != nullptr, "Products table exists");
 }
 
 void test_system_get_current_database_when_none(TestStats& stats) {
@@ -236,14 +236,14 @@ void test_system_get_current_database_when_none(TestStats& stats) {
 
     check(
         stats,
-        system.getCurrentDatabase() == nullptr, 
+        system.GetCurrentDatabase() == nullptr, 
         "Current database is null when none selected"
     );
     
-    system.createDatabase("testdb");
+    system.CreateDatabase("testdb");
     check(
         stats,
-        system.getCurrentDatabase() == nullptr, 
+        system.GetCurrentDatabase() == nullptr, 
         "Current database still null after creating (not using)"
     );
 }

@@ -25,9 +25,9 @@ void test_table_creation(TestStats& stats) {
     
     Table table("users", schema, test_path / "users");
     
-    check(stats, table.getName() == "users", "Table name correct");
-    check(stats, table.getSchema().size() == 2, "Schema size correct");
-    check(stats, table.getRows().empty(), "No rows initially");
+    check(stats, table.GetName() == "users", "Table name correct");
+    check(stats, table.GetSchema().size() == 2, "Schema size correct");
+    check(stats, table.GetRows().empty(), "No rows initially");
     
     fs::remove_all(test_path);
 }
@@ -42,10 +42,10 @@ void test_table_get_name(TestStats& stats) {
     std::vector<ColumnSchema> schema = {{"id", ColumnType::kInt}};
     
     Table t1("first", schema, test_path / "first");
-    check(stats, t1.getName() == "first", "First table name");
+    check(stats, t1.GetName() == "first", "First table name");
     
     Table t2("second_table_123", schema, test_path / "second");
-    check(stats, t2.getName() == "second_table_123", "Second table name");
+    check(stats, t2.GetName() == "second_table_123", "Second table name");
     
     fs::remove_all(test_path);
 }
@@ -64,16 +64,16 @@ void test_table_insert_row(TestStats& stats) {
     
     Table table("users", schema, test_path / "users");
     
-    RowId id = table.insertRow({Value(1), Value("john")});
+    RowId id = table.InsertRow({Value(1), Value("john")});
     check(stats, id == 1, "First row ID is 1");
     
-    const auto& rows = table.getRows();
+    const auto& rows = table.GetRows();
     check(stats, rows.size() == 1, "One row in table");
     check(stats, !rows[0]->deleted, "Row is not deleted");
-    check(stats, rows[0]->values[0].asInt() == 1, "First value correct");
+    check(stats, rows[0]->values[0].AsInt() == 1, "First value correct");
     check(
         stats,
-        rows[0]->values[1].asString() == "john",
+        rows[0]->values[1].AsString() == "john",
         "Second value correct"
     );
     
@@ -94,14 +94,14 @@ void test_table_insert_multiple_rows(TestStats& stats) {
     
     Table table("data", schema, test_path / "data");
     
-    RowId id1 = table.insertRow({Value(1), Value("first")});
-    RowId id2 = table.insertRow({Value(2), Value("second")});
-    RowId id3 = table.insertRow({Value(3), Value("third")});
+    RowId id1 = table.InsertRow({Value(1), Value("first")});
+    RowId id2 = table.InsertRow({Value(2), Value("second")});
+    RowId id3 = table.InsertRow({Value(3), Value("third")});
     
     check(stats, id1 == 1, "First ID is 1");
     check(stats, id2 == 2, "Second ID is 2");
     check(stats, id3 == 3, "Third ID is 3");
-    check(stats, table.getRows().size() == 3, "Three rows in table");
+    check(stats, table.GetRows().size() == 3, "Three rows in table");
     
     fs::remove_all(test_path);
 }
@@ -120,11 +120,11 @@ void test_table_insert_null_values(TestStats& stats) {
     
     Table table("items", schema, test_path / "items");
     
-    RowId id = table.insertRow({Value(1), Value()});
+    RowId id = table.InsertRow({Value(1), Value()});
     check(stats, id == 1, "Row with NULL inserted");
     
-    const auto& rows = table.getRows();
-    check(stats, rows[0]->values[1].isNull(), "NULL value is null");
+    const auto& rows = table.GetRows();
+    check(stats, rows[0]->values[1].IsNull(), "NULL value is null");
     
     fs::remove_all(test_path);
 }
@@ -145,7 +145,7 @@ void test_table_insert_wrong_column_count(TestStats& stats) {
     
     bool caught = false;
     try {
-        table.insertRow({Value(1)});
+        table.InsertRow({Value(1)});
     } catch (...) {
         caught = true;
     }
@@ -153,7 +153,7 @@ void test_table_insert_wrong_column_count(TestStats& stats) {
     
     caught = false;
     try {
-        table.insertRow({Value(1), Value("name"), Value(3)});
+        table.InsertRow({Value(1), Value("name"), Value(3)});
     } catch (...) {
         caught = true;
     }
@@ -178,7 +178,7 @@ void test_table_insert_wrong_type(TestStats& stats) {
     
     bool caught = false;
     try {
-        table.insertRow({Value("not_int"), Value("name")});
+        table.InsertRow({Value("not_int"), Value("name")});
     } catch (...) {
         caught = true;
     }
@@ -186,7 +186,7 @@ void test_table_insert_wrong_type(TestStats& stats) {
     
     caught = false;
     try {
-        table.insertRow({Value(1), Value(42)});
+        table.InsertRow({Value(1), Value(42)});
     } catch (...) {
         caught = true;
     }
@@ -211,7 +211,7 @@ void test_table_insert_not_null_violation(TestStats& stats) {
     
     bool caught = false;
     try {
-        table.insertRow({Value(1), Value()});
+        table.InsertRow({Value(1), Value()});
     } catch (...) {
         caught = true;
     }
@@ -234,11 +234,11 @@ void test_table_unique_constraint(TestStats& stats) {
     
     Table table("users", schema, test_path / "users");
     
-    table.insertRow({Value(1), Value("first")});
+    table.InsertRow({Value(1), Value("first")});
     
     bool caught = false;
     try {
-        table.insertRow({Value(1), Value("second")});
+        table.InsertRow({Value(1), Value("second")});
     } catch (...) {
         caught = true;
     }
@@ -257,25 +257,25 @@ void test_table_find_row_by_id(TestStats& stats) {
     std::vector<ColumnSchema> schema = {{"id", ColumnType::kInt}};
     Table table("data", schema, test_path / "data");
     
-    RowId id1 = table.insertRow({Value(10)});
-    RowId id2 = table.insertRow({Value(20)});
-    RowId id3 = table.insertRow({Value(30)});
+    RowId id1 = table.InsertRow({Value(10)});
+    RowId id2 = table.InsertRow({Value(20)});
+    RowId id3 = table.InsertRow({Value(30)});
     
-    Row* row = table.findRowById(id1);
+    Row* row = table.FindRowById(id1);
     check(stats, row != nullptr, "Row 1 found");
-    check(stats, row->values[0].asInt() == 10, "Row 1 value correct");
+    check(stats, row->values[0].AsInt() == 10, "Row 1 value correct");
     
-    row = table.findRowById(id2);
+    row = table.FindRowById(id2);
     check(stats, row != nullptr, "Row 2 found");
-    check(stats, row->values[0].asInt() == 20, "Row 2 value correct");
+    check(stats, row->values[0].AsInt() == 20, "Row 2 value correct");
     
-    row = table.findRowById(id3);
+    row = table.FindRowById(id3);
     check(stats, row != nullptr, "Row 3 found");
     
-    row = table.findRowById(999);
+    row = table.FindRowById(999);
     check(stats, row == nullptr, "Nonexistent ID returns nullptr");
     
-    row = table.findRowById(0);
+    row = table.FindRowById(0);
     check(stats, row == nullptr, "ID 0 returns nullptr");
     
     fs::remove_all(test_path);
@@ -295,21 +295,21 @@ void test_table_find_by_indexed_value(TestStats& stats) {
     
     Table table("users", schema, test_path / "users");
     
-    table.insertRow({Value(1), Value("alice")});
-    table.insertRow({Value(2), Value("bob")});
+    table.InsertRow({Value(1), Value("alice")});
+    table.InsertRow({Value(2), Value("bob")});
     
-    Row* row = table.findByIndexedValue("id", Value(1));
+    Row* row = table.FindByIndexedValue("id", Value(1));
     check(stats, row != nullptr, "Found by indexed value");
-    check(stats, row->values[1].asString() == "alice", "Correct row found");
+    check(stats, row->values[1].AsString() == "alice", "Correct row found");
     
-    row = table.findByIndexedValue("id", Value(2));
+    row = table.FindByIndexedValue("id", Value(2));
     check(stats, row != nullptr, "Second row found");
-    check(stats, row->values[1].asString() == "bob", "Second row value correct");
+    check(stats, row->values[1].AsString() == "bob", "Second row value correct");
     
-    row = table.findByIndexedValue("id", Value(99));
+    row = table.FindByIndexedValue("id", Value(99));
     check(stats, row == nullptr, "Nonexistent indexed value returns nullptr");
     
-    row = table.findByIndexedValue("name", Value("alice"));
+    row = table.FindByIndexedValue("name", Value("alice"));
     check(stats, row == nullptr, "Non-indexed column returns nullptr");
     
     fs::remove_all(test_path);
@@ -327,21 +327,21 @@ void test_table_contains_indexed_value(TestStats& stats) {
     };
     
     Table table("data", schema, test_path / "data");
-    table.insertRow({Value(100)});
+    table.InsertRow({Value(100)});
     
     check(
         stats,
-        table.containsIndexedValue("id", Value(100)),
+        table.ContainsIndexedValue("id", Value(100)),
         "Contains indexed value"
     );
     check(
         stats,
-        !table.containsIndexedValue("id", Value(200)),
+        !table.ContainsIndexedValue("id", Value(200)),
         "Does not contain non-existent value"
     );
     check(
         stats,
-        !table.containsIndexedValue("nonexistent", Value(100)),
+        !table.ContainsIndexedValue("nonexistent", Value(100)),
         "Non-indexed column returns false"
     );
     
@@ -363,12 +363,12 @@ void test_table_has_indexed_column(TestStats& stats) {
     
     Table table("users", schema, test_path / "users");
     
-    check(stats, table.hasIndexedColumn("id"), "id is indexed");
-    check(stats, table.hasIndexedColumn("email"), "email is indexed");
-    check(stats, !table.hasIndexedColumn("name"), "name is not indexed");
+    check(stats, table.HasIndexedColumn("id"), "id is indexed");
+    check(stats, table.HasIndexedColumn("email"), "email is indexed");
+    check(stats, !table.HasIndexedColumn("name"), "name is not indexed");
     check(
         stats,
-        !table.hasIndexedColumn("nonexistent"),
+        !table.HasIndexedColumn("nonexistent"),
         "Nonexistent column returns false"
     );
     
@@ -390,20 +390,20 @@ void test_table_update_row(TestStats& stats) {
     
     Table table("users", schema, test_path / "users");
     
-    table.insertRow({Value(1), Value("alice"), Value(25)});
+    table.InsertRow({Value(1), Value("alice"), Value(25)});
     
     std::vector<Assignment> assignments = {
         {"name", Value("alice_updated")},
         {"age", Value(26)}
     };
     
-    Row* row = table.findRowById(1);
-    table.updateRow(*row, assignments);
+    Row* row = table.FindRowById(1);
+    table.UpdateRow(*row, assignments);
     
-    row = table.findRowById(1);
-    check(stats, row->values[1].asString() == "alice_updated", "Name updated");
-    check(stats, row->values[2].asInt() == 26, "Age updated");
-    check(stats, row->values[0].asInt() == 1, "ID unchanged");
+    row = table.FindRowById(1);
+    check(stats, row->values[1].AsString() == "alice_updated", "Name updated");
+    check(stats, row->values[2].AsInt() == 26, "Age updated");
+    check(stats, row->values[0].AsInt() == 1, "ID unchanged");
     
     fs::remove_all(test_path);
 }
@@ -422,33 +422,33 @@ void test_table_update_row_with_indexed_column(TestStats& stats) {
     
     Table table("data", schema, test_path / "data");
     
-    table.insertRow({Value(1), Value("AAA")});
-    table.insertRow({Value(2), Value("BBB")});
+    table.InsertRow({Value(1), Value("AAA")});
+    table.InsertRow({Value(2), Value("BBB")});
     
     check(
         stats,
-        table.containsIndexedValue("code", Value("AAA")),
+        table.ContainsIndexedValue("code", Value("AAA")),
         "AAA indexed before update"
     );
     
-    Row* row = table.findRowById(1);
+    Row* row = table.FindRowById(1);
     std::vector<Assignment> assignments = {{"code", Value("CCC")}};
-    table.updateRow(*row, assignments);
+    table.UpdateRow(*row, assignments);
     
     check(
         stats,
-        !table.containsIndexedValue("code", Value("AAA")),
+        !table.ContainsIndexedValue("code", Value("AAA")),
         "AAA removed from index"
     );
     check(
         stats,
-        table.containsIndexedValue("code", Value("CCC")),
+        table.ContainsIndexedValue("code", Value("CCC")),
         "CCC added to index"
     );
     
-    row = table.findByIndexedValue("code", Value("CCC"));
+    row = table.FindByIndexedValue("code", Value("CCC"));
     check(stats, row != nullptr, "Can find updated row by new indexed value");
-    check(stats, row->values[0].asInt() == 1, "Correct row ID");
+    check(stats, row->values[0].AsInt() == 1, "Correct row ID");
     
     fs::remove_all(test_path);
 }
@@ -467,15 +467,15 @@ void test_table_update_unique_constraint_violation(TestStats& stats) {
     
     Table table("data", schema, test_path / "data");
     
-    table.insertRow({Value(1), Value("AAA")});
-    table.insertRow({Value(2), Value("BBB")});
+    table.InsertRow({Value(1), Value("AAA")});
+    table.InsertRow({Value(2), Value("BBB")});
     
-    Row* row = table.findRowById(1);
+    Row* row = table.FindRowById(1);
     std::vector<Assignment> assignments = {{"code", Value("BBB")}};
     
     bool caught = false;
     try {
-        table.updateRow(*row, assignments);
+        table.UpdateRow(*row, assignments);
     } catch (...) {
         caught = true;
     }
@@ -485,10 +485,10 @@ void test_table_update_unique_constraint_violation(TestStats& stats) {
         "Unique constraint violation on update throws error"
     );
     
-    row = table.findRowById(1);
+    row = table.FindRowById(1);
     check(
         stats,
-        row->values[1].asString() == "AAA",
+        row->values[1].AsString() == "AAA",
         "Value rolled back after failed update"
     );
     
@@ -508,40 +508,40 @@ void test_table_delete_row(TestStats& stats) {
     
     Table table("data", schema, test_path / "data");
     
-    table.insertRow({Value(1)});
-    table.insertRow({Value(2)});
-    table.insertRow({Value(3)});
+    table.InsertRow({Value(1)});
+    table.InsertRow({Value(2)});
+    table.InsertRow({Value(3)});
     
-    check(stats, table.getRows().size() == 3, "3 rows before delete");
+    check(stats, table.GetRows().size() == 3, "3 rows before delete");
     
-    table.deleteRow(2);
+    table.DeleteRow(2);
     
-    const auto& rows = table.getRows();
+    const auto& rows = table.GetRows();
     check(stats, rows.size() == 3, "Row count unchanged (logical delete)");
     
-    Row* row = table.findRowById(2);
+    Row* row = table.FindRowById(2);
     check(stats, row != nullptr, "Deleted row still exists");
     check(stats, row->deleted, "Deleted row marked as deleted");
     
-    row = table.findRowById(1);
+    row = table.FindRowById(1);
     check(stats, !row->deleted, "Other row not affected");
     
-    row = table.findRowById(3);
+    row = table.FindRowById(3);
     check(stats, !row->deleted, "Other row not affected");
     
     check(
         stats,
-        !table.containsIndexedValue("id", Value(2)),
+        !table.ContainsIndexedValue("id", Value(2)),
         "Deleted row removed from index"
     );
     check(
         stats,
-        table.containsIndexedValue("id", Value(1)),
+        table.ContainsIndexedValue("id", Value(1)),
         "Other row still in index"
     );
     check(
         stats,
-        table.containsIndexedValue("id", Value(3)),
+        table.ContainsIndexedValue("id", Value(3)),
         "Other row still in index"
     );
     
@@ -558,7 +558,7 @@ void test_table_delete_nonexistent_row(TestStats& stats) {
     std::vector<ColumnSchema> schema = {{"id", ColumnType::kInt}};
     Table table("data", schema, test_path / "data");
     
-    table.deleteRow(999);
+    table.DeleteRow(999);
     check(stats, true, "Deleting nonexistent row does not throw");
     
     fs::remove_all(test_path);
@@ -579,7 +579,7 @@ void test_table_get_schema(TestStats& stats) {
     
     Table table("test", schema, test_path / "test");
     
-    const auto& retrieved = table.getSchema();
+    const auto& retrieved = table.GetSchema();
     check(stats, retrieved.size() == 3, "Schema size correct");
     check(stats, retrieved[0].name == "col1", "Column 1 name");
     check(stats, retrieved[0].type == ColumnType::kInt, "Column 1 type");
@@ -603,11 +603,11 @@ void test_table_get_rows_mutable(TestStats& stats) {
     std::vector<ColumnSchema> schema = {{"value", ColumnType::kInt}};
     Table table("data", schema, test_path / "data");
     
-    table.insertRow({Value(10)});
+    table.InsertRow({Value(10)});
     
-    auto& rows = table.getRowsMutable();
+    auto& rows = table.GetRowsMutable();
     check(stats, rows.size() == 1, "Mutable rows accessible");
-    check(stats, rows[0]->values[0].asInt() == 10, "Mutable row value correct");
+    check(stats, rows[0]->values[0].AsInt() == 10, "Mutable row value correct");
     
     fs::remove_all(test_path);
 }

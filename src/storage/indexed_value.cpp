@@ -6,21 +6,21 @@ IndexedValue::IndexedValue(const Value& value) :
     value(value)
 {}
 
-const Value& IndexedValue::getValue() const {
+const Value& IndexedValue::GetValue() const {
     return value;
 }
 
 bool IndexedValue::operator<(const IndexedValue& other) const {
-    if (value.getType() != other.value.getType()) {
+    if (value.GetType() != other.value.GetType()) {
         return false;
     }
 
-    if (value.getType() == Value::Type::kInt) {
-        return value.asInt() < other.value.asInt();
+    if (value.GetType() == Value::Type::kInt) {
+        return value.AsInt() < other.value.AsInt();
     }
 
-    if (value.getType() == Value::Type::kString) {
-        return value.asString() < other.value.asString();
+    if (value.GetType() == Value::Type::kString) {
+        return value.AsString() < other.value.AsString();
     }
 
     return false;
@@ -31,16 +31,16 @@ bool IndexedValue::operator>(const IndexedValue& other) const {
 }
 
 bool IndexedValue::operator==(const IndexedValue& other) const {
-    if (value.getType() != other.value.getType()) {
+    if (value.GetType() != other.value.GetType()) {
         return false;
     }
 
-    if (value.getType() == Value::Type::kInt) {
-        return value.asInt() == other.value.asInt();
+    if (value.GetType() == Value::Type::kInt) {
+        return value.AsInt() == other.value.AsInt();
     }
 
-    if (value.getType() == Value::Type::kString) {
-        return value.asString() == other.value.asString();
+    if (value.GetType() == Value::Type::kString) {
+        return value.AsString() == other.value.AsString();
     }
 
     return false;

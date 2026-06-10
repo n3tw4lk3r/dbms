@@ -10,7 +10,7 @@ public:
 
     explicit IndexedValue(const Value& value);
 
-    const Value& getValue() const;
+    const Value& GetValue() const;
 
     bool operator<(const IndexedValue& other) const;
     bool operator>(const IndexedValue& other) const;

@@ -20,11 +20,11 @@ Value::Value(const std::string& value) :
     string_value(value)
 {}
 
-Value::Type Value::getType() const {
+Value::Type Value::GetType() const {
     return type;
 }
 
-int Value::asInt() const {
+int Value::AsInt() const {
     if (type != Type::kInt) {
         throw TypeError("Value is not INT");
     }
@@ -32,7 +32,7 @@ int Value::asInt() const {
     return int_value;
 }
 
-const std::string Value::asString() const {
+const std::string Value::AsString() const {
     if (type != Type::kString) {
         throw TypeError("Value is not STRING");
     }
@@ -40,7 +40,7 @@ const std::string Value::asString() const {
     return string_value;
 }
 
-bool Value::isNull() const {
+bool Value::IsNull() const {
     return type == Type::kNull;
 }
 

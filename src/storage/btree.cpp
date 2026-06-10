@@ -11,8 +11,8 @@ BTree::BTree(size_t min_degree) :
     root(std::make_unique<BTreeNode>(true))
 {}
 
-void BTree::insert(const IndexedValue& key, RowId row_id) {
-    if (contains(key)) {
+void BTree::Insert(const IndexedValue& key, RowId row_id) {
+    if (Contains(key)) {
         throw DuplicateError("Duplicate indexed key");
     }
 
@@ -25,20 +25,20 @@ void BTree::insert(const IndexedValue& key, RowId row_id) {
 
         new_root->children.push_back(std::move(root));
 
-        splitChild(new_root.get(), 0);
+        SplitChild(new_root.get(), 0);
 
         root = std::move(new_root);
     }
 
-    insertNonFull(root.get(), entry);
+    InsertNonFull(root.get(), entry);
 }
 
-bool BTree::erase(const IndexedValue& key) {
-    if (!contains(key)) {
+bool BTree::Erase(const IndexedValue& key) {
+    if (!Contains(key)) {
         return false;
     }
 
-    eraseInternal(root.get(), key);
+    EraseInternal(root.get(), key);
 
     if (!root->is_leaf && root->entries.empty()) {
         root = std::move(root->children[0]);
@@ -47,12 +47,12 @@ bool BTree::erase(const IndexedValue& key) {
     return true;
 }
 
-bool BTree::contains(const IndexedValue& key) const {
-    return search(root.get(), key) != nullptr;
+bool BTree::Contains(const IndexedValue& key) const {
+    return Search(root.get(), key) != nullptr;
 }
 
-RowId BTree::find(const IndexedValue& key) const {
-    BTreeEntry* entry = search(root.get(), key);
+RowId BTree::Find(const IndexedValue& key) const {
+    BTreeEntry* entry = Search(root.get(), key);
 
     if (!entry) {
         return 0;
@@ -61,7 +61,7 @@ RowId BTree::find(const IndexedValue& key) const {
     return entry->row_id;
 }
 
-size_t BTree::size() const {
+size_t BTree::Size() const {
     size_t count = 0;
 
     std::vector<const BTreeNode*> stack;
@@ -81,16 +81,16 @@ size_t BTree::size() const {
     return count;
 }
 
-bool BTree::empty() const {
+bool BTree::Empty() const {
     return root->entries.empty();
 }
 
-bool BTree::verify() const {
+bool BTree::Verify() const {
     size_t leaf_depth = 0;
-    return verifyNode(root.get(), 0, leaf_depth);
+    return VerifyNode(root.get(), 0, leaf_depth);
 }
 
-void BTree::insertNonFull(
+void BTree::InsertNonFull(
     BTreeNode* node,
     const BTreeEntry& entry
 ) {
@@ -116,16 +116,16 @@ void BTree::insertNonFull(
         node->children[i] ->entries.size() ==
             (min_degree << 1) - 1
     ) {
-        splitChild(node, i);
+        SplitChild(node, i);
         if (entry.key > node->entries[i].key) {
             ++i;
         }
     }
 
-    insertNonFull(node->children[i].get(), entry);
+    InsertNonFull(node->children[i].get(), entry);
 }
 
-void BTree::splitChild(BTreeNode* parent, size_t child_index) {
+void BTree::SplitChild(BTreeNode* parent, size_t child_index) {
     BTreeNode* child = parent->children[child_index].get();
 
     auto sibling = std::make_unique<BTreeNode>(
@@ -165,7 +165,7 @@ void BTree::splitChild(BTreeNode* parent, size_t child_index) {
     );
 }
 
-BTreeEntry* BTree::search(
+BTreeEntry* BTree::Search(
     BTreeNode* node,
     const IndexedValue& key
 ) const {
@@ -186,10 +186,10 @@ BTreeEntry* BTree::search(
         return nullptr;
     }
 
-    return search(node->children[i].get(), key);
+    return Search(node->children[i].get(), key);
 }
 
-size_t BTree::findKeyIndex(
+size_t BTree::FindKeyIndex(
     BTreeNode* node,
     const IndexedValue& key
 ) const {
@@ -205,20 +205,20 @@ size_t BTree::findKeyIndex(
     return index;
 }
 
-void BTree::eraseInternal(
+void BTree::EraseInternal(
     BTreeNode* node,
     const IndexedValue& key
 ) {
-    size_t index = findKeyIndex(node, key);
+    size_t index = FindKeyIndex(node, key);
 
     bool key_found = index < node->entries.size() &&
         node->entries[index].key == key;
 
     if (key_found) {
         if (node->is_leaf) {
-            eraseFromLeaf(node, index);
+            EraseFromLeaf(node, index);
         } else {
-            eraseFromInternal(node, index);
+            EraseFromInternal(node, index);
         }
 
         return;
@@ -231,47 +231,47 @@ void BTree::eraseInternal(
     bool last_child = index == node->entries.size();
 
     if (node->children[index]->entries.size() < min_degree) {
-        fillChild(node, index);
+        FillChild(node, index);
     }
 
     if (last_child && index > node->entries.size()) {
-        eraseInternal(node->children[index - 1].get(), key);
+        EraseInternal(node->children[index - 1].get(), key);
         return;
     }
 
-    eraseInternal(node->children[index].get(), key);
+    EraseInternal(node->children[index].get(), key);
 }
 
-void BTree::eraseFromLeaf(BTreeNode* node, size_t index) {
+void BTree::EraseFromLeaf(BTreeNode* node, size_t index) {
     node->entries.erase(node->entries.begin() + index);
 }
 
-void BTree::eraseFromInternal(BTreeNode* node, size_t index) {
+void BTree::EraseFromInternal(BTreeNode* node, size_t index) {
     IndexedValue key = node->entries[index].key;
 
     BTreeNode* left_child = node->children[index].get();
     BTreeNode* right_child = node->children[index + 1].get();
 
     if (left_child->entries.size() >= min_degree) {
-        BTreeEntry predecessor = getPredecessor(left_child);
+        BTreeEntry predecessor = GetPredecessor(left_child);
         node->entries[index] = predecessor;
-        eraseInternal(left_child, predecessor.key);
+        EraseInternal(left_child, predecessor.key);
         return;
     }
 
     if (right_child->entries.size() >= min_degree) {
-        BTreeEntry successor = getSuccessor(right_child);
+        BTreeEntry successor = GetSuccessor(right_child);
         node->entries[index] = successor;
 
-        eraseInternal(right_child, successor.key);
+        EraseInternal(right_child, successor.key);
         return;
     }
 
-    mergeChildren(node, index);
-    eraseInternal(left_child, key);
+    MergeChildren(node, index);
+    EraseInternal(left_child, key);
 }
 
-BTreeEntry BTree::getPredecessor(BTreeNode* node) {
+BTreeEntry BTree::GetPredecessor(BTreeNode* node) {
     while (!node->is_leaf) {
         node = node->children.back().get();
     }
@@ -279,7 +279,7 @@ BTreeEntry BTree::getPredecessor(BTreeNode* node) {
     return node->entries.back();
 }
 
-BTreeEntry BTree::getSuccessor(BTreeNode* node) {
+BTreeEntry BTree::GetSuccessor(BTreeNode* node) {
     while (!node->is_leaf) {
         node = node->children.front().get();
     }
@@ -287,12 +287,12 @@ BTreeEntry BTree::getSuccessor(BTreeNode* node) {
     return node->entries.front();
 }
 
-void BTree::fillChild(BTreeNode* node, size_t child_index) {
+void BTree::FillChild(BTreeNode* node, size_t child_index) {
     if (
         child_index > 0 && node->children[child_index - 1]
             ->entries.size() >= min_degree
     ) {
-        borrowFromPrevious(node, child_index);
+        BorrowFromPrevious(node, child_index);
         return;
     }
 
@@ -301,19 +301,19 @@ void BTree::fillChild(BTreeNode* node, size_t child_index) {
         node->children[child_index + 1]->entries.size() >= min_degree
     ) {
 
-        borrowFromNext(node, child_index);
+        BorrowFromNext(node, child_index);
         return;
     }
 
     if (child_index < node->entries.size()) {
-        mergeChildren(node, child_index);
+        MergeChildren(node, child_index);
         return;
     }
 
-    mergeChildren(node, child_index - 1);
+    MergeChildren(node, child_index - 1);
 }
 
-void BTree::borrowFromPrevious(
+void BTree::BorrowFromPrevious(
     BTreeNode* node,
     size_t child_index
 ) {
@@ -338,7 +338,7 @@ void BTree::borrowFromPrevious(
     sibling->entries.pop_back();
 }
 
-void BTree::borrowFromNext(BTreeNode* node, size_t child_index) {
+void BTree::BorrowFromNext(BTreeNode* node, size_t child_index) {
     BTreeNode* child = node->children[child_index].get();
     BTreeNode* sibling = node->children[child_index + 1].get();
 
@@ -357,7 +357,7 @@ void BTree::borrowFromNext(BTreeNode* node, size_t child_index) {
     sibling->entries.erase(sibling->entries.begin());
 }
 
-void BTree::mergeChildren(BTreeNode* node, size_t child_index) {
+void BTree::MergeChildren(BTreeNode* node, size_t child_index) {
     BTreeNode* child = node->children[child_index].get();
     auto sibling = std::move(node->children[child_index + 1]);
 
@@ -380,7 +380,7 @@ void BTree::mergeChildren(BTreeNode* node, size_t child_index) {
     );
 }
 
-bool BTree::verifyNode(
+bool BTree::VerifyNode(
     const BTreeNode* node,
     size_t depth,
     size_t& leaf_depth
@@ -404,7 +404,7 @@ bool BTree::verifyNode(
     }
 
     for (const auto& child : node->children) {
-        if (!verifyNode(child.get(), depth + 1, leaf_depth)) {
+        if (!VerifyNode(child.get(), depth + 1, leaf_depth)) {
             return false;
         }
     }

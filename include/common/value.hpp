@@ -16,12 +16,12 @@ public:
     explicit Value(int value);
     explicit Value(const std::string& value);
 
-    Type getType() const;
+    Type GetType() const;
 
-    int asInt() const;
-    const std::string asString() const;
+    int AsInt() const;
+    const std::string AsString() const;
 
-    bool isNull() const;
+    bool IsNull() const;
 
 private:
     Type type;
@@ -30,3 +30,4 @@ private:
 };
 
 } // namespace dbms
+

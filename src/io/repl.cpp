@@ -21,11 +21,11 @@ bool process_line(
         return false;
     }
 
-    auto queries = buffer.append(line);
+    auto queries = buffer.Append(line);
     for (const auto& query : queries) {
         try {
-            auto cmd = parser.parse(query);
-            executor.execute(cmd);
+            auto cmd = parser.Parse(query);
+            executor.Execute(cmd);
         } catch (const std::exception& error) {
             std::cerr << error.what() << std::endl;
             return true;
@@ -44,7 +44,7 @@ void run_interactive_mode() {
 
     bool should_exit = false;
     while (!should_exit) {
-        if (buffer.empty()) {
+        if (buffer.Empty()) {
             std::cout << "> ";
         } else {
             std::cout << "... ";

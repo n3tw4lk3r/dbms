@@ -13,27 +13,27 @@ void test_value_comparator_compare_int_eq(TestStats& stats) {
     
     check(
         stats,
-        ValueComparator::compare(Value(10), Value(10), "=="),
+        ValueComparator::Compare(Value(10), Value(10), "=="),
         "10 == 10"
     );
     check(
         stats,
-        !ValueComparator::compare(Value(10), Value(20), "=="),
+        !ValueComparator::Compare(Value(10), Value(20), "=="),
         "10 != 20"
     );
     check(
         stats,
-        ValueComparator::compare(Value(0), Value(0), "=="),
+        ValueComparator::Compare(Value(0), Value(0), "=="),
         "0 == 0"
     );
     check(
         stats,
-        ValueComparator::compare(Value(-5), Value(-5), "=="),
+        ValueComparator::Compare(Value(-5), Value(-5), "=="),
         "-5 == -5"
     );
     check(
         stats,
-        ValueComparator::compare(Value(INT_MAX), Value(INT_MAX), "=="),
+        ValueComparator::Compare(Value(INT_MAX), Value(INT_MAX), "=="),
         "INT_MAX == INT_MAX"
     );
 }
@@ -43,22 +43,22 @@ void test_value_comparator_compare_int_ne(TestStats& stats) {
     
     check(
         stats,
-        ValueComparator::compare(Value(10), Value(20), "!="),
+        ValueComparator::Compare(Value(10), Value(20), "!="),
         "10 != 20"
     );
     check(
         stats,
-        !ValueComparator::compare(Value(10), Value(10), "!="),
+        !ValueComparator::Compare(Value(10), Value(10), "!="),
         "10 not != 10"
     );
     check(
         stats,
-        ValueComparator::compare(Value(-1), Value(1), "!="),
+        ValueComparator::Compare(Value(-1), Value(1), "!="),
         "-1 != 1"
     );
     check(
         stats,
-        ValueComparator::compare(Value(0), Value(1), "!="),
+        ValueComparator::Compare(Value(0), Value(1), "!="),
         "0 != 1"
     );
 }
@@ -68,30 +68,30 @@ void test_value_comparator_compare_int_lt(TestStats& stats) {
     
     check(
         stats,
-        ValueComparator::compare(Value(1), Value(10), "<"),
+        ValueComparator::Compare(Value(1), Value(10), "<"),
         "1 < 10"
     );
     check(
         stats,
-        !ValueComparator::compare(Value(10), Value(1), "<"),
+        !ValueComparator::Compare(Value(10), Value(1), "<"),
         "10 not < 1"
     );
     check(
         stats,
-        !ValueComparator::compare(Value(5), Value(5), "<"),
+        !ValueComparator::Compare(Value(5), Value(5), "<"),
         "5 not < 5"
     );
     check(
         stats,
-        ValueComparator::compare(Value(-10), Value(-1), "<"),
+        ValueComparator::Compare(Value(-10), Value(-1), "<"),
         "-10 < -1"
     );
     check(
         stats,
-        ValueComparator::compare(Value(-10), Value(0), "<"),
+        ValueComparator::Compare(Value(-10), Value(0), "<"),
         "-10 < 0"
     );
-    check(stats, ValueComparator::compare(Value(-100), Value(100), "<"),
+    check(stats, ValueComparator::Compare(Value(-100), Value(100), "<"),
         "-100 < 100"
     );
 }
@@ -101,27 +101,27 @@ void test_value_comparator_compare_int_gt(TestStats& stats) {
     
     check(
         stats,
-        ValueComparator::compare(Value(10), Value(1), ">"),
+        ValueComparator::Compare(Value(10), Value(1), ">"),
         "10 > 1"
     );
     check(
         stats,
-        !ValueComparator::compare(Value(1), Value(10), ">"),
+        !ValueComparator::Compare(Value(1), Value(10), ">"),
         "1 not > 10"
     );
     check(
         stats,
-        !ValueComparator::compare(Value(5), Value(5), ">"),
+        !ValueComparator::Compare(Value(5), Value(5), ">"),
         "5 not > 5"
     );
     check(
         stats,
-        ValueComparator::compare(Value(0), Value(-10), ">"),
+        ValueComparator::Compare(Value(0), Value(-10), ">"),
         "0 > -10"
     );
     check(
         stats,
-        ValueComparator::compare(Value(100), Value(-100), ">"),
+        ValueComparator::Compare(Value(100), Value(-100), ">"),
         "100 > -100"
     );
 }
@@ -131,27 +131,27 @@ void test_value_comparator_compare_int_le(TestStats& stats) {
     
     check(
         stats,
-        ValueComparator::compare(Value(1), Value(10), "<="),
+        ValueComparator::Compare(Value(1), Value(10), "<="),
         "1 <= 10"
     );
     check(
         stats,
-        ValueComparator::compare(Value(5), Value(5), "<="),
+        ValueComparator::Compare(Value(5), Value(5), "<="),
         "5 <= 5"
     );
     check(
         stats,
-        !ValueComparator::compare(Value(10), Value(1), "<="),
+        !ValueComparator::Compare(Value(10), Value(1), "<="),
         "10 not <= 1"
     );
     check(
         stats,
-        ValueComparator::compare(Value(-10), Value(0), "<="),
+        ValueComparator::Compare(Value(-10), Value(0), "<="),
         "-10 <= 0"
     );
     check(
         stats,
-        ValueComparator::compare(Value(0), Value(0), "<="),
+        ValueComparator::Compare(Value(0), Value(0), "<="),
         "0 <= 0"
     );
 }
@@ -161,22 +161,22 @@ void test_value_comparator_compare_int_ge(TestStats& stats) {
     
     check(
         stats,
-        ValueComparator::compare(Value(10), Value(1), ">="),
+        ValueComparator::Compare(Value(10), Value(1), ">="),
         "10 >= 1"
     );
     check(
         stats,
-        ValueComparator::compare(Value(5), Value(5), ">="),
+        ValueComparator::Compare(Value(5), Value(5), ">="),
         "5 >= 5"
     );
     check(
         stats,
-        !ValueComparator::compare(Value(1), Value(10), ">="),
+        !ValueComparator::Compare(Value(1), Value(10), ">="),
         "1 not >= 10"
     );
     check(
         stats,
-        ValueComparator::compare(Value(0), Value(-10), ">="),
+        ValueComparator::Compare(Value(0), Value(-10), ">="),
         "0 >= -10"
     );
 }
@@ -186,22 +186,22 @@ void test_value_comparator_compare_string_eq(TestStats& stats) {
     
     check(
         stats,
-        ValueComparator::compare(Value("hello"), Value("hello"), "=="),
+        ValueComparator::Compare(Value("hello"), Value("hello"), "=="),
         "hello == hello"
     );
     check(
         stats,
-        !ValueComparator::compare(Value("hello"), Value("world"), "=="),
+        !ValueComparator::Compare(Value("hello"), Value("world"), "=="),
         "hello != world"
     );
     check(
         stats,
-        ValueComparator::compare(Value(""), Value(""), "=="),
+        ValueComparator::Compare(Value(""), Value(""), "=="),
         "empty == empty"
     );
     check(
         stats,
-        ValueComparator::compare(Value("abc"), Value("abc"), "=="),
+        ValueComparator::Compare(Value("abc"), Value("abc"), "=="),
         "abc == abc"
     );
 }
@@ -211,17 +211,17 @@ void test_value_comparator_compare_string_ne(TestStats& stats) {
     
     check(
         stats,
-        ValueComparator::compare(Value("abc"), Value("xyz"), "!="),
+        ValueComparator::Compare(Value("abc"), Value("xyz"), "!="),
         "abc != xyz"
     );
     check(
         stats,
-        !ValueComparator::compare(Value("abc"), Value("abc"), "!="),
+        !ValueComparator::Compare(Value("abc"), Value("abc"), "!="),
         "abc not != abc"
     );
     check(
         stats,
-        ValueComparator::compare(Value(""), Value("a"), "!="),
+        ValueComparator::Compare(Value(""), Value("a"), "!="),
         "empty != a"
     );
 }
@@ -231,27 +231,27 @@ void test_value_comparator_compare_string_lt(TestStats& stats) {
     
     check(
         stats,
-        ValueComparator::compare(Value("abc"), Value("xyz"), "<"),
+        ValueComparator::Compare(Value("abc"), Value("xyz"), "<"),
         "abc < xyz"
     );
     check(
         stats,
-        !ValueComparator::compare(Value("xyz"), Value("abc"), "<"),
+        !ValueComparator::Compare(Value("xyz"), Value("abc"), "<"),
         "xyz not < abc"
     );
     check(
         stats,
-        !ValueComparator::compare(Value("abc"), Value("abc"), "<"),
+        !ValueComparator::Compare(Value("abc"), Value("abc"), "<"),
         "abc not < abc"
     );
     check(
         stats,
-        ValueComparator::compare(Value(""), Value("a"), "<"),
+        ValueComparator::Compare(Value(""), Value("a"), "<"),
         "empty < a"
     );
     check(
         stats,
-        ValueComparator::compare(Value("apple"), Value("banana"), "<"),
+        ValueComparator::Compare(Value("apple"), Value("banana"), "<"),
         "apple < banana"
     );
 }
@@ -261,22 +261,22 @@ void test_value_comparator_compare_string_gt(TestStats& stats) {
     
     check(
         stats,
-        ValueComparator::compare(Value("xyz"), Value("abc"), ">"),
+        ValueComparator::Compare(Value("xyz"), Value("abc"), ">"),
         "xyz > abc"
     );
     check(
         stats,
-        !ValueComparator::compare(Value("abc"), Value("xyz"), ">"),
+        !ValueComparator::Compare(Value("abc"), Value("xyz"), ">"),
         "abc not > xyz"
     );
     check(
         stats,
-        ValueComparator::compare(Value("banana"), Value("apple"), ">"),
+        ValueComparator::Compare(Value("banana"), Value("apple"), ">"),
         "banana > apple"
     );
     check(
         stats,
-        ValueComparator::compare(Value("a"), Value(""), ">"),
+        ValueComparator::Compare(Value("a"), Value(""), ">"),
         "a > empty"
     );
 }
@@ -286,22 +286,22 @@ void test_value_comparator_compare_string_le(TestStats& stats) {
     
     check(
         stats,
-        ValueComparator::compare(Value("abc"), Value("xyz"), "<="),
+        ValueComparator::Compare(Value("abc"), Value("xyz"), "<="),
         "abc <= xyz"
     );
     check(
         stats,
-        ValueComparator::compare(Value("abc"), Value("abc"), "<="),
+        ValueComparator::Compare(Value("abc"), Value("abc"), "<="),
         "abc <= abc"
     );
     check(
         stats,
-        !ValueComparator::compare(Value("xyz"), Value("abc"), "<="),
+        !ValueComparator::Compare(Value("xyz"), Value("abc"), "<="),
         "xyz not <= abc"
     );
     check(
         stats,
-        ValueComparator::compare(Value(""), Value(""), "<="),
+        ValueComparator::Compare(Value(""), Value(""), "<="),
         "empty <= empty"
     );
 }
@@ -311,17 +311,17 @@ void test_value_comparator_compare_string_ge(TestStats& stats) {
     
     check(
         stats,
-        ValueComparator::compare(Value("xyz"), Value("abc"), ">="),
+        ValueComparator::Compare(Value("xyz"), Value("abc"), ">="),
         "xyz >= abc"
     );
     check(
         stats,
-        ValueComparator::compare(Value("abc"), Value("abc"), ">="),
+        ValueComparator::Compare(Value("abc"), Value("abc"), ">="),
         "abc >= abc"
     );
     check(
         stats,
-        !ValueComparator::compare(Value("abc"), Value("xyz"), ">="),
+        !ValueComparator::Compare(Value("abc"), Value("xyz"), ">="),
         "abc not >= xyz"
     );
 }
@@ -336,58 +336,58 @@ void test_value_comparator_compare_null(TestStats& stats) {
     
     check(
         stats,
-        ValueComparator::compare(null1, null2, "=="),
+        ValueComparator::Compare(null1, null2, "=="),
         "null == null"
     );
     check(
         stats,
-        !ValueComparator::compare(null1, null2, "!="),
+        !ValueComparator::Compare(null1, null2, "!="),
         "null not != null"
     );
     check(
         stats,
-        !ValueComparator::compare(null1, int_val, "=="),
+        !ValueComparator::Compare(null1, int_val, "=="),
         "null != int"
     );
     check(
         stats,
-        ValueComparator::compare(null1, int_val, "!="),
+        ValueComparator::Compare(null1, int_val, "!="),
         "null != int"
     );
     check(
         stats,
-        !ValueComparator::compare(null1, int_val, "<"),
+        !ValueComparator::Compare(null1, int_val, "<"),
         "null not < int"
     );
     check(
         stats,
-        !ValueComparator::compare(null1, int_val, ">"),
+        !ValueComparator::Compare(null1, int_val, ">"),
         "null not > int"
     );
     check(
         stats,
-        !ValueComparator::compare(null1, int_val, "<="),
+        !ValueComparator::Compare(null1, int_val, "<="),
         "null not <= int"
     );
     check(
         stats,
-        !ValueComparator::compare(null1, int_val, ">="),
+        !ValueComparator::Compare(null1, int_val, ">="),
         "null not >= int"
     );
     
     check(
         stats,
-        !ValueComparator::compare(int_val, null1, "=="),
+        !ValueComparator::Compare(int_val, null1, "=="),
         "int != null"
     );
     check(
         stats,
-        ValueComparator::compare(int_val, null1, "!="),
+        ValueComparator::Compare(int_val, null1, "!="),
         "int != null"
     );
     check(
         stats,
-        !ValueComparator::compare(str_val, null1, "=="),
+        !ValueComparator::Compare(str_val, null1, "=="),
         "string != null"
     );
 }
@@ -397,32 +397,32 @@ void test_value_comparator_compare_cross_type(TestStats& stats) {
     
     check(
         stats,
-        !ValueComparator::compare(Value(10), Value("10"), "=="),
+        !ValueComparator::Compare(Value(10), Value("10"), "=="),
         "int != string"
     );
     check(
         stats,
-        !ValueComparator::compare(Value(10), Value("10"), "!="),
+        !ValueComparator::Compare(Value(10), Value("10"), "!="),
         "int != string"
     );
     check(
         stats,
-        !ValueComparator::compare(Value(10), Value("10"), "<"),
+        !ValueComparator::Compare(Value(10), Value("10"), "<"),
         "int not < string"
     );
     check(
         stats,
-        !ValueComparator::compare(Value(10), Value("10"), ">"),
+        !ValueComparator::Compare(Value(10), Value("10"), ">"),
         "int not > string"
     );
     check(
         stats,
-        !ValueComparator::compare(Value(10), Value("10"), "<="),
+        !ValueComparator::Compare(Value(10), Value("10"), "<="),
         "int not <= string"
     );
     check(
         stats,
-        !ValueComparator::compare(Value(10), Value("10"), ">="),
+        !ValueComparator::Compare(Value(10), Value("10"), ">="),
         "int not >= string"
     );
 }
@@ -432,22 +432,22 @@ void test_value_comparator_compare_unknown_operator(TestStats& stats) {
     
     check(
         stats,
-        !ValueComparator::compare(Value(10), Value(10), "&&"),
+        !ValueComparator::Compare(Value(10), Value(10), "&&"),
         "Unknown operator returns false"
     );
     check(
         stats,
-        !ValueComparator::compare(Value(10), Value(10), "LIKE"),
+        !ValueComparator::Compare(Value(10), Value(10), "LIKE"),
         "LIKE returns false"
     );
     check(
         stats,
-        !ValueComparator::compare(Value(10), Value(10), ""),
+        !ValueComparator::Compare(Value(10), Value(10), ""),
         "Empty operator returns false"
     );
     check(
         stats,
-        !ValueComparator::compare(Value("abc"), Value("abc"), "BETWEEN"),
+        !ValueComparator::Compare(Value("abc"), Value("abc"), "BETWEEN"),
         "BETWEEN returns false"
     );
 }
@@ -457,32 +457,32 @@ void test_value_comparator_between_int(TestStats& stats) {
     
     check(
         stats,
-        ValueComparator::between(Value(5), Value(1), Value(10)),
+        ValueComparator::Between(Value(5), Value(1), Value(10)),
         "5 between 1 and 10"
     );
     check(
         stats,
-        !ValueComparator::between(Value(0), Value(1), Value(10)),
+        !ValueComparator::Between(Value(0), Value(1), Value(10)),
         "0 not between 1 and 10"
     );
     check(
         stats,
-        !ValueComparator::between(Value(10), Value(1), Value(10)),
+        !ValueComparator::Between(Value(10), Value(1), Value(10)),
         "10 not between 1 and 10 (exclusive upper)"
     );
     check(
         stats,
-        ValueComparator::between(Value(1), Value(1), Value(2)),
+        ValueComparator::Between(Value(1), Value(1), Value(2)),
         "1 between 1 and 2"
     );
     check(
         stats,
-        ValueComparator::between(Value(-5), Value(-10), Value(0)),
+        ValueComparator::Between(Value(-5), Value(-10), Value(0)),
         "-5 between -10 and 0"
     );
     check(
         stats,
-        ValueComparator::between(Value(-10), Value(-10), Value(0)),
+        ValueComparator::Between(Value(-10), Value(-10), Value(0)),
         "-10 between -10 and 0 (inclusive lower)"
     );
 }
@@ -492,27 +492,27 @@ void test_value_comparator_between_string(TestStats& stats) {
     
     check(
         stats,
-        ValueComparator::between(Value("banana"), Value("apple"),
+        ValueComparator::Between(Value("banana"), Value("apple"),
         Value("cherry")), "banana between apple and cherry"
     );
     check(
         stats,
-        ValueComparator::between(Value("apple"), Value("apple"),
+        ValueComparator::Between(Value("apple"), Value("apple"),
         Value("cherry")), "apple between apple and cherry (inclusive lower)"
     );
     check(
         stats,
-        !ValueComparator::between(Value("cherry"), Value("apple"),
+        !ValueComparator::Between(Value("cherry"), Value("apple"),
         Value("cherry")), "cherry not between apple and cherry"
     );
     check(
         stats,
-        !ValueComparator::between(Value("aardvark"), Value("apple"),
+        !ValueComparator::Between(Value("aardvark"), Value("apple"),
         Value("cherry")), "aardvark not between apple and cherry"
     );
     check(
         stats,
-        ValueComparator::between(Value("a"), Value("a"), Value("b")), 
+        ValueComparator::Between(Value("a"), Value("a"), Value("b")), 
         "a between a and b");
 }
 
@@ -521,22 +521,22 @@ void test_value_comparator_between_null(TestStats& stats) {
     
     check(
         stats,
-        !ValueComparator::between(Value(), Value(1), Value(10)),
+        !ValueComparator::Between(Value(), Value(1), Value(10)),
         "null not between"
     );
     check(
         stats,
-        !ValueComparator::between(Value(5), Value(), Value(10)),
+        !ValueComparator::Between(Value(5), Value(), Value(10)),
         "null lower bound returns false"
     );
     check(
         stats,
-        !ValueComparator::between(Value(5), Value(1), Value()),
+        !ValueComparator::Between(Value(5), Value(1), Value()),
         "null upper bound returns false"
     );
     check(
         stats,
-        !ValueComparator::between(Value(), Value(), Value()),
+        !ValueComparator::Between(Value(), Value(), Value()),
         "all null returns false"
     );
 }
@@ -546,17 +546,17 @@ void test_value_comparator_between_cross_type(TestStats& stats) {
     
     check(
         stats,
-        !ValueComparator::between(Value(5), Value("1"), Value("10")),
+        !ValueComparator::Between(Value(5), Value("1"), Value("10")),
         "cross-type between returns false"
     );
     check(
         stats,
-        !ValueComparator::between(Value("5"), Value(1), Value(10)),
+        !ValueComparator::Between(Value("5"), Value(1), Value(10)),
         "cross-type between returns false"
     );
     check(
         stats,
-        !ValueComparator::between(Value(5), Value(1), Value("10")),
+        !ValueComparator::Between(Value(5), Value(1), Value("10")),
         "mixed bounds returns false"
     );
 }
@@ -566,32 +566,32 @@ void test_value_comparator_edge_cases(TestStats& stats) {
     
     check(
         stats,
-        ValueComparator::compare(Value(0), Value(0), "=="),
+        ValueComparator::Compare(Value(0), Value(0), "=="),
         "0 == 0"
     );
-    check(stats, ValueComparator::compare(Value(0), Value(0), "<="), "0 <= 0");
-    check(stats, ValueComparator::compare(Value(0), Value(0), ">="), "0 >= 0");
-    check(stats, !ValueComparator::compare(Value(0), Value(0), "<"), "0 not < 0");
-    check(stats, !ValueComparator::compare(Value(0), Value(0), ">"), "0 not > 0");
+    check(stats, ValueComparator::Compare(Value(0), Value(0), "<="), "0 <= 0");
+    check(stats, ValueComparator::Compare(Value(0), Value(0), ">="), "0 >= 0");
+    check(stats, !ValueComparator::Compare(Value(0), Value(0), "<"), "0 not < 0");
+    check(stats, !ValueComparator::Compare(Value(0), Value(0), ">"), "0 not > 0");
     check(
         stats,
-        !ValueComparator::compare(Value(0), Value(0), "!="),
+        !ValueComparator::Compare(Value(0), Value(0), "!="),
         "0 not != 0"
     );
     
     check(
         stats,
-        ValueComparator::compare(Value(""), Value(""), "=="),
+        ValueComparator::Compare(Value(""), Value(""), "=="),
         "empty == empty"
     );
     check(
         stats,
-        ValueComparator::compare(Value(""), Value(""), "<="),
+        ValueComparator::Compare(Value(""), Value(""), "<="),
         "empty <= empty"
     );
     check(
         stats,
-        ValueComparator::compare(Value(""), Value(""), ">="),
+        ValueComparator::Compare(Value(""), Value(""), ">="),
         "empty >= empty"
     );
 }

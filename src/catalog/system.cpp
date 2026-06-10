@@ -23,7 +23,7 @@ System::System() {
     }
 }
 
-void System::createDatabase(const std::string& name) {
+void System::CreateDatabase(const std::string& name) {
     if (databases.contains(name)) {
         throw DuplicateError("Database already exists");
     }
@@ -38,7 +38,7 @@ void System::createDatabase(const std::string& name) {
     );
 }
 
-Database* System::getDatabase(const std::string& name) {
+Database* System::GetDatabase(const std::string& name) {
     auto it = databases.find(name);
 
     if (it == databases.end()) {
@@ -48,8 +48,8 @@ Database* System::getDatabase(const std::string& name) {
     return it->second.get();
 }
 
-void System::useDatabase(const std::string& name) {
-    Database* db = getDatabase(name);
+void System::UseDatabase(const std::string& name) {
+    Database* db = GetDatabase(name);
 
     if (!db) {
         throw NotFoundError("Database not found");
@@ -58,11 +58,11 @@ void System::useDatabase(const std::string& name) {
     current_database = db;
 }
 
-Database* System::getCurrentDatabase() {
+Database* System::GetCurrentDatabase() {
     return current_database;
 }
 
-void System::dropDatabase(const std::string& name) {
+void System::DropDatabase(const std::string& name) {
     auto it = databases.find(name);
 
     if (it == databases.end()) {

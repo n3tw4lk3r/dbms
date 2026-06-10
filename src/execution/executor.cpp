@@ -12,43 +12,43 @@ Executor::Executor(System& system) :
     system(system)
 {}
 
-void Executor::execute(const Command& cmd) {
+void Executor::Execute(const Command& cmd) {
     switch (cmd.type) {
 
     case CommandType::kCreateDatabase:
-        executeCreateDatabase(cmd);
+        ExecuteCreateDatabase(cmd);
         return;
 
     case CommandType::kDropDatabase:
-        executeDropDatabase(cmd);
+        ExecuteDropDatabase(cmd);
         return;
 
     case CommandType::kUseDatabase:
-        executeUseDatabase(cmd);
+        ExecuteUseDatabase(cmd);
         return;
 
     case CommandType::kCreateTable:
-        executeCreateTable(cmd);
+        ExecuteCreateTable(cmd);
         return;
 
     case CommandType::kDropTable:
-        executeDropTable(cmd);
+        ExecuteDropTable(cmd);
         return;
 
     case CommandType::kInsert:
-        executeInsert(cmd);
+        ExecuteInsert(cmd);
         return;
 
     case CommandType::kSelect:
-        executeSelect(cmd);
+        ExecuteSelect(cmd);
         return;
 
     case CommandType::kUpdate:
-        executeUpdate(cmd);
+        ExecuteUpdate(cmd);
         return;
 
     case CommandType::kDelete:
-        executeDelete(cmd);
+        ExecuteDelete(cmd);
         return;
 
     default:
@@ -56,88 +56,88 @@ void Executor::execute(const Command& cmd) {
     }
 }
 
-void Executor::executeCreateDatabase(const Command& cmd) {
-    system.createDatabase(cmd.database_name);
+void Executor::ExecuteCreateDatabase(const Command& cmd) {
+    system.CreateDatabase(cmd.database_name);
 
     std::cout << "Database " << cmd.database_name << " created\n";
 }
 
-void Executor::executeDropDatabase(const Command& cmd) {
-    Database* db = system.getDatabase(cmd.database_name);
+void Executor::ExecuteDropDatabase(const Command& cmd) {
+    Database* db = system.GetDatabase(cmd.database_name);
 
     if (!db) {
         throw NotFoundError("Database not found");
     }
 
-    system.dropDatabase(cmd.database_name);
+    system.DropDatabase(cmd.database_name);
 
     std::cout << "Database dropped: " << cmd.database_name << "\n";
 }
 
-void Executor::executeUseDatabase(const Command& cmd) {
-    system.useDatabase(cmd.database_name);
+void Executor::ExecuteUseDatabase(const Command& cmd) {
+    system.UseDatabase(cmd.database_name);
     std::cout << "Using database " << cmd.database_name << "\n";
 }
 
-void Executor::executeCreateTable(const Command& cmd) {
-    Database* db = resolveDatabase(cmd);
-    db->createTable(cmd.table_name, cmd.columns);
+void Executor::ExecuteCreateTable(const Command& cmd) {
+    Database* db = ResolveDatabase(cmd);
+    db->CreateTable(cmd.table_name, cmd.columns);
 
     std::cout << "Table " << cmd.table_name << " created\n";
 }
 
-void Executor::executeDropTable(const Command& cmd) {
-    Database* db = resolveDatabase(cmd);
-    Table* table = db->getTable(cmd.table_name);
+void Executor::ExecuteDropTable(const Command& cmd) {
+    Database* db = ResolveDatabase(cmd);
+    Table* table = db->GetTable(cmd.table_name);
 
     if (!table) {
         throw NotFoundError("Table not found");
     }
 
-    db->dropTable(cmd.table_name);
+    db->DropTable(cmd.table_name);
     std::cout << "Table dropped: " << cmd.table_name << "\n";
 }
 
-void Executor::executeInsert(const Command& cmd) {
-    Database* db = resolveDatabase(cmd);
-    Table* table = db->getTable(cmd.table_name);
+void Executor::ExecuteInsert(const Command& cmd) {
+    Database* db = ResolveDatabase(cmd);
+    Table* table = db->GetTable(cmd.table_name);
 
     if (!table) {
         throw NotFoundError("Table not found");
     }
     
-    const auto& schema = table->getSchema();
+    const auto& schema = table->GetSchema();
     for (const auto& column_name : cmd.column_names) {
-        validateColumnExists(schema, column_name);
+        ValidateColumnExists(schema, column_name);
     }
 
 
     for (const auto& values : cmd.values) {
-        table->insertRow(buildInsertRow(*table, cmd, values));
+        table->InsertRow(BuildInsertRow(*table, cmd, values));
     }
     
     std::cout << cmd.values.size() << " rows inserted\n";
 }
 
-void Executor::executeSelect(const Command& cmd) {
-    Database* db = resolveDatabase(cmd);
-    Table* table = db->getTable(cmd.table_name);
+void Executor::ExecuteSelect(const Command& cmd) {
+    Database* db = ResolveDatabase(cmd);
+    Table* table = db->GetTable(cmd.table_name);
 
     if (!table) {
         throw NotFoundError("Table not found");
     }
 
-    const auto& schema = table->getSchema();
+    const auto& schema = table->GetSchema();
     
-    validateSelectColumns(cmd, schema);
-    validateConditions(cmd.conditions, schema);
+    ValidateSelectColumns(cmd, schema);
+    ValidateConditions(cmd.conditions, schema);
     
     std::vector<const Row*> result_rows;
-    if (canUseIndexLookup(*table, cmd.conditions)) {
-        Row* row = tryFindIndexedRow(*table, cmd.conditions);
+    if (CanUseIndexLookup(*table, cmd.conditions)) {
+        Row* row = TryFindIndexedRow(*table, cmd.conditions);
 
         if (
-            row && matchConditions(
+            row && MatchConditions(
                 cmd.conditions,
                 *row,
                 schema
@@ -146,11 +146,11 @@ void Executor::executeSelect(const Command& cmd) {
             result_rows.push_back(row);
         }
 
-        printJsonRows(result_rows, cmd, schema);
+        PrintJsonRows(result_rows, cmd, schema);
         return;
     }
 
-    const auto& rows = table->getRows();
+    const auto& rows = table->GetRows();
     for (const auto& row_ptr : rows) {
         const Row& row = *row_ptr;
 
@@ -158,29 +158,29 @@ void Executor::executeSelect(const Command& cmd) {
             continue;
         }
 
-        if (!matchConditions(cmd.conditions, row, schema)) {
+        if (!MatchConditions(cmd.conditions, row, schema)) {
             continue;
         }
 
         result_rows.push_back(&row);
     }
 
-    printJsonRows(result_rows, cmd, schema);
+    PrintJsonRows(result_rows, cmd, schema);
 }
 
-void Executor::executeUpdate(const Command& cmd) {
-    Database* db = resolveDatabase(cmd);
-    Table* table = db->getTable(cmd.table_name);
+void Executor::ExecuteUpdate(const Command& cmd) {
+    Database* db = ResolveDatabase(cmd);
+    Table* table = db->GetTable(cmd.table_name);
 
     if (!table) {
         throw NotFoundError("Table not found");
     }
 
-    auto& rows = table->getRowsMutable();
-    const auto& schema = table->getSchema();
+    auto& rows = table->GetRowsMutable();
+    const auto& schema = table->GetSchema();
     
-    validateAssignments(cmd, schema);
-    validateConditions(cmd.conditions, schema);
+    ValidateAssignments(cmd, schema);
+    ValidateConditions(cmd.conditions, schema);
     
     size_t updated = 0;
     for (const auto& row_ptr : rows) {
@@ -190,29 +190,29 @@ void Executor::executeUpdate(const Command& cmd) {
             continue;
         }
 
-        if (!matchConditions(cmd.conditions, row, schema)) {
+        if (!MatchConditions(cmd.conditions, row, schema)) {
             continue;
         }
 
-        table->updateRow(row, cmd.assignments);
+        table->UpdateRow(row, cmd.assignments);
         ++updated;
     }
 
     std::cout << updated << " rows updated\n";
 }
 
-void Executor::executeDelete(const Command& cmd) {
-    Database* db = resolveDatabase(cmd);
-    Table* table = db->getTable(cmd.table_name);
+void Executor::ExecuteDelete(const Command& cmd) {
+    Database* db = ResolveDatabase(cmd);
+    Table* table = db->GetTable(cmd.table_name);
 
     if (!table) {
         throw NotFoundError("Table not found");
     }
 
-    auto& rows = table->getRowsMutable();
-    const auto& schema = table->getSchema();
+    auto& rows = table->GetRowsMutable();
+    const auto& schema = table->GetSchema();
 
-    validateConditions(cmd.conditions, schema);
+    ValidateConditions(cmd.conditions, schema);
 
     size_t deleted = 0;
     for (const auto& row_ptr : rows) {
@@ -222,24 +222,24 @@ void Executor::executeDelete(const Command& cmd) {
             continue;
         }
 
-        if (!matchConditions(cmd.conditions, row, schema)) {
+        if (!MatchConditions(cmd.conditions, row, schema)) {
             continue;
         }
 
-        table->deleteRow(row.id);
+        table->DeleteRow(row.id);
         ++deleted;
     }
 
     std::cout << deleted << " rows deleted\n";
 }
 
-Database* Executor::resolveDatabase(const Command& cmd) {
+Database* Executor::ResolveDatabase(const Command& cmd) {
     Database* db = nullptr;
 
     if (!cmd.database_name.empty()) {
-        db = system.getDatabase(cmd.database_name);
+        db = system.GetDatabase(cmd.database_name);
     } else {
-        db = system.getCurrentDatabase();
+        db = system.GetCurrentDatabase();
     }
 
     if (!db) {
@@ -249,7 +249,7 @@ Database* Executor::resolveDatabase(const Command& cmd) {
     return db;
 }
 
-void Executor::printJsonRows(
+void Executor::PrintJsonRows(
     const std::vector<const Row*>& rows,
     const Command& cmd,
     const std::vector<ColumnSchema>& schema
@@ -257,7 +257,7 @@ void Executor::printJsonRows(
     std::cout << "[\n";
 
     for (size_t i = 0; i < rows.size(); ++i) {
-        printJsonRow(*rows[i], cmd, schema);
+        PrintJsonRow(*rows[i], cmd, schema);
 
         if (i + 1 != rows.size()) {
             std::cout << ",";
@@ -269,7 +269,7 @@ void Executor::printJsonRows(
     std::cout << "]\n";
 }
 
-void Executor::printJsonRow(
+void Executor::PrintJsonRow(
     const Row& row,
     const Command& cmd,
     const std::vector<ColumnSchema>& schema
@@ -293,7 +293,7 @@ void Executor::printJsonRow(
     for (size_t i = 0; i < columns.size(); ++i) {
         const auto& column = columns[i];
 
-        int column_index = findColumnIndex(
+        int column_index = FindColumnIndex(
             schema,
             column.name
         );
@@ -313,7 +313,7 @@ void Executor::printJsonRow(
         }
 
         std::cout << "    \"" << field_name << "\": ";
-        printJsonValue(row.values[column_index]);
+        PrintJsonValue(row.values[column_index]);
 
         if (i + 1 != columns.size()) {
             std::cout << ",";
@@ -324,11 +324,11 @@ void Executor::printJsonRow(
     std::cout << "  }";
 }
 
-void Executor::printJsonValue(const Value& value) {
-    switch (value.getType()) {
+void Executor::PrintJsonValue(const Value& value) {
+    switch (value.GetType()) {
 
     case Value::Type::kInt:
-        std::cout << value.asInt();
+        std::cout << value.AsInt();
         return;
 
     case Value::Type::kNull:
@@ -338,7 +338,7 @@ void Executor::printJsonValue(const Value& value) {
     case Value::Type::kString: {
         std::cout << "\"";
 
-        const std::string str = value.asString();
+        const std::string str = value.AsString();
 
         for (char ch : str) {
             switch (ch) {
@@ -376,7 +376,7 @@ void Executor::printJsonValue(const Value& value) {
     }
 }
 
-bool Executor::matchConditions(
+bool Executor::MatchConditions(
     const std::vector<Condition>& conditions,
     const Row& row,
     const std::vector<ColumnSchema>& schema
@@ -386,27 +386,27 @@ bool Executor::matchConditions(
     }
 
     for (const auto& condition : conditions) {
-        Value left = resolveOperand(
+        Value left = ResolveOperand(
             condition.lhs,
             row,
             schema
         );
 
-        Value right = resolveOperand(
+        Value right = ResolveOperand(
             condition.rhs,
             row,
             schema
         );
 
         if (condition.operator_type == "BETWEEN") {
-            Value range_end = resolveOperand(
+            Value range_end = ResolveOperand(
                 condition.range_end,
                 row,
                 schema
             );
 
             if (
-                !ValueComparator::between(
+                !ValueComparator::Between(
                     left,
                     right,
                     range_end
@@ -419,7 +419,7 @@ bool Executor::matchConditions(
         }
 
         if (condition.operator_type == "LIKE") {
-            if (!likeValues(left, right)) {
+            if (!LikeValues(left, right)) {
                 return false;
             }
 
@@ -427,7 +427,7 @@ bool Executor::matchConditions(
         }
 
         if (
-            !ValueComparator::compare(
+            !ValueComparator::Compare(
                 left,
                 right,
                 condition.operator_type
@@ -440,7 +440,7 @@ bool Executor::matchConditions(
     return true;
 }
 
-int Executor::findColumnIndex(
+int Executor::FindColumnIndex(
     const std::vector<ColumnSchema>& schema,
     const std::string& name
 ) {
@@ -453,11 +453,11 @@ int Executor::findColumnIndex(
     return -1;
 }
 
-void Executor::validateColumnExists(
+void Executor::ValidateColumnExists(
     const std::vector<ColumnSchema>& schema,
     const std::string& column_name
 ) {
-    if (findColumnIndex(schema, column_name) < 0) {
+    if (FindColumnIndex(schema, column_name) < 0) {
         throw SchemaError(
             "Unknown column: " +
             column_name
@@ -465,7 +465,7 @@ void Executor::validateColumnExists(
     }
 }
 
-void Executor::validateSelectColumns(
+void Executor::ValidateSelectColumns(
     const Command& cmd,
     const std::vector<ColumnSchema>& schema
 ) {
@@ -477,46 +477,46 @@ void Executor::validateSelectColumns(
     }
 
     for (const auto& column : cmd.select_columns) {
-        validateColumnExists(
+        ValidateColumnExists(
             schema,
             column.name
         );
     }
 }
 
-void Executor::validateAssignments(
+void Executor::ValidateAssignments(
     const Command& cmd,
     const std::vector<ColumnSchema>& schema
 ) {
     for (const auto& assignment : cmd.assignments) {
-        validateColumnExists(
+        ValidateColumnExists(
             schema,
             assignment.column
         );
     }
 }
 
-void Executor::validateConditions(
+void Executor::ValidateConditions(
     const std::vector<Condition>& conditions,
     const std::vector<ColumnSchema>& schema
 ) {
     for (const auto& condition : conditions) {
         if (condition.lhs.is_column) {
-            validateColumnExists(
+            ValidateColumnExists(
                 schema,
                 condition.lhs.column
             );
         }
 
         if (condition.rhs.is_column) {
-            validateColumnExists(
+            ValidateColumnExists(
                 schema,
                 condition.rhs.column
             );
         }
 
         if (condition.range_end.is_column) {
-            validateColumnExists(
+            ValidateColumnExists(
                 schema,
                 condition.range_end.column
             );
@@ -524,7 +524,7 @@ void Executor::validateConditions(
     }
 }
 
-Value Executor::resolveOperand(
+Value Executor::ResolveOperand(
     const Operand& operand,
     const Row& row,
     const std::vector<ColumnSchema>& schema
@@ -533,7 +533,7 @@ Value Executor::resolveOperand(
         return operand.value;
     }
 
-    int column_index = findColumnIndex(
+    int column_index = FindColumnIndex(
         schema,
         operand.column
     );
@@ -548,26 +548,26 @@ Value Executor::resolveOperand(
     return row.values[column_index];
 }
 
-bool Executor::likeValues(
+bool Executor::LikeValues(
     const Value& value,
     const Value& pattern
 ) {
-    if (value.isNull() || pattern.isNull()) {
+    if (value.IsNull() || pattern.IsNull()) {
         return false;
     }
 
     if (
-        value.getType() != Value::Type::kString ||
-        pattern.getType() != Value::Type::kString
+        value.GetType() != Value::Type::kString ||
+        pattern.GetType() != Value::Type::kString
     ) {
         return false;
     }
 
     try {
-        std::regex regex(pattern.asString());
+        std::regex regex(pattern.AsString());
 
         return std::regex_match(
-            value.asString(),
+            value.AsString(),
             regex
         );
 
@@ -579,7 +579,7 @@ bool Executor::likeValues(
     }
 }
 
-bool Executor::canUseIndexLookup(
+bool Executor::CanUseIndexLookup(
     const Table& table,
     const std::vector<Condition>& conditions
 ) {
@@ -601,29 +601,29 @@ bool Executor::canUseIndexLookup(
         return false;
     }
 
-    return table.hasIndexedColumn(
+    return table.HasIndexedColumn(
         condition.lhs.column
     );
 }
 
-Row* Executor::tryFindIndexedRow(
+Row* Executor::TryFindIndexedRow(
     Table& table,
     const std::vector<Condition>& conditions
 ) {
     const Condition& condition = conditions[0];
 
-    return table.findByIndexedValue(
+    return table.FindByIndexedValue(
         condition.lhs.column,
         condition.rhs.value
     );
 }
 
-std::vector<Value> Executor::buildInsertRow(
+std::vector<Value> Executor::BuildInsertRow(
     const Table& table,
     const Command& cmd,
     const std::vector<Value>& values
 ) {
-    const auto& schema = table.getSchema();
+    const auto& schema = table.GetSchema();
 
     if (cmd.column_names.empty()) {
         return values;
@@ -638,7 +638,7 @@ std::vector<Value> Executor::buildInsertRow(
     std::vector<Value> result(schema.size(), Value());
 
     for (size_t i = 0; i < cmd.column_names.size(); ++i) {
-        int column_index = findColumnIndex(
+        int column_index = FindColumnIndex(
             schema,
             cmd.column_names[i]
         );

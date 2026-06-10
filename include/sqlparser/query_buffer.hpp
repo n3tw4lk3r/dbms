@@ -7,8 +7,8 @@ namespace dbms {
 
 class QueryBuffer {
 public:
-    std::vector<std::string> append(const std::string& line);
-    bool empty() const;
+    std::vector<std::string> Append(const std::string& line);
+    bool Empty() const;
 
 private:
     std::string buffer;

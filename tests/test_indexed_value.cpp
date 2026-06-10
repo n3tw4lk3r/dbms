@@ -10,7 +10,7 @@ using namespace dbms;
 void test_indexed_value_default_constructor(TestStats& stats) {
     test_header("Default constructor");
     IndexedValue iv;
-    check(stats, iv.getValue().isNull(), "Default indexed value is null");
+    check(stats, iv.GetValue().IsNull(), "Default indexed value is null");
 }
 
 void test_indexed_value_value_constructor(TestStats& stats) {
@@ -19,25 +19,25 @@ void test_indexed_value_value_constructor(TestStats& stats) {
     IndexedValue iv_int(Value(42));
     check(
         stats,
-        iv_int.getValue().getType() == Value::Type::kInt,
+        iv_int.GetValue().GetType() == Value::Type::kInt,
         "Int type preserved"
     );
-    check(stats, iv_int.getValue().asInt() == 42, "Int value preserved");
+    check(stats, iv_int.GetValue().AsInt() == 42, "Int value preserved");
     
     IndexedValue iv_str(Value("hello"));
     check(
         stats,
-        iv_str.getValue().getType() == Value::Type::kString,
+        iv_str.GetValue().GetType() == Value::Type::kString,
         "String type preserved"
     );
     check(
         stats,
-        iv_str.getValue().asString() == "hello",
+        iv_str.GetValue().AsString() == "hello",
         "String value preserved"
     );
     
     IndexedValue iv_null;
-    check(stats, iv_null.getValue().isNull(), "Null value preserved");
+    check(stats, iv_null.GetValue().IsNull(), "Null value preserved");
 }
 
 void test_indexed_value_int_comparison_less(TestStats& stats) {
@@ -183,19 +183,19 @@ void test_indexed_value_get_value_returns_reference(TestStats& stats) {
     
     Value v(42);
     IndexedValue iv(v);
-    const Value& ref = iv.getValue();
-    check(stats, ref.getType() == Value::Type::kInt, "Reference type is Int");
-    check(stats, ref.asInt() == 42, "Reference value is 42");
+    const Value& ref = iv.GetValue();
+    check(stats, ref.GetType() == Value::Type::kInt, "Reference type is Int");
+    check(stats, ref.AsInt() == 42, "Reference value is 42");
     
     Value v_str("test");
     IndexedValue iv_str(v_str);
-    const Value& ref_str = iv_str.getValue();
+    const Value& ref_str = iv_str.GetValue();
     check(
         stats,
-        ref_str.getType() == Value::Type::kString,
+        ref_str.GetType() == Value::Type::kString,
         "String reference type"
     );
-    check(stats, ref_str.asString() == "test", "String reference value");
+    check(stats, ref_str.AsString() == "test", "String reference value");
 }
 
 void test_indexed_value_negative_numbers_comparison(TestStats& stats) {

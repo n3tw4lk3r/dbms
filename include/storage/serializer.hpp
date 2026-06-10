@@ -9,12 +9,12 @@ namespace dbms {
 
 class Serializer {
 public:
-    static std::string serializeValue(const Value& value);
-    static Value deserializeValue(const std::string& token);
+    static std::string SerializeValue(const Value& value);
+    static Value DeserializeValue(const std::string& token);
 
-    static std::string serializeRowBody(const Row& row);
-    static std::string serializeRow(const Row& row);
-    static Row deserializeRow(const std::string& line);
+    static std::string SerializeRowBody(const Row& row);
+    static std::string SerializeRow(const Row& row);
+    static Row DeserializeRow(const std::string& line);
 };
 
 } // namespace dbms

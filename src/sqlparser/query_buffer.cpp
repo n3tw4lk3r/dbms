@@ -2,7 +2,7 @@
 
 namespace dbms {
 
-std::vector<std::string> QueryBuffer::append(
+std::vector<std::string> QueryBuffer::Append(
     const std::string& line
 ) {
     buffer += line;
@@ -45,7 +45,7 @@ std::vector<std::string> QueryBuffer::append(
     return queries;
 }
 
-bool QueryBuffer::empty() const {
+bool QueryBuffer::Empty() const {
     return buffer.empty();
 }
 

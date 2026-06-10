@@ -13,22 +13,17 @@ class System {
 public:
     System();
 
-    void createDatabase(const std::string& name);
-    Database* getDatabase(const std::string& name);
-    void useDatabase(const std::string& name);
+    void CreateDatabase(const std::string& name);
+    Database* GetDatabase(const std::string& name);
+    void UseDatabase(const std::string& name);
     
-    Database* getCurrentDatabase();
+    Database* GetCurrentDatabase();
     
-    void dropDatabase(const std::string& name);
+    void DropDatabase(const std::string& name);
 
 private:
-    std::unordered_map<
-        std::string,
-        std::unique_ptr<Database>
-    > databases;
-
+    std::unordered_map<std::string, std::unique_ptr<Database>> databases;
     Database* current_database = nullptr;
-
     std::filesystem::path storage_root = "data";
 };
 

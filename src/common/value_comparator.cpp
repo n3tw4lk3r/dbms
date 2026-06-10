@@ -2,30 +2,30 @@
 
 namespace dbms {
 
-bool ValueComparator::compare(
+bool ValueComparator::Compare(
     const Value& lhs,
     const Value& rhs,
     const std::string& operator_str
 ) {
-    if (lhs.isNull() || rhs.isNull()) {
+    if (lhs.IsNull() || rhs.IsNull()) {
         if (operator_str == "==") {
-            return lhs.isNull() && rhs.isNull();
+            return lhs.IsNull() && rhs.IsNull();
         }
 
         if (operator_str == "!=") {
-            return lhs.isNull() != rhs.isNull();
+            return lhs.IsNull() != rhs.IsNull();
         }
 
         return false;
     }
     
-    if (lhs.getType() != rhs.getType()) {
+    if (lhs.GetType() != rhs.GetType()) {
         return false;
     }
 
-    if (lhs.getType() == Value::Type::kInt) {
-        int x = lhs.asInt();
-        int y = rhs.asInt();
+    if (lhs.GetType() == Value::Type::kInt) {
+        int x = lhs.AsInt();
+        int y = rhs.AsInt();
 
         if (operator_str == "==") {
             return x == y;
@@ -52,9 +52,9 @@ bool ValueComparator::compare(
         }
     }
 
-    if (lhs.getType() == Value::Type::kString) {
-        const auto& x = lhs.asString();
-        const auto& y = rhs.asString();
+    if (lhs.GetType() == Value::Type::kString) {
+        const auto& x = lhs.AsString();
+        const auto& y = rhs.AsString();
 
         if (operator_str == "==") {
             return x == y;
@@ -84,31 +84,31 @@ bool ValueComparator::compare(
     return false;
 }
 
-bool ValueComparator::between(
+bool ValueComparator::Between(
     const Value& value,
     const Value& lhs,
     const Value& rhs
 ) {
-    if (value.isNull() || lhs.isNull() || rhs.isNull()) {
+    if (value.IsNull() || lhs.IsNull() || rhs.IsNull()) {
         return false;
     }
 
     if (
-        value.getType() != lhs.getType() ||
-        value.getType() != rhs.getType()
+        value.GetType() != lhs.GetType() ||
+        value.GetType() != rhs.GetType()
     ) {
         return false;
     }
 
-    if (value.getType() == Value::Type::kInt) {
-        int x = value.asInt();
+    if (value.GetType() == Value::Type::kInt) {
+        int x = value.AsInt();
 
-        return lhs.asInt() <= x && x < rhs.asInt();
+        return lhs.AsInt() <= x && x < rhs.AsInt();
     }
 
-    if (value.getType() == Value::Type::kString) {
-        const auto& x = value.asString();
-        return lhs.asString() <= x && x < rhs.asString();
+    if (value.GetType() == Value::Type::kString) {
+        const auto& x = value.AsString();
+        return lhs.AsString() <= x && x < rhs.AsString();
     }
 
     return false;
