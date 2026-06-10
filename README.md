@@ -99,6 +99,13 @@ cmake --build build
 
 ## Run
 
+Inside `build/`:
+
+Run unit tests:
+```bash
+ctest --rerun-failed --output-on-failure
+```
+
 Interactive mode:
 
 ```bash
