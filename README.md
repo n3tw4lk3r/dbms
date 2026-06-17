@@ -99,22 +99,23 @@ cmake --build build
 
 ## Run
 
-Inside `build/`:
-
 Run unit tests:
 ```bash
+# inside build/tests/
 ctest --rerun-failed --output-on-failure
 ```
 
 Interactive mode:
 
 ```bash
+#inside build/
 ./dbms
 ```
 
 Batch mode:
 
 ```bash
+#inside build/
 ./dbms script.txt
 ```
 
