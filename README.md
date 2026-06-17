@@ -108,14 +108,14 @@ ctest --rerun-failed --output-on-failure
 Interactive mode:
 
 ```bash
-#inside build/
+# inside build/
 ./dbms
 ```
 
 Batch mode:
 
 ```bash
-#inside build/
+# inside build/
 ./dbms script.txt
 ```
 
