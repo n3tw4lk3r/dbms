@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "catalog/system.hpp"
@@ -49,7 +50,7 @@ private:
 
     int FindColumnIndex(
         const std::vector<ColumnSchema>& schema,
-        const std::string& name
+        std::string_view name
     );
 
     void ValidateColumnExists(

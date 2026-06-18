@@ -2,14 +2,15 @@
 
 #include <filesystem>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
 #include "common/types.hpp"
 #include "common/value.hpp"
+#include "sqlparser/command.hpp"
 #include "storage/btree.hpp"
 #include "storage/row.hpp"
-#include "sqlparser/command.hpp"
 
 namespace dbms {
 
@@ -18,7 +19,7 @@ class Table {
 
 public:
     Table(
-        const std::string& name,
+        std::string_view name,
         const std::vector<ColumnSchema>& schema,
         const std::filesystem::path& storage_path
     );
@@ -80,7 +81,7 @@ private:
         RowId ignored_row_id = 0
     ) const;
 
-    int FindColumnIndex(const std::string& column_name) const;
+    int FindColumnIndex(std::string_view column_name) const;
 
     void InsertIntoIndexes(const Row& row);
     void EraseFromIndexes(const Row& row);

@@ -442,7 +442,7 @@ bool Executor::MatchConditions(
 
 int Executor::FindColumnIndex(
     const std::vector<ColumnSchema>& schema,
-    const std::string& name
+    std::string_view name
 ) {
     for (size_t i = 0; i < schema.size(); ++i) {
         if (schema[i].name == name) {
@@ -558,7 +558,7 @@ bool Executor::LikeValues(
 
     if (
         value.GetType() != Value::Type::kString ||
-        pattern.GetType() != Value::Type::kString
+            pattern.GetType() != Value::Type::kString
     ) {
         return false;
     }

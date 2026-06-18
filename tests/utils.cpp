@@ -33,11 +33,11 @@ ScopedDataDirectory::~ScopedDataDirectory() {
     }
 }
 
-void test_header(const std::string& name) {
+void test_header(std::string_view name) {
     std::cout << "\n=== " << name << " ===" << std::endl;
 }
 
-void check(TestStats& stats, bool condition, const std::string& description) {
+void check(TestStats& stats, bool condition, std::string_view description) {
     ++stats.tests_run;
     if (condition) {
         ++stats.tests_passed;

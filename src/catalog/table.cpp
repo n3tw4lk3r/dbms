@@ -9,7 +9,7 @@
 namespace dbms {
 
 Table::Table(
-    const std::string& name,
+    std::string_view name,
     const std::vector<ColumnSchema>& schema,
     const std::filesystem::path& storage_path
 ) :
@@ -545,9 +545,7 @@ void Table::ValidateUniqueConstraints(
     }
 }
 
-int Table::FindColumnIndex(
-    const std::string& column_name
-) const {
+int Table::FindColumnIndex(std::string_view column_name) const {
     for (size_t i = 0; i < schema.size(); ++i) {
         if (schema[i].name == column_name) {
             return static_cast<int>(i);

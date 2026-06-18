@@ -42,7 +42,7 @@ Command Parser::Parse(const std::string& query) {
     return cmd;
 }
 
-std::vector<std::string> Parser::Tokenize(const std::string& input) {
+std::vector<std::string> Parser::Tokenize(std::string_view input) {
     if (input.empty()) {
         throw ParserError("Empty query");
     }

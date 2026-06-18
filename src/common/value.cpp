@@ -14,7 +14,7 @@ Value::Value(int value) :
     int_value(value)
 {}
 
-Value::Value(const std::string& value) :
+Value::Value(std::string_view value) :
     type(Type::kString),
     int_value(0),
     string_value(value)

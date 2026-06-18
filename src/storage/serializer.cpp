@@ -23,13 +23,13 @@ std::string Serializer::SerializeValue(const Value& value) {
     throw TypeError("Unknown value type");
 }
 
-Value Serializer::DeserializeValue(const std::string& token) {
+Value Serializer::DeserializeValue(std::string_view token) {
     if (token == "NULL") {
         return Value();
     }
 
     if (token.rfind("INT:", 0) == 0) {
-        return Value(std::stoi(token.substr(4)));
+        return Value(std::stoi(std::string(token.substr(4))));
     }
 
     if (token.rfind("STRING:", 0) != 0) {
@@ -41,8 +41,8 @@ Value Serializer::DeserializeValue(const std::string& token) {
         throw DataCorruptionError("Corrupted string format");
     }
 
-    size_t len = std::stoull(token.substr(7, size_delimeter - 7));
-    std::string value = token.substr(size_delimeter + 1);
+    size_t len = std::stoull(std::string(token.substr(7, size_delimeter - 7)));
+    std::string value(token.substr(size_delimeter + 1));
 
     if (value.size() != len) {
         throw DataCorruptionError("String size mismatch");
@@ -68,7 +68,7 @@ std::string Serializer::SerializeRow(const Row& row) {
     return std::to_string(row.id) + "|" + SerializeRowBody(row);
 }
 
-Row Serializer::DeserializeRow(const std::string& line) {
+Row Serializer::DeserializeRow(std::string_view line) {
     Row row;
 
     size_t pos = line.find('|');
@@ -77,7 +77,7 @@ Row Serializer::DeserializeRow(const std::string& line) {
         throw DataCorruptionError("Corrupted row");
     }
 
-    row.id = std::stoull(line.substr(0, pos));
+    row.id = std::stoull(std::string(line.substr(0, pos)));
 
     size_t current = pos + 1;
     while (current < line.size()) {
@@ -120,7 +120,7 @@ Row Serializer::DeserializeRow(const std::string& line) {
             }
 
             size_t len = std::stoull(
-                line.substr(len_begin, len_end - len_begin)
+                std::string(line.substr(len_begin, len_end - len_begin))
             );
 
             size_t data_begin = len_end + 1;
@@ -129,10 +129,10 @@ Row Serializer::DeserializeRow(const std::string& line) {
                 throw DataCorruptionError("Corrupted string length");
             }
 
-            std::string value = line.substr(
+            std::string value(line.substr(
                 data_begin,
                 len
-            );
+            ));
 
             row.values.push_back(Value(value));
 

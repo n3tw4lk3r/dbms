@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include <string_view>
 
 #include "common/value.hpp"
 
@@ -11,7 +11,7 @@ public:
     static bool Compare(
         const Value& lhs,
         const Value& rhs,
-        const std::string& operator_str
+        std::string_view operator_str
     );
 
     static bool Between(

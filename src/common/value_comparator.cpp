@@ -5,7 +5,7 @@ namespace dbms {
 bool ValueComparator::Compare(
     const Value& lhs,
     const Value& rhs,
-    const std::string& operator_str
+    std::string_view operator_str
 ) {
     if (lhs.IsNull() || rhs.IsNull()) {
         if (operator_str == "==") {

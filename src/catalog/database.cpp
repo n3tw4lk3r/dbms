@@ -57,7 +57,7 @@ void Database::CreateTable(
         names.insert(column.name);
     }
 
-    if (tables.contains(table_name)) {
+    if (tables.contains(std::string(table_name))) {
         throw DuplicateError("Table already exists");
     }
     

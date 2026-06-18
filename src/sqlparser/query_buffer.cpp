@@ -2,9 +2,7 @@
 
 namespace dbms {
 
-std::vector<std::string> QueryBuffer::Append(
-    const std::string& line
-) {
+std::vector<std::string> QueryBuffer::Append(std::string_view line) {
     buffer += line;
     buffer += '\n';
 

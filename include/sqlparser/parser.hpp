@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "sqlparser/command.hpp"
@@ -12,7 +13,7 @@ public:
     Command Parse(const std::string& query);
 
 private:
-    std::vector<std::string> Tokenize(const std::string& query);
+    std::vector<std::string> Tokenize(std::string_view query);
     std::string Normalize(const std::string& token);
     
     void ValidateIdentifier(const std::string& token) const;   
@@ -35,7 +36,7 @@ private:
     );
     Operand ParseOperand(const std::string& token);
     void ParseTableName(
-        const std::string& fullName,
+        const std::string& full_name,
         std::string& database_name,
         std::string& table_name
     );

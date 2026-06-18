@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 
 namespace dbms {
 
@@ -14,7 +15,7 @@ public:
 
     Value();
     explicit Value(int value);
-    explicit Value(const std::string& value);
+    explicit Value(std::string_view value);
 
     Type GetType() const;
 

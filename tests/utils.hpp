@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include <string_view>
 
 class ScopedDataDirectory {
 private:
@@ -17,7 +17,7 @@ struct TestStats {
     int tests_failed = 0;
 };
 
-void test_header(const std::string& name);
-void check(TestStats& stats, bool condition, const std::string& description);
+void test_header(std::string_view name);
+void check(TestStats& stats, bool condition, std::string_view description);
 void print_test_results(const TestStats& stats);
 
