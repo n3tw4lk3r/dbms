@@ -4,10 +4,10 @@
 #include <iostream>
 #include <string>
 
-#include "catalog/system.hpp"
-#include "execution/executor.hpp"
-#include "sqlparser/parser.hpp"
-#include "sqlparser/query_buffer.hpp"
+#include "catalog/System.hpp"
+#include "execution/Executor.hpp"
+#include "sqlparser/Parser.hpp"
+#include "sqlparser/QueryBuffer.hpp"
 
 namespace dbms {
 

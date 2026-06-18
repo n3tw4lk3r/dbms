@@ -19,63 +19,63 @@ add_executable(test_batch_mode
     test_batch_mode.cpp
 )
 
-add_executable(test_btree
-    test_btree.cpp
+add_executable(test_BTree
+    test_BTree.cpp
 )
 
-add_executable(test_btree_node
-    test_btree_node.cpp
+add_executable(test_BTreeNode
+    test_BTreeNode.cpp
 )
 
-add_executable(test_database
-    test_database.cpp
+add_executable(test_Database
+    test_Database.cpp
 )
 
-add_executable(test_executor
-    test_executor.cpp
+add_executable(test_Executor
+    test_Executor.cpp
 )
 
-add_executable(test_indexed_value
-    test_indexed_value.cpp
+add_executable(test_IndexedValue
+    test_IndexedValue.cpp
 )
 
-add_executable(test_parser
-    test_parser.cpp
+add_executable(test_Parser
+    test_Parser.cpp
 )
 
-add_executable(test_serializer
-    test_serializer.cpp
+add_executable(test_Serializer
+    test_Serializer.cpp
 )
 
-add_executable(test_system
-    test_system.cpp
+add_executable(test_System
+    test_System.cpp
 )
 
-add_executable(test_table
-    test_table.cpp
+add_executable(test_Table
+    test_Table.cpp
 )
 
-add_executable(test_value
-    test_value.cpp
+add_executable(test_Value
+    test_Value.cpp
 )
 
-add_executable(test_value_comparator
-    test_value_comparator.cpp
+add_executable(test_ValueComparator
+    test_ValueComparator.cpp
 )
 
 set(TEST_TARGETS
     test_batch_mode
-    test_btree
-    test_btree_node
-    test_database
-    test_executor
-    test_indexed_value
-    test_parser
-    test_serializer
-    test_system
-    test_table
-    test_value
-    test_value_comparator
+    test_BTree
+    test_BTreeNode
+    test_Database
+    test_Executor
+    test_IndexedValue
+    test_Parser
+    test_Serializer
+    test_System
+    test_Table
+    test_Value
+    test_ValueComparator
 )
 
 foreach(TEST_TARGET ${TEST_TARGETS})

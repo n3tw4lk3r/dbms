@@ -1,22 +1,22 @@
 add_library(dbms_lib STATIC
-    catalog/database.cpp
-    catalog/system.cpp
-    catalog/table.cpp
+    catalog/Database.cpp
+    catalog/System.cpp
+    catalog/Table.cpp
 
-    common/value.cpp
-    common/value_comparator.cpp
+    common/Value.cpp
+    common/ValueComparator.cpp
 
-    execution/executor.cpp
+    execution/Executor.cpp
 
     io/repl.cpp
 
-    sqlparser/parser.cpp
-    sqlparser/query_buffer.cpp
+    sqlparser/Parser.cpp
+    sqlparser/QueryBuffer.cpp
 
-    storage/btree.cpp
-    storage/btree_node.cpp
-    storage/indexed_value.cpp
-    storage/serializer.cpp
+    storage/BTree.cpp
+    storage/BTreeNode.cpp
+    storage/IndexedValue.cpp
+    storage/Serializer.cpp
 )
 
 target_include_directories(dbms_lib
