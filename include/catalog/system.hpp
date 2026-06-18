@@ -16,9 +16,9 @@ public:
     void CreateDatabase(const std::string& name);
     Database* GetDatabase(const std::string& name);
     void UseDatabase(const std::string& name);
-    
+
     Database* GetCurrentDatabase();
-    
+
     void DropDatabase(const std::string& name);
 
 private:

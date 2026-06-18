@@ -15,50 +15,60 @@ Executor::Executor(System& system) :
 void Executor::Execute(const Command& cmd) {
     switch (cmd.type) {
 
-    case CommandType::kCreateDatabase:
+    case CommandType::kCreateDatabase: {
         ExecuteCreateDatabase(cmd);
         return;
+    }
 
-    case CommandType::kDropDatabase:
+    case CommandType::kDropDatabase: {
         ExecuteDropDatabase(cmd);
         return;
+    }
 
-    case CommandType::kUseDatabase:
+    case CommandType::kUseDatabase: {
         ExecuteUseDatabase(cmd);
         return;
+    }
 
-    case CommandType::kCreateTable:
+    case CommandType::kCreateTable: {
         ExecuteCreateTable(cmd);
         return;
+    }
 
-    case CommandType::kDropTable:
+    case CommandType::kDropTable: {
         ExecuteDropTable(cmd);
         return;
+    }
 
-    case CommandType::kInsert:
+    case CommandType::kInsert: {
         ExecuteInsert(cmd);
         return;
+    }
 
-    case CommandType::kSelect:
+    case CommandType::kSelect: {
         ExecuteSelect(cmd);
         return;
+    }
 
-    case CommandType::kUpdate:
+    case CommandType::kUpdate: {
         ExecuteUpdate(cmd);
         return;
+    }
 
-    case CommandType::kDelete:
+    case CommandType::kDelete: {
         ExecuteDelete(cmd);
         return;
+    }
 
-    default:
+    default: {
         throw ExecutionError("Unknown command");
+    }
+
     }
 }
 
 void Executor::ExecuteCreateDatabase(const Command& cmd) {
     system.CreateDatabase(cmd.database_name);
-
     std::cout << "Database " << cmd.database_name << " created\n";
 }
 
@@ -70,7 +80,6 @@ void Executor::ExecuteDropDatabase(const Command& cmd) {
     }
 
     system.DropDatabase(cmd.database_name);
-
     std::cout << "Database dropped: " << cmd.database_name << "\n";
 }
 
@@ -81,8 +90,8 @@ void Executor::ExecuteUseDatabase(const Command& cmd) {
 
 void Executor::ExecuteCreateTable(const Command& cmd) {
     Database* db = ResolveDatabase(cmd);
-    db->CreateTable(cmd.table_name, cmd.columns);
 
+    db->CreateTable(cmd.table_name, cmd.columns);
     std::cout << "Table " << cmd.table_name << " created\n";
 }
 
@@ -105,7 +114,7 @@ void Executor::ExecuteInsert(const Command& cmd) {
     if (!table) {
         throw NotFoundError("Table not found");
     }
-    
+
     const auto& schema = table->GetSchema();
     for (const auto& column_name : cmd.column_names) {
         ValidateColumnExists(schema, column_name);
@@ -115,7 +124,7 @@ void Executor::ExecuteInsert(const Command& cmd) {
     for (const auto& values : cmd.values) {
         table->InsertRow(BuildInsertRow(*table, cmd, values));
     }
-    
+
     std::cout << cmd.values.size() << " rows inserted\n";
 }
 
@@ -128,10 +137,10 @@ void Executor::ExecuteSelect(const Command& cmd) {
     }
 
     const auto& schema = table->GetSchema();
-    
+
     ValidateSelectColumns(cmd, schema);
     ValidateConditions(cmd.conditions, schema);
-    
+
     std::vector<const Row*> result_rows;
     if (CanUseIndexLookup(*table, cmd.conditions)) {
         Row* row = TryFindIndexedRow(*table, cmd.conditions);
@@ -178,10 +187,10 @@ void Executor::ExecuteUpdate(const Command& cmd) {
 
     auto& rows = table->GetRowsMutable();
     const auto& schema = table->GetSchema();
-    
+
     ValidateAssignments(cmd, schema);
     ValidateConditions(cmd.conditions, schema);
-    
+
     size_t updated = 0;
     for (const auto& row_ptr : rows) {
         Row& row = *row_ptr;
@@ -301,7 +310,7 @@ void Executor::PrintJsonRow(
         if (column_index < 0) {
             throw SchemaError(
                 "Unknown column: " +
-                column.name
+                    column.name
             );
         }
 
@@ -460,7 +469,7 @@ void Executor::ValidateColumnExists(
     if (FindColumnIndex(schema, column_name) < 0) {
         throw SchemaError(
             "Unknown column: " +
-            column_name
+                column_name
         );
     }
 }
@@ -548,10 +557,7 @@ Value Executor::ResolveOperand(
     return row.values[column_index];
 }
 
-bool Executor::LikeValues(
-    const Value& value,
-    const Value& pattern
-) {
+bool Executor::LikeValues(const Value& value, const Value& pattern) {
     if (value.IsNull() || pattern.IsNull()) {
         return false;
     }
@@ -574,7 +580,7 @@ bool Executor::LikeValues(
     } catch (const std::regex_error& error) {
         throw ExecutionError(
             "Invalid regex pattern: " +
-            std::string(error.what())
+                std::string(error.what())
         );
     }
 }
@@ -646,7 +652,7 @@ std::vector<Value> Executor::BuildInsertRow(
         if (column_index < 0) {
             throw SchemaError(
                 "Unknown column: " +
-                cmd.column_names[i]
+                    cmd.column_names[i]
             );
         }
 

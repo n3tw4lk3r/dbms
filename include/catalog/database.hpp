@@ -16,13 +16,13 @@ public:
         const std::filesystem::path& storage_path
     );
 
-    const std::string GetName() const;
-    
+    std::string GetName() const;
+
     void CreateTable(
         const std::string& table_name,
         const std::vector<ColumnSchema>& schema
     );
-    
+
     Table* GetTable(const std::string& table_name);
     void DropTable(const std::string& table_name);
 

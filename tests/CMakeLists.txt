@@ -84,25 +84,25 @@ foreach(TEST_TARGET ${TEST_TARGETS})
             ${PROJECT_SOURCE_DIR}/include
             ${CMAKE_CURRENT_SOURCE_DIR}
     )
-    
+
     target_link_libraries(${TEST_TARGET}
         PRIVATE
             dbms_lib
             test_utils
     )
-    
+
     target_compile_options(${TEST_TARGET}
         PRIVATE
             -Wall
             -Wextra
         -Wpedantic
     )
-    
+
     add_test(
         NAME ${TEST_TARGET}
         COMMAND ${TEST_TARGET}
     )
-    
+
     message(STATUS "Added test: ${TEST_TARGET}")
 endforeach()
 

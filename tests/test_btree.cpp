@@ -1,5 +1,4 @@
 #include <iostream>
-#include <string>
 
 #include "common/value.hpp"
 #include "storage/btree.hpp"

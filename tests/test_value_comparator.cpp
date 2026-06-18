@@ -1,6 +1,5 @@
 #include <climits>
 #include <iostream>
-#include <string>
 
 #include "common/value.hpp"
 #include "common/value_comparator.hpp"
@@ -10,7 +9,7 @@ using namespace dbms;
 
 void test_value_comparator_compare_int_eq(TestStats& stats) {
     test_header("compare int ==");
-    
+
     check(
         stats,
         ValueComparator::Compare(Value(10), Value(10), "=="),
@@ -40,7 +39,7 @@ void test_value_comparator_compare_int_eq(TestStats& stats) {
 
 void test_value_comparator_compare_int_ne(TestStats& stats) {
     test_header("compare int !=");
-    
+
     check(
         stats,
         ValueComparator::Compare(Value(10), Value(20), "!="),
@@ -65,7 +64,7 @@ void test_value_comparator_compare_int_ne(TestStats& stats) {
 
 void test_value_comparator_compare_int_lt(TestStats& stats) {
     test_header("compare int <");
-    
+
     check(
         stats,
         ValueComparator::Compare(Value(1), Value(10), "<"),
@@ -98,7 +97,7 @@ void test_value_comparator_compare_int_lt(TestStats& stats) {
 
 void test_value_comparator_compare_int_gt(TestStats& stats) {
     test_header("compare int >");
-    
+
     check(
         stats,
         ValueComparator::Compare(Value(10), Value(1), ">"),
@@ -128,7 +127,7 @@ void test_value_comparator_compare_int_gt(TestStats& stats) {
 
 void test_value_comparator_compare_int_le(TestStats& stats) {
     test_header("compare int <=");
-    
+
     check(
         stats,
         ValueComparator::Compare(Value(1), Value(10), "<="),
@@ -158,7 +157,7 @@ void test_value_comparator_compare_int_le(TestStats& stats) {
 
 void test_value_comparator_compare_int_ge(TestStats& stats) {
     test_header("compare int >=");
-    
+
     check(
         stats,
         ValueComparator::Compare(Value(10), Value(1), ">="),
@@ -183,7 +182,7 @@ void test_value_comparator_compare_int_ge(TestStats& stats) {
 
 void test_value_comparator_compare_string_eq(TestStats& stats) {
     test_header("compare string ==");
-    
+
     check(
         stats,
         ValueComparator::Compare(Value("hello"), Value("hello"), "=="),
@@ -208,7 +207,7 @@ void test_value_comparator_compare_string_eq(TestStats& stats) {
 
 void test_value_comparator_compare_string_ne(TestStats& stats) {
     test_header("compare string !=");
-    
+
     check(
         stats,
         ValueComparator::Compare(Value("abc"), Value("xyz"), "!="),
@@ -228,7 +227,7 @@ void test_value_comparator_compare_string_ne(TestStats& stats) {
 
 void test_value_comparator_compare_string_lt(TestStats& stats) {
     test_header("compare string <");
-    
+
     check(
         stats,
         ValueComparator::Compare(Value("abc"), Value("xyz"), "<"),
@@ -258,7 +257,7 @@ void test_value_comparator_compare_string_lt(TestStats& stats) {
 
 void test_value_comparator_compare_string_gt(TestStats& stats) {
     test_header("compare string >");
-    
+
     check(
         stats,
         ValueComparator::Compare(Value("xyz"), Value("abc"), ">"),
@@ -283,7 +282,7 @@ void test_value_comparator_compare_string_gt(TestStats& stats) {
 
 void test_value_comparator_compare_string_le(TestStats& stats) {
     test_header("compare string <=");
-    
+
     check(
         stats,
         ValueComparator::Compare(Value("abc"), Value("xyz"), "<="),
@@ -308,7 +307,7 @@ void test_value_comparator_compare_string_le(TestStats& stats) {
 
 void test_value_comparator_compare_string_ge(TestStats& stats) {
     test_header("compare string >=");
-    
+
     check(
         stats,
         ValueComparator::Compare(Value("xyz"), Value("abc"), ">="),
@@ -328,12 +327,12 @@ void test_value_comparator_compare_string_ge(TestStats& stats) {
 
 void test_value_comparator_compare_null(TestStats& stats) {
     test_header("compare with null");
-    
+
     Value null1;
     Value null2;
     Value int_val(10);
     Value str_val("hello");
-    
+
     check(
         stats,
         ValueComparator::Compare(null1, null2, "=="),
@@ -374,7 +373,7 @@ void test_value_comparator_compare_null(TestStats& stats) {
         !ValueComparator::Compare(null1, int_val, ">="),
         "null not >= int"
     );
-    
+
     check(
         stats,
         !ValueComparator::Compare(int_val, null1, "=="),
@@ -394,7 +393,7 @@ void test_value_comparator_compare_null(TestStats& stats) {
 
 void test_value_comparator_compare_cross_type(TestStats& stats) {
     test_header("compare cross-type");
-    
+
     check(
         stats,
         !ValueComparator::Compare(Value(10), Value("10"), "=="),
@@ -429,7 +428,7 @@ void test_value_comparator_compare_cross_type(TestStats& stats) {
 
 void test_value_comparator_compare_unknown_operator(TestStats& stats) {
     test_header("compare unknown operator");
-    
+
     check(
         stats,
         !ValueComparator::Compare(Value(10), Value(10), "&&"),
@@ -454,7 +453,7 @@ void test_value_comparator_compare_unknown_operator(TestStats& stats) {
 
 void test_value_comparator_between_int(TestStats& stats) {
     test_header("between int");
-    
+
     check(
         stats,
         ValueComparator::Between(Value(5), Value(1), Value(10)),
@@ -489,7 +488,7 @@ void test_value_comparator_between_int(TestStats& stats) {
 
 void test_value_comparator_between_string(TestStats& stats) {
     test_header("between string");
-    
+
     check(
         stats,
         ValueComparator::Between(Value("banana"), Value("apple"),
@@ -512,13 +511,13 @@ void test_value_comparator_between_string(TestStats& stats) {
     );
     check(
         stats,
-        ValueComparator::Between(Value("a"), Value("a"), Value("b")), 
+        ValueComparator::Between(Value("a"), Value("a"), Value("b")),
         "a between a and b");
 }
 
 void test_value_comparator_between_null(TestStats& stats) {
     test_header("between null");
-    
+
     check(
         stats,
         !ValueComparator::Between(Value(), Value(1), Value(10)),
@@ -543,7 +542,7 @@ void test_value_comparator_between_null(TestStats& stats) {
 
 void test_value_comparator_between_cross_type(TestStats& stats) {
     test_header("between cross-type");
-    
+
     check(
         stats,
         !ValueComparator::Between(Value(5), Value("1"), Value("10")),
@@ -563,7 +562,7 @@ void test_value_comparator_between_cross_type(TestStats& stats) {
 
 void test_value_comparator_edge_cases(TestStats& stats) {
     test_header("Edge cases");
-    
+
     check(
         stats,
         ValueComparator::Compare(Value(0), Value(0), "=="),
@@ -578,7 +577,7 @@ void test_value_comparator_edge_cases(TestStats& stats) {
         !ValueComparator::Compare(Value(0), Value(0), "!="),
         "0 not != 0"
     );
-    
+
     check(
         stats,
         ValueComparator::Compare(Value(""), Value(""), "=="),
@@ -599,7 +598,7 @@ void test_value_comparator_edge_cases(TestStats& stats) {
 int main() {
     TestStats stats;
     std::cout << "Running ValueComparator tests..." << std::endl;
-    
+
     test_value_comparator_compare_int_eq(stats);
     test_value_comparator_compare_int_ne(stats);
     test_value_comparator_compare_int_lt(stats);
@@ -620,7 +619,7 @@ int main() {
     test_value_comparator_between_null(stats);
     test_value_comparator_between_cross_type(stats);
     test_value_comparator_edge_cases(stats);
-    
+
     print_test_results(stats);
     if (stats.tests_failed > 0) {
         return EXIT_FAILURE;

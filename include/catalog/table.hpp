@@ -55,7 +55,7 @@ public:
     );
 
     void DeleteRow(RowId row_id);
-    
+
 
 private:
     void Save() const;
@@ -85,7 +85,7 @@ private:
 
     void InsertIntoIndexes(const Row& row);
     void EraseFromIndexes(const Row& row);
-    
+
     void AppendInsert(const Row& row);
     void AppendDelete(RowId row_id);
     void AppendUpdate(const Row& row);
@@ -96,11 +96,11 @@ private:
     std::string name;
     std::vector<ColumnSchema> schema;
     std::unordered_map<std::string, BTree> indexes;
-    
+
     std::vector<std::unique_ptr<Row>> rows;
     std::unordered_map<RowId, Row*> row_lookup;
     RowId next_row_id = 1;
-    
+
     std::filesystem::path storage_path;
     std::filesystem::path metadata_path;
     std::filesystem::path data_path;

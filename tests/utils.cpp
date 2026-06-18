@@ -54,3 +54,4 @@ void print_test_results(const TestStats& stats) {
     std::cout << "Passed: " << stats.tests_passed << std::endl;
     std::cout << "Failed: " << stats.tests_failed << std::endl;
 }
+

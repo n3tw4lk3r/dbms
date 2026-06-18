@@ -69,7 +69,7 @@ private:
         const std::vector<Condition>& conditions,
         const std::vector<ColumnSchema>& schema
     );
-    
+
     Value ResolveOperand(
         const Operand& operand,
         const Row& row,
@@ -96,7 +96,7 @@ private:
         const Command& cmd,
         const std::vector<ColumnSchema>& schema
     );
-    
+
     std::vector<Value> BuildInsertRow(
         const Table& table,
         const Command& cmd,

@@ -1,8 +1,8 @@
-#include <iostream>
+#include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <filesystem>
 
 #include "io/repl.hpp"
 #include "utils.hpp"
@@ -15,21 +15,21 @@ struct BatchTestContext {
     std::streambuf* old_cout;
     std::ostringstream error_output;
     std::streambuf* old_cerr;
-    
+
     BatchTestContext() {
         old_cout = std::cout.rdbuf(output.rdbuf());
         old_cerr = std::cerr.rdbuf(error_output.rdbuf());
     }
-    
+
     ~BatchTestContext() {
         std::cout.rdbuf(old_cout);
         std::cerr.rdbuf(old_cerr);
     }
-    
+
     std::string getOutput() const {
         return output.str();
     }
-    
+
     std::string getError() const {
         return error_output.str();
     }
@@ -40,31 +40,31 @@ void run_batch_from_file(
     TestStats& stats
 ) {
     std::string filename = "temp_batch_test.txt";
-    
+
     {
         std::ofstream file(filename);
         check(stats, file.is_open(), "Temporary file created");
         file << content;
         file.close();
     }
-    
+
     std::ifstream input(filename);
     check(stats, input.is_open(), "Temporary file opened for reading");
     run_batch_mode(input);
     input.close();
-    
+
     std::remove(filename.c_str());
 }
 
 void test_batch_mode_exit_immediately(TestStats& stats) {
     test_header("Batch: exit immediately");
-    
+
     ScopedDataDirectory guard;
     BatchTestContext ctx;
-    
+
     std::istringstream input("exit\n");
     run_batch_mode(input);
-    
+
     check(
         stats,
         ctx.getError().empty(),
@@ -79,17 +79,17 @@ void test_batch_mode_exit_immediately(TestStats& stats) {
 
 void test_batch_mode_create_database(TestStats& stats) {
     test_header("Batch: CREATE DATABASE");
-    
+
     ScopedDataDirectory guard;
     BatchTestContext ctx;
-    
-    std::string script = 
+
+    std::string script =
         "CREATE DATABASE batch_test;\n"
         "exit;\n";
     std::istringstream input(script);
-    
+
     run_batch_mode(input);
-    
+
     std::string out = ctx.getOutput();
     check(
         stats,
@@ -105,18 +105,18 @@ void test_batch_mode_create_database(TestStats& stats) {
 
 void test_batch_mode_create_and_use(TestStats& stats) {
     test_header("Batch: CREATE and USE database");
-    
+
     ScopedDataDirectory guard;
     BatchTestContext ctx;
-    
-    std::string script = 
+
+    std::string script =
         "CREATE DATABASE batch_db;\n"
         "USE batch_db;\n"
         "exit;\n";
     std::istringstream input(script);
-    
+
     run_batch_mode(input);
-    
+
     std::string out = ctx.getOutput();
     check(
         stats,
@@ -132,19 +132,19 @@ void test_batch_mode_create_and_use(TestStats& stats) {
 
 void test_batch_mode_create_table(TestStats& stats) {
     test_header("Batch: CREATE TABLE");
-    
+
     ScopedDataDirectory guard;
     BatchTestContext ctx;
-    
-    std::string script = 
+
+    std::string script =
         "CREATE DATABASE batch_db;\n"
         "USE batch_db;\n"
         "CREATE TABLE batch_db.users (id INT INDEXED, name STRING NOT_NULL);\n"
         "exit;\n";
     std::istringstream input(script);
-    
+
     run_batch_mode(input);
-    
+
     std::string out = ctx.getOutput();
     check(
         stats,
@@ -160,11 +160,11 @@ void test_batch_mode_create_table(TestStats& stats) {
 
 void test_batch_mode_insert_and_select(TestStats& stats) {
     test_header("Batch: INSERT and SELECT");
-    
+
     ScopedDataDirectory guard;
     BatchTestContext ctx;
-    
-    std::string script = 
+
+    std::string script =
         "CREATE DATABASE batch_db;\n"
         "USE batch_db;\n"
         "CREATE TABLE batch_db.users (id INT INDEXED, name STRING);\n"
@@ -173,9 +173,9 @@ void test_batch_mode_insert_and_select(TestStats& stats) {
         "SELECT * FROM users;\n"
         "exit;\n";
     std::istringstream input(script);
-    
+
     run_batch_mode(input);
-    
+
     std::string out = ctx.getOutput();
     check(
         stats,
@@ -206,13 +206,13 @@ void test_batch_mode_insert_and_select(TestStats& stats) {
 
 void test_batch_mode_empty_input(TestStats& stats) {
     test_header("Batch: empty input");
-    
+
     ScopedDataDirectory guard;
     BatchTestContext ctx;
-    
+
     std::istringstream input("");
     run_batch_mode(input);
-    
+
     check(
         stats,
         true,
@@ -222,17 +222,17 @@ void test_batch_mode_empty_input(TestStats& stats) {
 
 void test_batch_mode_invalid_command(TestStats& stats) {
     test_header("Batch: invalid command");
-    
+
     ScopedDataDirectory guard;
     BatchTestContext ctx;
-    
-    std::string script = 
+
+    std::string script =
         "INVALID COMMAND;\n"
         "exit;\n";
     std::istringstream input(script);
-    
+
     run_batch_mode(input);
-    
+
     std::string err = ctx.getError();
     check(
         stats,
@@ -243,16 +243,16 @@ void test_batch_mode_invalid_command(TestStats& stats) {
 
 void test_batch_mode_semicolon_separated_queries(TestStats& stats) {
     test_header("Batch: semicolon separated queries");
-    
+
     ScopedDataDirectory guard;
     BatchTestContext ctx;
-    
-    std::string script = 
+
+    std::string script =
         "CREATE DATABASE batch_db; USE batch_db; CREATE TABLE batch_db.t (id INT); exit;\n";
     std::istringstream input(script);
-    
+
     run_batch_mode(input);
-    
+
     std::string out = ctx.getOutput();
     check(
         stats,
@@ -273,11 +273,11 @@ void test_batch_mode_semicolon_separated_queries(TestStats& stats) {
 
 void test_batch_mode_multiline_query(TestStats& stats) {
     test_header("Batch: multiline query");
-    
+
     ScopedDataDirectory guard;
     BatchTestContext ctx;
-    
-    std::string script = 
+
+    std::string script =
         "CREATE DATABASE batch_db;\n"
         "USE batch_db;\n"
         "CREATE TABLE batch_db.users (\n"
@@ -287,9 +287,9 @@ void test_batch_mode_multiline_query(TestStats& stats) {
         "INSERT INTO users (id, name) VALUE (1, \"alice\");\n"
         "exit;\n";
     std::istringstream input(script);
-    
+
     run_batch_mode(input);
-    
+
     std::string out = ctx.getOutput();
     check(
         stats,
@@ -305,18 +305,18 @@ void test_batch_mode_multiline_query(TestStats& stats) {
 
 void test_batch_mode_from_file_basic(TestStats& stats) {
     test_header("Batch from file: basic operations");
-    
+
     ScopedDataDirectory guard;
     BatchTestContext ctx;
-    
-    std::string script = 
+
+    std::string script =
         "CREATE DATABASE testdb;\n"
         "USE testdb;\n"
         "CREATE TABLE testdb.users (id INT INDEXED, name STRING NOT_NULL);\n"
         "exit;\n";
-    
+
     run_batch_from_file(script, stats);
-    
+
     std::string out = ctx.getOutput();
     check(
         stats,
@@ -342,11 +342,11 @@ void test_batch_mode_from_file_basic(TestStats& stats) {
 
 void test_batch_mode_from_file_full_workflow(TestStats& stats) {
     test_header("Batch from file: full workflow");
-    
+
     ScopedDataDirectory guard;
     BatchTestContext ctx;
-    
-    std::string script = 
+
+    std::string script =
         "CREATE DATABASE company;\n"
         "USE company;\n"
         "CREATE TABLE company.employees (id INT INDEXED, name STRING NOT_NULL, salary INT);\n"
@@ -361,11 +361,11 @@ void test_batch_mode_from_file_full_workflow(TestStats& stats) {
         "DROP TABLE company.employees;\n"
         "DROP DATABASE company;\n"
         "exit;\n";
-    
+
     run_batch_from_file(script, stats);
-    
+
     std::string out = ctx.getOutput();
-    
+
     check(
         stats,
         out.find("Database company created") != std::string::npos,
@@ -415,11 +415,11 @@ void test_batch_mode_from_file_full_workflow(TestStats& stats) {
 
 void test_batch_mode_from_file_multiline_query(TestStats& stats) {
     test_header("Batch from file: multiline query");
-    
+
     ScopedDataDirectory guard;
     BatchTestContext ctx;
-    
-    std::string script = 
+
+    std::string script =
         "CREATE DATABASE testdb;\n"
         "USE testdb;\n"
         "CREATE TABLE testdb.products (\n"
@@ -432,9 +432,9 @@ void test_batch_mode_from_file_multiline_query(TestStats& stats) {
         "VALUE (1, \"Laptop\", 1000, \"High performance laptop\");\n"
         "SELECT * FROM products;\n"
         "exit;\n";
-    
+
     run_batch_from_file(script, stats);
-    
+
     std::string out = ctx.getOutput();
     check(
         stats,
@@ -465,11 +465,11 @@ void test_batch_mode_from_file_multiline_query(TestStats& stats) {
 
 void test_batch_mode_from_file_with_errors(TestStats& stats) {
     test_header("Batch from file: handling errors");
-    
+
     ScopedDataDirectory guard;
     BatchTestContext ctx;
-    
-    std::string script = 
+
+    std::string script =
         "CREATE DATABASE testdb;\n"
         "USE testdb;\n"
         "CREATE TABLE testdb.users (id INT INDEXED, name STRING);\n"
@@ -477,12 +477,12 @@ void test_batch_mode_from_file_with_errors(TestStats& stats) {
         "INSERT INTO users (id, name) VALUE (1, \"Alice\");\n"
         "SELECT * FROM users;\n"
         "exit;\n";
-    
+
     run_batch_from_file(script, stats);
-    
+
     std::string err = ctx.getError();
     std::string out = ctx.getOutput();
-    
+
     check(
         stats,
         !err.empty(),
@@ -502,14 +502,14 @@ void test_batch_mode_from_file_with_errors(TestStats& stats) {
 
 void test_batch_mode_from_file_empty(TestStats& stats) {
     test_header("Batch from file: empty file");
-    
+
     ScopedDataDirectory guard;
     BatchTestContext ctx;
-    
+
     std::string script;
-    
+
     run_batch_from_file(script, stats);
-    
+
     check(
         stats,
         true,
@@ -520,7 +520,7 @@ void test_batch_mode_from_file_empty(TestStats& stats) {
 int main() {
     TestStats stats;
     std::cout << "Running Batch Mode tests..." << std::endl;
-    
+
     test_batch_mode_exit_immediately(stats);
     test_batch_mode_empty_input(stats);
     test_batch_mode_create_database(stats);
@@ -535,7 +535,7 @@ int main() {
     test_batch_mode_from_file_multiline_query(stats);
     test_batch_mode_from_file_with_errors(stats);
     test_batch_mode_from_file_empty(stats);
-    
+
     print_test_results(stats);
     if (stats.tests_failed > 0) {
         return EXIT_FAILURE;

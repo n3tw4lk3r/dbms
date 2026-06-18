@@ -36,7 +36,7 @@ bool process_line(
 
 void run_interactive_mode() {
     std::cout << "Enter 'exit' to exit." << std::endl;
-    
+
     System system;
     Parser parser;
     Executor executor(system);
@@ -49,13 +49,13 @@ void run_interactive_mode() {
         } else {
             std::cout << "... ";
         }
-        
+
         std::string line;
         if (!std::getline(std::cin, line)) {
             should_exit = true;
             break;
         }
-        
+
         if (line.empty()) {
             continue;
         }

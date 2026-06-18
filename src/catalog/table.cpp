@@ -138,7 +138,7 @@ void Table::UpdateRow(
         if (column_index < 0) {
             throw SchemaError(
                 "Unknown column: " +
-                assignment.column
+                    assignment.column
             );
         }
 
@@ -278,9 +278,9 @@ void Table::Load() {
 
         if (
             !std::getline(ss, name, '|') ||
-            !std::getline(ss, type, '|') ||
-            !std::getline(ss, not_null, '|') ||
-            !std::getline(ss, indexed, '|')
+                !std::getline(ss, type, '|') ||
+                !std::getline(ss, not_null, '|') ||
+                !std::getline(ss, indexed, '|')
         ) {
             throw DataCorruptionError("Corrupted column metadata");
         }
@@ -318,7 +318,6 @@ void Table::Load() {
         }
 
         std::stringstream ss(line);
-
         std::string op;
 
         if (!std::getline(ss, op, '|')) {
@@ -457,9 +456,7 @@ void Table::ValidateRow(const std::vector<Value>& values) const {
     ValidateUniqueConstraints(values);
 }
 
-void Table::ValidateColumnCount(
-    const std::vector<Value>& values
-) const {
+void Table::ValidateColumnCount(const std::vector<Value>& values) const {
     if (values.size() != schema.size()) {
         throw SchemaError("Column count does not match schema");
     }
@@ -475,23 +472,23 @@ void Table::ValidateColumnType(
 
     if (
         column.type == ColumnType::kInt &&
-        value.GetType() != Value::Type::kInt
+            value.GetType() != Value::Type::kInt
     ) {
         throw TypeError(
             "Expected INT value for column '" +
-            column.name +
-            "'"
+                column.name +
+                "'"
         );
     }
 
     if (
         column.type == ColumnType::kString &&
-        value.GetType() != Value::Type::kString
+            value.GetType() != Value::Type::kString
     ) {
         throw TypeError(
             "Expected STRING value for column '" +
-            column.name +
-            "'"
+                column.name +
+                "'"
         );
     }
 }
@@ -503,8 +500,8 @@ void Table::ValidateNotNull(
     if ((column.not_null || column.indexed) && value.IsNull()) {
         throw ConstraintViolationError(
             "Column '" +
-            column.name +
-            "' cannot be NULL"
+                column.name +
+                "' cannot be NULL"
         );
     }
 }
@@ -539,8 +536,8 @@ void Table::ValidateUniqueConstraints(
 
         throw ConstraintViolationError(
             "Duplicate value for indexed column '" +
-            column.name +
-            "'"
+                column.name +
+                "'"
         );
     }
 }

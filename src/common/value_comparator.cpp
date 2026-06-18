@@ -18,7 +18,7 @@ bool ValueComparator::Compare(
 
         return false;
     }
-    
+
     if (lhs.GetType() != rhs.GetType()) {
         return false;
     }
@@ -95,7 +95,7 @@ bool ValueComparator::Between(
 
     if (
         value.GetType() != lhs.GetType() ||
-        value.GetType() != rhs.GetType()
+            value.GetType() != rhs.GetType()
     ) {
         return false;
     }

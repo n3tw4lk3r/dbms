@@ -138,10 +138,7 @@ Row Serializer::DeserializeRow(std::string_view line) {
 
             current = data_begin + len;
 
-            if (
-                current < line.size() &&
-                line[current] == '|'
-            ) {
+            if (current < line.size() && line[current] == '|') {
                 ++current;
             }
 

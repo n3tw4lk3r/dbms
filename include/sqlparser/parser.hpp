@@ -15,9 +15,9 @@ public:
 private:
     std::vector<std::string> Tokenize(std::string_view query);
     std::string Normalize(const std::string& token);
-    
-    void ValidateIdentifier(const std::string& token) const;   
-    
+
+    void ValidateIdentifier(const std::string& token) const;
+
     std::string NormalizeKeyword(const std::string& token) const;
     std::string TryNormalizeToken(const std::string& token) const;
 

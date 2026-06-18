@@ -105,16 +105,13 @@ std::vector<std::string> Parser::Tokenize(std::string_view input) {
         }
 
         if (i + 1 < input.size()) {
-            const std::string two_chars {
-                ch,
-                input[i + 1]
-            };
+            const std::string two_chars(ch, input[i + 1]);
 
             if (
                 two_chars == "==" ||
-                two_chars == "!=" ||
-                two_chars == "<=" ||
-                two_chars == ">="
+                    two_chars == "!=" ||
+                    two_chars == "<=" ||
+                    two_chars == ">="
             ) {
                 push_current();
                 tokens.push_back(two_chars);
@@ -187,9 +184,7 @@ void Parser::ValidateIdentifier(const std::string& token) const {
     }
 }
 
-std::string Parser::NormalizeKeyword(
-    const std::string& token
-) const {
+std::string Parser::NormalizeKeyword(const std::string& token) const {
     bool has_lower = false;
     bool has_upper = false;
 
@@ -217,9 +212,7 @@ std::string Parser::NormalizeKeyword(
     return result;
 }
 
-std::string Parser::TryNormalizeToken(
-    const std::string& token
-) const {
+std::string Parser::TryNormalizeToken(const std::string& token) const {
     if (IsKeyword(token)) {
         return NormalizeKeyword(token);
     }
@@ -242,9 +235,7 @@ Command Parser::ParseUse(const std::vector<std::string>& tokens) {
     return cmd;
 }
 
-Command Parser::ParseDrop(
-    const std::vector<std::string>& tokens
-) {
+Command Parser::ParseDrop(const std::vector<std::string>& tokens) {
     if (tokens.size() != 3) {
         throw ParserError("DROP syntax error");
     }
@@ -273,9 +264,7 @@ Command Parser::ParseDrop(
     return cmd;
 }
 
-Command Parser::ParseCreate(
-    const std::vector<std::string>& tokens
-) {
+Command Parser::ParseCreate(const std::vector<std::string>& tokens) {
     if (tokens.size() < 3) {
         throw ParserError("Incomplete CREATE statement");
     }
@@ -303,9 +292,7 @@ Command Parser::ParseCreate(
     return {};
 }
 
-Command Parser::ParseCreateTable(
-    const std::vector<std::string>& tokens
-) {
+Command Parser::ParseCreateTable(const std::vector<std::string>& tokens) {
     if (tokens.size() < 5) {
         throw ParserError("Incomplete CREATE TABLE statement");
     }
@@ -408,9 +395,7 @@ Command Parser::ParseCreateTable(
     return cmd;
 }
 
-Command Parser::ParseInsert(
-    const std::vector<std::string>& tokens
-) {
+Command Parser::ParseInsert(const std::vector<std::string>& tokens) {
     if (tokens.size() < 6) {
         throw ParserError("Incomplete INSERT statement");
     }
@@ -448,7 +433,7 @@ Command Parser::ParseInsert(
                 if (unique_columns.contains(tokens[pos])) {
                     throw ParserError(
                         "Duplicate column name: " +
-                        tokens[pos]
+                            tokens[pos]
                     );
                 }
 
@@ -515,7 +500,7 @@ Command Parser::ParseInsert(
 
         if (
             !cmd.column_names.empty() &&
-            row.size() != cmd.column_names.size()
+                row.size() != cmd.column_names.size()
         ) {
             throw ParserError("Column/value count mismatch");
         }
@@ -540,9 +525,7 @@ Command Parser::ParseInsert(
     return cmd;
 }
 
-Command Parser::ParseSelect(
-    const std::vector<std::string>& tokens
-) {
+Command Parser::ParseSelect(const std::vector<std::string>& tokens) {
     if (tokens.size() < 4) {
         throw ParserError("Incomplete SELECT statement");
     }
@@ -574,11 +557,7 @@ Command Parser::ParseSelect(
 
                 ++pos;
 
-                if (
-                    pos < tokens.size() &&
-                    tokens[pos] == "AS"
-                ) {
-
+                if (pos < tokens.size() && tokens[pos] == "AS") {
                     ++pos;
 
                     if (pos >= tokens.size()) {
@@ -644,9 +623,7 @@ Command Parser::ParseSelect(
     return cmd;
 }
 
-Command Parser::ParseUpdate(
-    const std::vector<std::string>& tokens
-) {
+Command Parser::ParseUpdate(const std::vector<std::string>& tokens) {
     if (tokens.size() < 6) {
         throw ParserError("Incomplete UPDATE statement");
     }
@@ -728,9 +705,7 @@ Command Parser::ParseUpdate(
     return cmd;
 }
 
-Command Parser::ParseDelete(
-    const std::vector<std::string>& tokens
-) {
+Command Parser::ParseDelete(const std::vector<std::string>& tokens) {
     if (tokens.size() < 3) {
         throw ParserError("Incomplete DELETE statement");
     }
@@ -850,8 +825,8 @@ Value Parser::ParseValue(const std::string& token) {
 
     if (
         token.size() >= 2 &&
-        token.front() == '"' &&
-        token.back() == '"'
+            token.front() == '"' &&
+            token.back() == '"'
     ) {
         return Value(token.substr(1, token.size() - 2));
     }
@@ -942,7 +917,7 @@ Operand Parser::ParseOperand(const std::string& token) {
 
         if (
             result.ec != std::errc() ||
-            result.ptr != token.data() + token.size()
+                result.ptr != token.data() + token.size()
         ) {
             throw ParserError("Invalid integer: " + token);
         }

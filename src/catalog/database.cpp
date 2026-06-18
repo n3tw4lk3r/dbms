@@ -34,7 +34,7 @@ Database::Database(
     }
 }
 
-const std::string Database::GetName() const {
+std::string Database::GetName() const {
     return name;
 }
 
@@ -43,7 +43,7 @@ void Database::CreateTable(
     const std::vector<ColumnSchema>& schema
 ) {
     std::filesystem::path table_path = storage_path / table_name;
- 
+
     std::unordered_set<std::string> names;
 
     for (const auto& column : schema) {
@@ -60,7 +60,7 @@ void Database::CreateTable(
     if (tables.contains(std::string(table_name))) {
         throw DuplicateError("Table already exists");
     }
-    
+
     tables[table_name] = std::make_unique<Table>(
         table_name,
         schema,

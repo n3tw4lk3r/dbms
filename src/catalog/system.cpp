@@ -72,7 +72,7 @@ void System::DropDatabase(const std::string& name) {
     if (current_database == it->second.get()) {
         current_database = nullptr;
     }
-    
+
     std::filesystem::remove_all(storage_root / name);
     databases.erase(it);
 }

@@ -14,10 +14,10 @@ public:
     bool Erase(const IndexedValue& key);
     bool Contains(const IndexedValue& key) const;
     RowId Find(const IndexedValue& key) const;
-    
+
     size_t Size() const;
     bool Empty() const;
-    
+
     bool Verify() const;
 
 private:
@@ -41,7 +41,7 @@ private:
     void MergeChildren(BTreeNode* node, size_t child_index);
 
     size_t FindKeyIndex(BTreeNode* node, const IndexedValue& key) const;
-    
+
     bool VerifyNode(
         const BTreeNode* node,
         size_t depth,
