@@ -1,6 +1,6 @@
-# Database Management System
+# dbms 
 
-A relational DBMS written in C++20.
+A relational database management system written in C++20.
 
 It supports SQL-like queries, typed tables, persistent storage, indexed lookups, and JSON output.
 
