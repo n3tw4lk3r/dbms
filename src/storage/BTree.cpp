@@ -261,8 +261,8 @@ BTreeEntry BTree::GetSuccessor(BTreeNode* node) {
 
 void BTree::FillChild(BTreeNode* node, size_t child_index) {
     if (
-        child_index > 0 && node->children[child_index - 1]->entries.size()
-            >= min_degree
+        child_index > 0 &&
+        node->children[child_index - 1]->entries.size() >= min_degree
     ) {
         BorrowFromPrevious(node, child_index);
         return;
@@ -270,7 +270,7 @@ void BTree::FillChild(BTreeNode* node, size_t child_index) {
 
     if (
         child_index < node->entries.size() &&
-            node->children[child_index + 1]->entries.size() >= min_degree
+        node->children[child_index + 1]->entries.size() >= min_degree
     ) {
 
         BorrowFromNext(node, child_index);

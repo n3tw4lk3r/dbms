@@ -80,13 +80,13 @@ std::vector<std::string> Parser::Tokenize(std::string_view query) {
 
         if (
             query[i] == '=' ||
-                query[i] == '<' ||
-                query[i] == '>' ||
-                query[i] == '(' ||
-                query[i] == ')' ||
-                query[i] == ',' ||
-                query[i] == ';' ||
-                query[i] == '*'
+            query[i] == '<' ||
+            query[i] == '>' ||
+            query[i] == '(' ||
+            query[i] == ')' ||
+            query[i] == ',' ||
+            query[i] == ';' ||
+            query[i] == '*'
         ) {
             tokens.emplace_back(1, query[i]);
             ++i;
@@ -118,17 +118,17 @@ std::vector<std::string> Parser::Tokenize(std::string_view query) {
 
         while (
             i < len &&
-                !IsSpace(query[i]) &&
-                query[i] != '(' &&
-                query[i] != ')' &&
-                query[i] != ',' &&
-                query[i] != ';' &&
-                query[i] != '"' &&
-                query[i] != '*' &&
-                query[i] != '=' &&
-                query[i] != '<' &&
-                query[i] != '>' &&
-                query[i] != '!'
+            !IsSpace(query[i]) &&
+            query[i] != '(' &&
+            query[i] != ')' &&
+            query[i] != ',' &&
+            query[i] != ';' &&
+            query[i] != '"' &&
+            query[i] != '*' &&
+            query[i] != '=' &&
+            query[i] != '<' &&
+            query[i] != '>' &&
+            query[i] != '!'
         ) {
             ++i;
         }
@@ -498,8 +498,8 @@ Command Parser::ParseSelect(const std::vector<std::string>& tokens) {
                 }
             } else if (
                 upper_next != "FROM" &&
-                    tokens[pos] != "," &&
-                    !IsKeyword(tokens[pos])
+                tokens[pos] != "," &&
+                !IsKeyword(tokens[pos])
             ) {
                 col.alias = tokens[pos];
                 ++pos;

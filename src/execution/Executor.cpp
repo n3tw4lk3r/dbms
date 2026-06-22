@@ -310,7 +310,7 @@ void Executor::PrintJsonRow(
         if (column_index < 0) {
             throw SchemaError(
                 "Unknown column: " +
-                    column.name
+                column.name
             );
         }
 
@@ -469,7 +469,7 @@ void Executor::ValidateColumnExists(
     if (FindColumnIndex(schema, column_name) < 0) {
         throw SchemaError(
             "Unknown column: " +
-                column_name
+            column_name
         );
     }
 }
@@ -548,8 +548,7 @@ Value Executor::ResolveOperand(
     );
 
     if (
-        column_index < 0 || column_index >=
-            static_cast<int>(row.values.size())
+        column_index < 0 || column_index >= static_cast<int>(row.values.size())
     ) {
         return Value();
     }
@@ -580,7 +579,7 @@ bool Executor::LikeValues(const Value& value, const Value& pattern) {
     } catch (const std::regex_error& error) {
         throw ExecutionError(
             "Invalid regex pattern: " +
-                std::string(error.what())
+            std::string(error.what())
         );
     }
 }
@@ -652,7 +651,7 @@ std::vector<Value> Executor::BuildInsertRow(
         if (column_index < 0) {
             throw SchemaError(
                 "Unknown column: " +
-                    cmd.column_names[i]
+                cmd.column_names[i]
             );
         }
 
